@@ -140,7 +140,7 @@
     </button>
     <button md-raised-button
             color="accent"
-            [disabled]="!aclForm.valid || !aclForm.dirty"
+            [disabled]="!aclForm.valid || !aclForm.dirty || aclFormArray.controls.length === 0"
             (click)="onSubmit()">
       Save
     </button>

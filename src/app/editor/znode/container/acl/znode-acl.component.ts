@@ -87,27 +87,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
   onSubmit(): void {
     const acl = this.getAclFormValue();
 
-    if (acl.length > 0) {
-      this.saveZNodeAcl(acl);
-      return;
-    }
-
-    this.feedbackService
-      .showConfirm(
-        "Empty ACL",
-        "Saving an empty ACL will render the node inaccessible, are you sure you want to continue?",
-        "Confirm",
-        "Cancel",
-        this.viewContainerRef
-      )
-      .afterClosed()
-      .subscribe(
-        confirm => {
-          if (confirm) {
-            this.saveZNodeAcl(acl);
-          }
-        }
-      );
+    this.saveZNodeAcl(acl);
   }
 
   addAclFormGroup(acl?: Acl): void {
