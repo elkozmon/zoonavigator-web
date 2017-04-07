@@ -1,0 +1,47 @@
+<!--
+  ~ Copyright (C) 2017  Ľuboš Kozmon
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!--suppress HtmlUnknownTag, HtmlUnknownAttribute -->
+<button
+  md-icon-button
+  mdTooltip="Toggle select all"
+  mdTooltipPosition="below"
+  (click)="onSelectAllClick()">
+  <md-icon class="md-24">select_all</md-icon>
+</button>
+<button
+  md-icon-button
+  mdTooltip="Refresh children list"
+  mdTooltipPosition="below"
+  (click)="onReloadClick()">
+  <md-icon class="md-24">refresh</md-icon>
+</button>
+<button
+  md-icon-button
+  mdTooltip="Delete selected nodes"
+  mdTooltipPosition="below"
+  [disabled]="zNodes.length === 0"
+  (click)="onDeleteClick()">
+  <md-icon class="md-24">delete_forever</md-icon>
+</button>
+<button
+  md-icon-button
+  mdTooltip="Create child node"
+  mdTooltipPosition="below"
+  (click)="onCreateClick()">
+  <md-icon class="md-24">create_new_folder</md-icon>
+</button>

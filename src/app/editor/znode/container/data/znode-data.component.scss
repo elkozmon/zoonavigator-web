@@ -1,0 +1,42 @@
+/*!
+ * Copyright (C) 2017  Ľuboš Kozmon
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import "../../../../../sass/utils";
+
+.zoo-actionbar {
+  padding: .8em;
+  border-top: 1px solid #d3d3d3;
+  border-left: 1px solid #e4e4e4;
+  background-color: #f7f7f7;
+  //@include box-shadow(-2px, 0, 2px, #000);
+
+  .zoo-divider {
+    width: 1px;
+    height: 100%;
+    border-left: 1px solid #aaa;
+    margin: 0 1em;
+  }
+
+  md-select {
+    vertical-align: middle;
+  }
+
+  label {
+    margin: 0 .2em 0 1em;
+    text-transform: uppercase;
+  }
+}

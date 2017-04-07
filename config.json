@@ -1,0 +1,4 @@
+{
+  "apiUrlPath": "/api",
+  "apiRequestTimeoutMillis": 10000
+}

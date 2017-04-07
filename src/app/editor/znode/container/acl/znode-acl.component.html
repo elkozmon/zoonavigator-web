@@ -1,0 +1,152 @@
+<!--
+  ~ Copyright (C) 2017  Ľuboš Kozmon
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!--suppress HtmlUnknownTag, HtmlUnknownAttribute, HtmlFormInputWithoutLabel -->
+<form [formGroup]="aclForm"
+      layout="column"
+      layout-fill>
+  <div flex>
+    <md-card>
+      <md-card-content>
+        <input type="hidden"
+               formControlName="aclVersion"/>
+        <div formArrayName="aclArray">
+          <table *ngIf="aclFormArray.length > 0">
+            <colgroup>4</colgroup>
+            <thead>
+            <tr>
+              <th rowspan="2" style="text-align: left">Scheme</th>
+              <th rowspan="2" style="text-align: left">Id</th>
+              <th colspan="5">Permissions</th>
+              <th></th>
+            </tr>
+            <tr>
+              <th mdTooltip="Create" mdTooltipPosition="below">C</th>
+              <th mdTooltip="Read" mdTooltipPosition="below">R</th>
+              <th mdTooltip="Delete" mdTooltipPosition="below">D</th>
+              <th mdTooltip="Write" mdTooltipPosition="below">W</th>
+              <th mdTooltip="Admin" mdTooltipPosition="below">A</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let acl of aclFormArray.controls; let i = index" [formGroup]="acl">
+              <td>
+                <md-input-container>
+                  <input mdInput
+                         type="text"
+                         formControlName="scheme"/>
+                </md-input-container>
+                <div *ngIf="!acl.get('scheme').valid" class="zoo-warn">
+                  <small>Scheme is required.</small>
+                </div>
+              </td>
+              <td>
+                <md-input-container>
+                  <input mdInput
+                         type="text"
+                         formControlName="id"/>
+                </md-input-container>
+              </td>
+              <td>
+                <md-checkbox [formControl]="acl.get('permissions').get('canCreate')"
+                             mdTooltip="Create"
+                             mdTooltipPosition="below"
+                             class="zoo-nolabel"
+                             color="primary">
+                </md-checkbox>
+              </td>
+              <td>
+                <md-checkbox [formControl]="acl.get('permissions').get('canRead')"
+                             mdTooltip="Read"
+                             mdTooltipPosition="below"
+                             class="zoo-nolabel"
+                             color="primary">
+                </md-checkbox>
+              </td>
+              <td>
+                <md-checkbox [formControl]="acl.get('permissions').get('canDelete')"
+                             mdTooltip="Delete"
+                             mdTooltipPosition="below"
+                             class="zoo-nolabel"
+                             color="primary">
+                </md-checkbox>
+              </td>
+              <td>
+                <md-checkbox [formControl]="acl.get('permissions').get('canWrite')"
+                             mdTooltip="Write"
+                             mdTooltipPosition="below"
+                             class="zoo-nolabel"
+                             color="primary">
+                </md-checkbox>
+              </td>
+              <td>
+                <md-checkbox [formControl]="acl.get('permissions').get('canAdmin')"
+                             mdTooltip="Admin"
+                             mdTooltipPosition="below"
+                             class="zoo-nolabel"
+                             color="primary">
+                </md-checkbox>
+              </td>
+              <td>
+                <button md-button
+                        class="tc-red-800"
+                        type="button"
+                        (click)="removeAclFormGroup(i)">
+                  Remove
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div layout="row" class="zoo-form-controls">
+          <button md-button
+                  type="button"
+                  (click)="addAclFormGroup()">
+            Add new
+          </button>
+          <button md-button
+                  type="button"
+                  *ngIf="aclFormArray.length > 0"
+                  (click)="clearAclFormArray()">
+            Remove all
+          </button>
+        </div>
+      </md-card-content>
+    </md-card>
+  </div>
+
+  <div class="zoo-actionbar">
+    <button md-button
+            type="button"
+            (click)="onRefresh()">
+      Refresh
+    </button>
+    <button md-raised-button
+            color="accent"
+            [disabled]="!aclForm.valid || !aclForm.dirty"
+            (click)="onSubmit()">
+      Save
+    </button>
+    <md-checkbox formControlName="applyRecursive"
+                 color="accent">
+      <small>Apply recursively</small>
+    </md-checkbox>
+  </div>
+</form>

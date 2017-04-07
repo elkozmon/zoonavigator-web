@@ -1,0 +1,51 @@
+<!--
+  ~ Copyright (C) 2017  Ľuboš Kozmon
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!--suppress HtmlUnknownTag, HtmlUnknownAttribute, UnnecessaryLabelJS -->
+<a
+  md-list-item
+  *ngIf="!zPath.isRoot() && zPath.goUp()?.isRoot()"
+  routerLink="/editor">
+  <md-icon>
+    arrow_back
+  </md-icon>
+  ../
+</a>
+<a
+  md-list-item
+  *ngIf="!zPath.isRoot() && !zPath.goUp()?.isRoot()"
+  routerLink="/editor/node"
+  queryParamsHandling="merge"
+  [queryParams]="{path: zPath.goUp()?.toString()}">
+  <md-icon>
+    arrow_back
+  </md-icon>
+  ../
+</a>
+<a
+  md-list-item
+  *ngFor="let node of zNodes; trackBy: trackByName"
+  routerLink="/editor/node"
+  queryParamsHandling="merge"
+  [queryParams]="{path: node.path}">
+  <md-checkbox
+    [checked]="zNodesSelected.indexOf(node) >= 0"
+    (click)="$event.stopPropagation()"
+    (change)="$event.checked ? onNodeChecked(node) : onNodeUnchecked(node)">
+  </md-checkbox>
+  {{node.name}}
+</a>

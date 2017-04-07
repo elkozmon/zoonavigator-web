@@ -1,0 +1,64 @@
+@import "./themes";
+@import "./utils";
+@import "./bootstrap";
+
+div.zoo-error-bar {
+  padding: 10px;
+  margin-bottom: 20px;
+  color: #f4f4f4;
+  background-color: #d02337;
+  @include border-radius(2px);
+}
+
+div.zoo-actionbar {
+  padding: .8em;
+  border-top: 1px solid #d3d3d3;
+  background-color: #f5f5f5;
+  //@include box-shadow(-2px, 0, 2px, #000);
+
+  .zoo-divider {
+    width: 1px;
+    height: 100%;
+    border-left: 1px solid #aaa;
+    margin: 0 1em;
+  }
+
+  md-select {
+    vertical-align: middle;
+  }
+
+  label {
+    margin: 0 .2em 0 1em;
+    text-transform: uppercase;
+  }
+}
+
+.mat-icon-button {
+  .md-18 {
+    line-height: 18px !important;
+  }
+}
+
+.zoo-bold {
+  font-weight: bold;
+}
+
+.zoo-warn {
+  color: #d03e3c;
+}
+
+md-toolbar md-icon {
+  width: 40px !important;
+}
+
+button {
+  text-transform: uppercase;
+}
+
+button.mat-menu-item {
+  text-transform: none;
+}
+
+md-checkbox.zoo-nolabel .mat-checkbox-label {
+  display: none;
+}
