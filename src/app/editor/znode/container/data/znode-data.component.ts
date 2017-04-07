@@ -19,17 +19,18 @@ import {Component, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {Observable} from "rxjs/Observable";
 import "rxjs/add/operator/skip";
+import "brace";
+import "brace/mode/text";
+import "brace/mode/json";
+import "brace/mode/yaml";
+import "brace/mode/xml";
+import "brace/theme/chrome";
 import {ZNodeMetaWith} from "../meta/znode-meta-with";
 import {ZNodeData} from "./znode-data";
 import {ZNodeService} from "../../znode.service";
 import {FeedbackService} from "../../../../core";
 import {CanDeactivateComponent} from "../../../../shared";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
-import "brace/mode/text";
-import "brace/mode/json";
-import "brace/mode/yaml";
-import "brace/mode/xml";
-import "brace/theme/chrome";
 
 @Component({
   templateUrl: "znode-data.component.html",

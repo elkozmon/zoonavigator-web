@@ -30,7 +30,6 @@ import {CoreModule} from "./core";
 import {ConnectModule} from "./connect";
 import {EditorModule} from "./editor";
 
-
 @NgModule({
   imports: [
     LocalStorageModule.withConfig({
@@ -42,7 +41,7 @@ import {EditorModule} from "./editor";
     ReactiveFormsModule,
     BrowserModule,
     HttpModule,
-    CovalentCoreModule.forRoot(),
+    CovalentCoreModule,
     CoreModule,
     ConnectModule,
     EditorModule,
