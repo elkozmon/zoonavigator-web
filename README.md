@@ -3,7 +3,7 @@ ZooNavigator Web
 
 Web client for ZooNavigator, web-based GUI for ZooKeeper.
 
-For more info and instructions how to use ZooNavigator see [parent GitHub repository](https://github.com/elkozmon/zoonavigator).
+**For more info and instructions how to use ZooNavigator see [parent GitHub repository](https://github.com/elkozmon/zoonavigator).**
 
 License
 -------
