@@ -94,8 +94,8 @@ export class DefaultApiService implements ApiService {
       message = "Unable to receive a response.";
     }
 
-    if (error.status === 403) {
-      this.zSessionHandler.onSessionInvalid(message);
+    if (error.status === 401) {
+      this.zSessionHandler.onSessionInvalid();
     }
 
     return Observable.throw(message);
