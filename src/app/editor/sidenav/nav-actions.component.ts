@@ -76,10 +76,10 @@ export class NavActionsComponent {
     const path = this.zPath.toString();
     const names = this.zNodes.map(node => node.name);
 
-    const message = `Do you want to delete ${names.length} ${names.length === 1 ? "node" : "nodes"}?`;
+    const message = `Do you want to delete ${names.length} ${names.length === 1 ? "node and its" : "nodes and their"} children?`;
 
     this.feedbackService.showConfirm(
-      "Confirm delete",
+      "Confirm recursive delete",
       message,
       "Confirm",
       "Cancel",
