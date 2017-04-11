@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, Output, EventEmitter} from "@angular/core";
+import {Component, EventEmitter, Output} from "@angular/core";
 
 @Component({
   selector: "zoo-regexp-filter",
@@ -24,22 +24,32 @@ import {Component, Output, EventEmitter} from "@angular/core";
 })
 export class RegexpFilterComponent {
 
-  @Output() update: EventEmitter<RegExp> = new EventEmitter();
-  @Output() error: EventEmitter<any> = new EventEmitter();
+  @Output() regexpChange: EventEmitter<RegExp> = new EventEmitter();
 
-  filterError: any;
+  value = "";
+  error: any;
 
-  private filter: RegExp;
+  clear(): void {
+    this.value = null;
+    this.error = null;
+
+    this.regexpChange.emit(null);
+  }
 
   onChange(value: string): void {
-    if (!this.filter || this.filter.source !== value) {
-      try {
-        this.update.emit(new RegExp(value));
-        this.filterError = null;
-      } catch (e) {
-        this.filterError = e;
-        this.error.emit(e);
-      }
+    this.value = value;
+    this.error = null;
+
+    if (!value) {
+      this.regexpChange.emit(null);
+      return;
+    }
+
+    try {
+      this.regexpChange.emit(new RegExp(value));
+    } catch (e) {
+      this.regexpChange.emit(null);
+      this.error = e;
     }
   }
 }

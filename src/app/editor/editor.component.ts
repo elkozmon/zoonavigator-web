@@ -15,15 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AfterViewInit, Component, OnInit, ViewContainerRef} from "@angular/core";
+import {AfterViewInit, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
 import {ZSessionHandler, ZSessionService} from "../core";
-import {ZNode, ZNodeChildren} from "./znode";
+import {ZNode} from "./znode";
 import {ZPath, ZPathService} from "./zpath";
 import {ZNodeService} from "./znode/znode.service";
 import {FeedbackService} from "../core/feedback/feedback.service";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
+import {RegexpFilterComponent} from "../shared/regexp/regexp-filter.component";
 
 @Component({
   templateUrl: "editor.component.html",
@@ -31,15 +32,19 @@ import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
 })
 export class EditorComponent implements OnInit, AfterViewInit {
 
-  connectionString: string;
+  @ViewChild("childrenFilter") childrenFilter: RegexpFilterComponent;
 
   currentZPath: ZPath;
 
-  childrenZNodes: ZNodeChildren;
-  filteredZNodes: ZNode[];
-  selectedZNodes: ZNode[];
+  childrenZNodes: ZNode[] = [];
+  filteredZNodes: ZNode[] = [];
+  selectedZNodes: ZNode[] = [];
 
-  zNodesFilter: RegExp;
+  childrenFilterRegexp: RegExp = null;
+
+  private static filterZNodes(nodes: ZNode[], regexp: RegExp): ZNode[] {
+    return nodes.filter(node => node.name.match(regexp));
+  }
 
   constructor(
     public mediaService: TdMediaService,
@@ -55,39 +60,34 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // init values
     const nodePath = this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/";
-
-    this.connectionString = this.zSessionHandler.sessionInfo.connectionString;
     this.currentZPath = this.zPathService.parse(nodePath);
-    this.childrenZNodes = this.route.snapshot.data["children"].data;
-    this.filteredZNodes = this.childrenZNodes;
-    this.selectedZNodes = [];
+
+    this.updateChildren(this.route.snapshot.data["children"].data);
+  }
+
+  ngAfterViewInit(): void {
+    this.mediaService.broadcast();
 
     // update values on query params change
     this.route
       .queryParams
       .skip(1)
       .forEach(queryParams => {
-        const newNodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
+        const nodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
 
-        this.currentZPath = this.zPathService.parse(newNodePath);
-        this.reloadChildren();
+        if (nodePath !== this.currentZPath.toString()) {
+          this.currentZPath = this.zPathService.parse(nodePath);
+          this.childrenFilter.clear();
+
+          this.reloadChildren();
+        }
       });
   }
 
-  ngAfterViewInit(): void {
-    this.mediaService.broadcast();
-  }
-
-  onFilterUpdate(value: RegExp): void {
-    this.zNodesFilter = value;
-    this.refreshZNodeFilter();
-  }
-
-  //noinspection JSUnusedLocalSymbols
-  onFilterError(error: any): void {
-    this.filteredZNodes = this.childrenZNodes;
+  onFilterRegexpChange(regexp: RegExp): void {
+    this.childrenFilterRegexp = regexp;
+    this.updateFilteredChildren();
   }
 
   disconnect(): void {
@@ -123,16 +123,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.zNodeService
       .getChildren(this.currentZPath.toString())
       .subscribe(
-        metaWithChildren => {
-          // update children znodes
-          this.childrenZNodes = metaWithChildren.data;
-
-          // refresh filtered znodes
-          this.refreshZNodeFilter();
-
-          // remove non-existing selected znodes
-          this.selectedZNodes = this.selectedZNodes.filter(node => this.childrenZNodes.indexOf(node) >= 0);
-        },
+        metaWithChildren => this.updateChildren(metaWithChildren.data),
         error => this.feedbackService.showError(error, null)
       );
   }
@@ -148,11 +139,26 @@ export class EditorComponent implements OnInit, AfterViewInit {
     }
   }
 
-  private refreshZNodeFilter(): void {
-    if (this.zNodesFilter) {
-      this.filteredZNodes = this.childrenZNodes.filter(node => node.name.match(this.zNodesFilter));
+  private updateChildren(children: ZNode[]): void {
+    this.childrenZNodes = children;
+
+    this.updateFilteredChildren();
+    this.updateSelectedChildren();
+  }
+
+  private updateFilteredChildren(): void {
+    if (this.childrenFilterRegexp) {
+      this.filteredZNodes = EditorComponent.filterZNodes(
+        this.childrenZNodes,
+        this.childrenFilterRegexp
+      );
     } else {
       this.filteredZNodes = this.childrenZNodes;
     }
+  }
+
+  private updateSelectedChildren(): void {
+    // remove non-existing selected znodes
+    this.selectedZNodes = this.selectedZNodes.filter(node => this.childrenZNodes.indexOf(node) >= 0);
   }
 }

@@ -19,14 +19,14 @@ import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs/Observable";
 import "rxjs/add/operator/toPromise";
-import {ZNodeChildren} from "./znode-children";
 import {ZNodeService} from "../znode.service";
 import {ZNodeMetaWith} from "../container/meta/znode-meta-with";
 import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
 import {FeedbackService} from "../../../core";
+import {ZNode} from "../znode";
 
 @Injectable()
-export class ZNodeChildrenResolver implements Resolve<ZNodeMetaWith<ZNodeChildren>> {
+export class ZNodeChildrenResolver implements Resolve<ZNodeMetaWith<ZNode[]>> {
 
   constructor(
     private router: Router,
@@ -38,7 +38,7 @@ export class ZNodeChildrenResolver implements Resolve<ZNodeMetaWith<ZNodeChildre
   resolve(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<ZNodeMetaWith<ZNodeChildren>> | Promise<ZNodeMetaWith<ZNodeChildren>> | ZNodeMetaWith<ZNodeChildren> {
+  ): Observable<ZNodeMetaWith<ZNode[]>> | Promise<ZNodeMetaWith<ZNode[]>> | ZNodeMetaWith<ZNode[]> {
     const nodePath = route.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/";
 
     return this.zNodeService

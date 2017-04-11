@@ -47,10 +47,9 @@
     <md-nav-list
       td-sidenav-content
       (click)="!mediaService.query('gt-sm') && manageList.close()">
-        <zoo-regexp-filter
-          (update)="onFilterUpdate($event)"
-          (error)="onFilterError($event)">
-        </zoo-regexp-filter>
+      <zoo-regexp-filter #childrenFilter
+                         (regexpChange)="onFilterRegexpChange($event)">
+      </zoo-regexp-filter>
       <zoo-editor-nav-list
         [zPath]="currentZPath"
         [zNodes]="filteredZNodes"
@@ -58,7 +57,8 @@
         (select)="selectZNode($event)"
         (deselect)="deselectZNode($event)">
       </zoo-editor-nav-list>
-      <div class="zoo-nav-info bgc-grey-200 tc-grey-900" *ngIf="filteredZNodes.length === 0 && childrenZNodes.length > 0">
+      <div class="zoo-nav-info bgc-grey-200 tc-grey-900"
+           *ngIf="filteredZNodes.length === 0 && childrenZNodes.length > 0">
         <md-icon class="md-18">info_outline</md-icon>
         Your filter didn't match any children
       </div>

@@ -17,8 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs/Observable";
-import {ZNodeMeta, ZNodeData, ZNodeMetaWith, ZNodeAcl} from "./container";
-import {ZNodeChildren} from "./children/znode-children";
+import {ZNodeAcl, ZNodeData, ZNodeMeta, ZNodeMetaWith} from "./container";
+import {ZNode} from "./znode";
 
 @Injectable()
 export abstract class ZNodeService {
@@ -49,7 +49,7 @@ export abstract class ZNodeService {
 
   abstract getMeta(path: string): Observable<ZNodeMeta>
 
-  abstract getChildren(path: string): Observable<ZNodeMetaWith<ZNodeChildren>>
+  abstract getChildren(path: string): Observable<ZNodeMetaWith<ZNode[]>>
 
   abstract deleteChildren(
     path: string,

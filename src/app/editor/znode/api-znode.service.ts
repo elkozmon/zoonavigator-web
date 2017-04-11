@@ -22,9 +22,9 @@ import {ApiService, ApiRequestFactory} from "../../core";
 import {ZNodeMeta} from "./container/meta/znode-meta";
 import {ZNodeData} from "./container/data/znode-data";
 import {ZNodeService} from "./znode.service";
-import {ZNodeChildren} from "./children/znode-children";
 import {ZNodeMetaWith} from "./container/meta/znode-meta-with";
 import {ZNodeAcl} from "./container/acl/znode-acl";
+import {ZNode} from "./znode";
 
 @Injectable()
 export class ApiZNodeService implements ZNodeService {
@@ -131,7 +131,7 @@ export class ApiZNodeService implements ZNodeService {
       .map(response => response.payload);
   }
 
-  getChildren(path: string): Observable<ZNodeMetaWith<ZNodeChildren>> {
+  getChildren(path: string): Observable<ZNodeMetaWith<ZNode[]>> {
     const params = new URLSearchParams();
     params.set("path", path);
 

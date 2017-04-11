@@ -22,12 +22,13 @@
     mdTooltip="RegExp filter"
     mdTooltipPosition="below"
     #regexpFilter
+    [value]="value"
     (change)="onChange(regexpFilter.value)"
     (keyup)="onChange(regexpFilter.value)"/>
   <span md-prefix><md-icon>search</md-icon></span>
 </md-input-container>
 
-<div *ngIf="filterError" class="zoo-filter-info bgc-red-400 tc-white-4">
+<div *ngIf="error" class="zoo-filter-info bgc-red-400 tc-white-4">
   <md-icon class="md-18">error_outline</md-icon>
-  {{filterError}}
+  {{error}}
 </div>
