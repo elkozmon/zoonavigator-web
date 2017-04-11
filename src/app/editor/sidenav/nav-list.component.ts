@@ -42,7 +42,7 @@ export class NavListComponent {
   }
 
   //noinspection JSMethodCanBeStatic,JSUnusedLocalSymbols
-  trackByName(index: number, zNode: ZNode): string {
-    return zNode.name;
+  trackByPath(index: number, zNode: ZNode): string {
+    return zNode.path;
   }
 }

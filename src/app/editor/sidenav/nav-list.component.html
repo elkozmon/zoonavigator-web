@@ -38,7 +38,7 @@
 </a>
 <a
   md-list-item
-  *ngFor="let node of zNodes; trackBy: trackByName"
+  *ngFor="let node of zNodes; trackBy: trackByPath"
   routerLink="/editor/node"
   queryParamsHandling="merge"
   [queryParams]="{path: node.path}">
