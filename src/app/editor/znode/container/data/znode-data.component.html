@@ -19,17 +19,17 @@
 <div layout="column" layout-fill>
 
   <md-card layout="column" flex>
-    <md-card-content ace-editor
-                     flex
-                     #dataEditor
-                     theme="chrome"
-                     [(text)]="metaWithData.data"
-                     [mode]="editorMode"
-                     [options]="editorOpts"
-                     [readOnly]="false"
-                     [autoUpdateContent]="true"
-                     style="height: 100%; overflow: auto;">
-    </md-card-content>
+    <ace-editor ace-editor
+                flex
+                #dataEditor
+                theme="chrome"
+                [(text)]="metaWithData.data"
+                [mode]="editorMode"
+                [options]="editorOpts"
+                [readOnly]="false"
+                [autoUpdateContent]="true"
+                style="height: 100%; overflow: auto;">
+    </ace-editor>
   </md-card>
 
   <div class="zoo-actionbar">

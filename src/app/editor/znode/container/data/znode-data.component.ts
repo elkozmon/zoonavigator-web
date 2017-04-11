@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, OnInit, ViewContainerRef} from "@angular/core";
+import {AfterViewInit, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {Observable} from "rxjs/Observable";
 import "rxjs/add/operator/skip";
@@ -31,12 +31,15 @@ import {ZNodeService} from "../../znode.service";
 import {FeedbackService} from "../../../../core";
 import {CanDeactivateComponent} from "../../../../shared";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
+import {AceEditorComponent} from "ng2-ace-editor";
 
 @Component({
   templateUrl: "znode-data.component.html",
   styleUrls: ["znode-data.component.scss"]
 })
-export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
+export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateComponent {
+
+  @ViewChild("dataEditor") editor: AceEditorComponent;
 
   editorModes: string[] = ["text", "json", "yaml", "xml"];
   editorMode = "text";
@@ -71,6 +74,14 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
         this.reloadDataForm(newNodePath);
       });
+  }
+
+  ngAfterViewInit(): void {
+    // https://github.com/fxmontigny/ng2-ace-editor/issues/34
+    this.editor
+      .getEditor()
+      .selection
+      .moveCursorFileStart();
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
