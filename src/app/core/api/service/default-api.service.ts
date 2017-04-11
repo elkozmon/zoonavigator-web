@@ -16,14 +16,13 @@
  */
 
 import {Injectable} from "@angular/core";
-import {ActivatedRoute, Router} from "@angular/router";
-import {Http, RequestOptionsArgs, Response, Headers} from "@angular/http";
-import {Observable} from "rxjs/Observable";
+import {Headers, Http, RequestOptionsArgs, Response} from "@angular/http";
+import {Observable, ObservableInput} from "rxjs/Observable";
 import "rxjs/add/observable/defer";
 import "rxjs/add/observable/throw";
 import "rxjs/add/operator/catch";
 import "rxjs/add/operator/timeoutWith";
-import {ObservableInput} from "rxjs/Observable";
+import "rxjs/add/operator/skip";
 import {ConfigService} from "../../../config";
 import {ApiRequest} from "../request";
 import {ApiResponse} from "../api-response";
@@ -45,8 +44,6 @@ export class DefaultApiService implements ApiService {
 
   constructor(
     private http: Http,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
     private zSessionHandler: ZSessionHandler,
     private configService: ConfigService
   ) {
@@ -81,33 +78,26 @@ export class DefaultApiService implements ApiService {
   }
 
   private handleError<T>(error: Response | any): ObservableInput<T> {
-    let errorMsg: string = null;
+    let message: string = null;
 
     if (error instanceof Response) {
-      errorMsg = DefaultApiService
+      message = DefaultApiService
         .extractResponse(error)
         .message;
     } else if (error.message) {
-      errorMsg = error.message;
+      message = error.message;
     } else {
-      errorMsg = error.toString();
+      message = error.toString();
     }
 
-    if (!errorMsg && error.status === 0) {
-      errorMsg = "Unable to receive a response.";
+    if (!message && error.status === 0) {
+      message = "Unable to receive a response.";
     }
 
     if (error.status === 403) {
-      this.zSessionHandler.sessionInfo = null;
-
-      this.router.navigate(
-        ["/connect", {
-          returnUrl: this.activatedRoute.snapshot.url,
-          errorMsg: errorMsg
-        }]
-      );
+      this.zSessionHandler.onSessionInvalid(message);
     }
 
-    return Observable.throw(errorMsg);
+    return Observable.throw(message);
   }
 }

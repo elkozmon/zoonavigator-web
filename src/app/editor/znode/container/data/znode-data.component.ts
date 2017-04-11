@@ -132,12 +132,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
             this.viewContainerRef
           );
         },
-        error => {
-          this.feedbackService.showError(
-            error,
-            this.viewContainerRef
-          );
-        }
+        error => this.feedbackService.showError(error, null)
       );
   }
 
@@ -149,15 +144,8 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
     this.zNodeService
       .getData(path)
       .subscribe(
-        metaWithData => {
-          this.updateDataForm(metaWithData);
-        },
-        error => {
-          this.feedbackService.showError(
-            error,
-            this.viewContainerRef
-          );
-        }
+        metaWithData => this.updateDataForm(metaWithData),
+        error => this.feedbackService.showError(error, null)
       );
   }
 

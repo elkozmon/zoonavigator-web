@@ -78,15 +78,8 @@ export class ZNodeMetaComponent implements OnInit {
               this.meta.dataVersion
             )
             .subscribe(
-              success => {
-                this.navigateToParent();
-              },
-              error => {
-                this.feedbackService.showError(
-                  error,
-                  this.viewContainerRef
-                );
-              }
+              success => this.navigateToParent(),
+              error => this.feedbackService.showError(error, null)
             );
         }
       });
@@ -96,15 +89,8 @@ export class ZNodeMetaComponent implements OnInit {
     this.zNodeService
       .getMeta(path)
       .subscribe(
-        meta => {
-          this.meta = meta;
-        },
-        error => {
-          this.feedbackService.showError(
-            error,
-            this.viewContainerRef
-          );
-        }
+        meta => this.meta = meta,
+        error => this.feedbackService.showError(error, null)
       );
   }
 

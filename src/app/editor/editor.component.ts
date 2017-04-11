@@ -133,12 +133,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
           // remove non-existing selected znodes
           this.selectedZNodes = this.selectedZNodes.filter(node => this.childrenZNodes.indexOf(node) >= 0);
         },
-        error => {
-          this.feedbackService.showError(
-            error,
-            this.viewContainerRef
-          );
-        }
+        error => this.feedbackService.showError(error, null)
       );
   }
 

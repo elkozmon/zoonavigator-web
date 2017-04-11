@@ -156,12 +156,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
             this.viewContainerRef
           );
         },
-        error => {
-          this.feedbackService.showError(
-            error,
-            this.viewContainerRef
-          );
-        }
+        error => this.feedbackService.showError(error, null)
       );
   }
 
@@ -173,15 +168,8 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     this.zNodeService
       .getAcl(path)
       .subscribe(
-        metaWithAcl => {
-          this.updateAclForm(metaWithAcl);
-        },
-        error => {
-          this.feedbackService.showError(
-            error,
-            this.viewContainerRef
-          );
-        }
+        metaWithAcl => this.updateAclForm(metaWithAcl),
+        error => this.feedbackService.showError(error, null)
       );
   }
 

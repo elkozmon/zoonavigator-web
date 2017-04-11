@@ -65,15 +65,8 @@ export class NavActionsComponent {
           this.zNodeService
             .createNode(snapshotZPath.goDown(name).toString())
             .subscribe(
-              success => {
-                this.reload.emit();
-              },
-              error => {
-                this.feedbackService.showError(
-                  error,
-                  this.viewContainerRef
-                );
-              }
+              success => this.reload.emit(),
+              error => this.feedbackService.showError(error, null)
             );
         }
       });
@@ -99,7 +92,7 @@ export class NavActionsComponent {
             .deleteChildren(path, names)
             .subscribe(
               success => this.reload.emit(),
-              error => this.feedbackService.showError(error, this.viewContainerRef)
+              error => this.feedbackService.showError(error, null)
             );
         }
       });

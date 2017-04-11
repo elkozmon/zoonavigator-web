@@ -19,6 +19,8 @@ import {Injectable} from "@angular/core";
 import {ZSessionHandler} from "./zsession.handler";
 import {ZSessionInfo} from "../zsession-info";
 import {StorageService} from "../../../core";
+import {ActivatedRoute, Router} from "@angular/router";
+import {FeedbackService} from "../../feedback/feedback.service";
 
 @Injectable()
 export class DefaultZSessionHandler implements ZSessionHandler {
@@ -26,8 +28,20 @@ export class DefaultZSessionHandler implements ZSessionHandler {
   private sessionInfoKey = "sessionInfo";
 
   constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
     private storageService: StorageService
   ) {
+  }
+
+  onSessionInvalid(message: string): void {
+    this.router
+      .navigate(
+        ["/connect", {
+          returnUrl: this.activatedRoute.snapshot.url
+        }]
+      )
+      .then(() => this.sessionInfo = null);
   }
 
   get sessionInfo(): ZSessionInfo | null {

@@ -44,9 +44,13 @@ export class ZNodeChildrenResolver implements Resolve<ZNodeMetaWith<ZNodeChildre
     return this.zNodeService
       .getChildren(nodePath)
       .toPromise()
-      .catch((reason) => {
-        this.feedbackService.showError(reason, null);
-        this.router.navigate(["/editor"]);
+      .catch(error => {
+        this.feedbackService
+          .showError(error, null)
+          .afterClosed()
+          .subscribe(
+            () => this.router.navigate(["/editor"])
+          );
       });
   }
 }
