@@ -34,7 +34,7 @@ export class DefaultZSessionHandler implements ZSessionHandler {
   ) {
   }
 
-  onSessionInvalid(message: string): void {
+  onSessionInvalid(): void {
     this.router
       .navigate(
         ["/connect", {
