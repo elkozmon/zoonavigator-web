@@ -60,6 +60,10 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
   }
 
   get editorDirty(): boolean {
+    if (!this.metaWithData) {
+      return false;
+    }
+
     return this.metaWithData.data !== this.dataPristine;
   }
 
