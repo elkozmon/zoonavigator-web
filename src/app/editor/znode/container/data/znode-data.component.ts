@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AfterViewInit, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
+import {AfterViewChecked, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {Observable} from "rxjs/Observable";
 import "rxjs/add/operator/skip";
@@ -37,7 +37,7 @@ import {AceEditorComponent} from "ng2-ace-editor";
   templateUrl: "znode-data.component.html",
   styleUrls: ["znode-data.component.scss"]
 })
-export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateComponent {
+export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactivateComponent {
 
   @ViewChild("dataEditor") editor: AceEditorComponent;
 
@@ -49,6 +49,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
 
   metaWithData: ZNodeMetaWith<ZNodeData>;
 
+  private shouldClearDataFormSelection: boolean;
   private dataPristine: string;
 
   constructor(
@@ -69,6 +70,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
 
   ngOnInit(): void {
     this.updateDataForm(this.route.snapshot.data["data"]);
+    this.scheduleDataFormSelectionClear();
 
     this.route
       .queryParams
@@ -80,12 +82,11 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
       });
   }
 
-  ngAfterViewInit(): void {
+  ngAfterViewChecked(): void {
     // https://github.com/fxmontigny/ng2-ace-editor/issues/34
-    this.editor
-      .getEditor()
-      .selection
-      .moveCursorFileStart();
+    if (this.shouldClearDataFormSelection) {
+      this.clearDataFormSelection();
+    }
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
@@ -156,5 +157,19 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
   private updateDataForm(metaWithData: ZNodeMetaWith<ZNodeData>): void {
     this.metaWithData = metaWithData;
     this.dataPristine = metaWithData.data;
+
+    this.scheduleDataFormSelectionClear();
+  }
+
+  private scheduleDataFormSelectionClear(): void {
+    this.shouldClearDataFormSelection = true;
+  }
+
+  private clearDataFormSelection(): void {
+    this.editor
+      .getEditor()
+      .clearSelection();
+
+    this.shouldClearDataFormSelection = false;
   }
 }
