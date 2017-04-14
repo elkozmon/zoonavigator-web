@@ -20,7 +20,7 @@ import {ZSessionHandler} from "./zsession.handler";
 import {ZSessionInfo} from "../zsession-info";
 import {StorageService} from "../../../core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {FeedbackService} from "../../feedback/feedback.service";
+import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
 
 @Injectable()
 export class DefaultZSessionHandler implements ZSessionHandler {
@@ -37,9 +37,11 @@ export class DefaultZSessionHandler implements ZSessionHandler {
   onSessionInvalid(): void {
     this.router
       .navigate(
-        ["/connect", {
-          returnUrl: this.activatedRoute.snapshot.url
-        }]
+        ["/connect"], {
+          queryParams: {
+            [CONNECT_QUERY_RETURN_URL]: this.activatedRoute.snapshot.url
+          }
+        }
       )
       .then(() => this.sessionInfo = null);
   }

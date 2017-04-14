@@ -21,6 +21,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {LoadingMode, LoadingType, TdLoadingService} from "@covalent/core";
 import {AuthInfo, ZSessionHandler, ZSessionService} from "../core";
 import {Scheme} from "../core/acl/scheme";
+import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 
 @Component({
   templateUrl: "./connect.component.html",
@@ -55,10 +56,10 @@ export class ConnectComponent implements OnInit {
     });
 
     this.route
-      .params
-      .subscribe(params => {
-        this.errorMsg = params["errorMsg"] || null;
-        this.redirectUrl = params["returnUrl"] || "/editor";
+      .queryParamMap
+      .subscribe(paramMap => {
+        this.errorMsg = paramMap.get(CONNECT_QUERY_ERROR_MSG) || null;
+        this.redirectUrl = paramMap.get(CONNECT_QUERY_RETURN_URL) || "/editor";
       });
 
     this.connectForm = this.newConnectForm();

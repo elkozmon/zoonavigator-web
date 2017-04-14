@@ -16,9 +16,10 @@
  */
 
 import {Injectable} from "@angular/core";
-import {CanActivate, CanActivateChild, ActivatedRouteSnapshot, RouterStateSnapshot, Router} from "@angular/router";
+import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs/Observable";
 import {ZSessionHandler} from "../core/zsession/handler/zsession.handler";
+import {CONNECT_QUERY_RETURN_URL} from "../connect/connect-routing.constants";
 
 @Injectable()
 export class EditorGuard implements CanActivate, CanActivateChild {
@@ -32,14 +33,14 @@ export class EditorGuard implements CanActivate, CanActivateChild {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<boolean>|Promise<boolean>|boolean {
+  ): Observable<boolean> | Promise<boolean> | boolean {
     return this.checkSession(state.url);
   }
 
   canActivateChild(
     childRoute: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<boolean>|Promise<boolean>|boolean {
+  ): Observable<boolean> | Promise<boolean> | boolean {
     return this.canActivate(childRoute, state);
   }
 
@@ -49,7 +50,11 @@ export class EditorGuard implements CanActivate, CanActivateChild {
     }
 
     this.router.navigate(
-      ["/connect", {returnUrl: url}]
+      ["/connect"], {
+        queryParams: {
+          [CONNECT_QUERY_RETURN_URL]: url
+        }
+      }
     );
 
     return false;
