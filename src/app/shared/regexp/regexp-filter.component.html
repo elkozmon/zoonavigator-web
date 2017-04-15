@@ -19,9 +19,8 @@
 <md-input-container>
   <input
     mdInput
-    mdTooltip="RegExp filter"
-    mdTooltipPosition="below"
     #regexpFilter
+    placeholder="Regexp filter"
     [value]="value"
     (change)="onChange(regexpFilter.value)"
     (keyup)="onChange(regexpFilter.value)"/>
