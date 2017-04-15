@@ -35,7 +35,7 @@ export class DefaultZSessionHandler implements ZSessionHandler {
   ) {
   }
 
-  onSessionInvalid(): void {
+  onSessionInvalid(): boolean {
     if (this.sessionInfo) {
       this.sessionInfo = null;
       this.router.navigate(
@@ -45,7 +45,11 @@ export class DefaultZSessionHandler implements ZSessionHandler {
           }
         }
       );
+
+      return true;
     }
+
+    return false;
   }
 
   get sessionInfo(): ZSessionInfo | null {

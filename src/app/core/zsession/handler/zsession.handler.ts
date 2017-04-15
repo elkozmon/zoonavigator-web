@@ -21,7 +21,7 @@ import {ZSessionInfo} from "../zsession-info";
 @Injectable()
 export abstract class ZSessionHandler {
 
-  abstract onSessionInvalid(): void
+  abstract onSessionInvalid(): boolean
 
   abstract get sessionInfo(): ZSessionInfo | null
 

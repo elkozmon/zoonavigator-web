@@ -19,6 +19,7 @@ import {Injectable} from "@angular/core";
 import {Headers, Http, RequestOptionsArgs, Response} from "@angular/http";
 import {Observable, ObservableInput} from "rxjs/Observable";
 import "rxjs/add/observable/defer";
+import "rxjs/add/observable/empty";
 import "rxjs/add/observable/throw";
 import "rxjs/add/operator/catch";
 import "rxjs/add/operator/timeoutWith";
@@ -95,7 +96,9 @@ export class DefaultApiService implements ApiService {
     }
 
     if (error.status === 401) {
-      this.zSessionHandler.onSessionInvalid();
+      if (!this.zSessionHandler.onSessionInvalid()) {
+        return Observable.empty();
+      }
     }
 
     return Observable.throw(message);
