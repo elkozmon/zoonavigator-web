@@ -15,11 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {Router} from "@angular/router";
 import {Injectable} from "@angular/core";
+import {Location} from "@angular/common";
 import {ZSessionHandler} from "./zsession.handler";
 import {ZSessionInfo} from "../zsession-info";
 import {StorageService} from "../../../core";
-import {ActivatedRoute, Router} from "@angular/router";
 import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
 
 @Injectable()
@@ -29,21 +30,22 @@ export class DefaultZSessionHandler implements ZSessionHandler {
 
   constructor(
     private router: Router,
-    private activatedRoute: ActivatedRoute,
+    private location: Location,
     private storageService: StorageService
   ) {
   }
 
   onSessionInvalid(): void {
-    this.router
-      .navigate(
+    if (this.sessionInfo) {
+      this.sessionInfo = null;
+      this.router.navigate(
         ["/connect"], {
           queryParams: {
-            [CONNECT_QUERY_RETURN_URL]: this.activatedRoute.snapshot.url
+            [CONNECT_QUERY_RETURN_URL]: this.location.path()
           }
         }
-      )
-      .then(() => this.sessionInfo = null);
+      );
+    }
   }
 
   get sessionInfo(): ZSessionInfo | null {

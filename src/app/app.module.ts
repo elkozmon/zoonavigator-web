@@ -16,6 +16,7 @@
  */
 
 import {APP_INITIALIZER, NgModule} from "@angular/core";
+import {Location, LocationStrategy, PathLocationStrategy} from "@angular/common";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ReactiveFormsModule} from "@angular/forms";
@@ -54,6 +55,11 @@ import {EditorModule} from "./editor";
       useFactory: getConfigLoader,
       deps: [ConfigService],
       multi: true
+    },
+    Location,
+    {
+      provide: LocationStrategy,
+      useClass: PathLocationStrategy
     }
   ],
   declarations: [
