@@ -63,7 +63,7 @@ export class ZNodeMetaComponent implements OnInit {
   onDelete(): void {
     this.feedbackService
       .showConfirm(
-        "Confirm delete",
+        "Confirm recursive delete",
         "Do you want to delete this node and all its children?",
         "Confirm",
         "Cancel",
