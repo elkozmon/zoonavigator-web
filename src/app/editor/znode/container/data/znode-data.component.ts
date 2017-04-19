@@ -168,7 +168,8 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
   private clearDataFormSelection(): void {
     this.editor
       .getEditor()
-      .clearSelection();
+      .selection
+      .moveCursorFileStart();
 
     this.shouldClearDataFormSelection = false;
   }
