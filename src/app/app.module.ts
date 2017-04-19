@@ -17,7 +17,7 @@
 
 import {APP_INITIALIZER, NgModule} from "@angular/core";
 import {Location, LocationStrategy, PathLocationStrategy} from "@angular/common";
-import {BrowserModule} from "@angular/platform-browser";
+import {BrowserModule, Title} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ReactiveFormsModule} from "@angular/forms";
 import {HttpModule} from "@angular/http";
@@ -56,6 +56,7 @@ import {EditorModule} from "./editor";
       deps: [ConfigService],
       multi: true
     },
+    Title,
     Location,
     {
       provide: LocationStrategy,

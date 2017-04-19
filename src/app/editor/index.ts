@@ -16,3 +16,4 @@
  */
 
 export * from "./editor.module"
+export * from "./editor-routing.constants"

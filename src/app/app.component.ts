@@ -15,12 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
+import {Title} from "@angular/platform-browser";
+import {ActivatedRoute} from "@angular/router";
+import {EDITOR_QUERY_NODE_PATH} from "./editor/editor-routing.constants";
 
 @Component({
   selector: "zoo-app",
   template: `<router-outlet></router-outlet>`
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
 
+  constructor(
+    private titleService: Title,
+    private activatedRoute: ActivatedRoute
+  ) {
+  }
+
+  ngOnInit(): void {
+    this.activatedRoute
+      .queryParamMap
+      .subscribe(
+        map => {
+          if (map.has(EDITOR_QUERY_NODE_PATH)) {
+            this.titleService.setTitle("ZooNavigator - " + map.get(EDITOR_QUERY_NODE_PATH));
+          } else {
+            this.titleService.setTitle("ZooNavigator");
+          }
+        }
+      );
+  }
 }
