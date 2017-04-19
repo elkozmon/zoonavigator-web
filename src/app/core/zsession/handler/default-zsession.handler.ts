@@ -22,6 +22,7 @@ import {ZSessionHandler} from "./zsession.handler";
 import {ZSessionInfo} from "../zsession-info";
 import {StorageService} from "../../../core";
 import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
+import {FeedbackService} from "../../feedback/feedback.service";
 
 @Injectable()
 export class DefaultZSessionHandler implements ZSessionHandler {
@@ -31,25 +32,41 @@ export class DefaultZSessionHandler implements ZSessionHandler {
   constructor(
     private router: Router,
     private location: Location,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private feedbackService: FeedbackService
   ) {
   }
 
-  onSessionInvalid(): boolean {
-    if (this.sessionInfo) {
-      this.sessionInfo = null;
-      this.router.navigate(
-        ["/connect"], {
-          queryParams: {
-            [CONNECT_QUERY_RETURN_URL]: this.location.path()
-          }
-        }
-      );
-
-      return true;
+  onSessionInvalid(reason: string): void {
+    if (!this.sessionInfo) {
+      return;
     }
 
-    return false;
+    const tempSessionInfo = this.sessionInfo;
+    this.sessionInfo = null;
+
+    this.feedbackService
+      .showError(reason, null)
+      .afterClosed()
+      .subscribe(
+        () => {
+          this.router
+            .navigate(
+              ["/connect"], {
+                queryParams: {
+                  [CONNECT_QUERY_RETURN_URL]: this.location.path()
+                }
+              }
+            )
+            .then(
+              success => {
+                if (!success) {
+                  this.sessionInfo = tempSessionInfo;
+                }
+              }
+            );
+        }
+      );
   }
 
   get sessionInfo(): ZSessionInfo | null {

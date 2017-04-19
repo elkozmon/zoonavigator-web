@@ -96,9 +96,9 @@ export class DefaultApiService implements ApiService {
     }
 
     if (error.status === 401) {
-      if (!this.zSessionHandler.onSessionInvalid()) {
-        return Observable.empty();
-      }
+      this.zSessionHandler.onSessionInvalid(message);
+
+      return Observable.empty();
     }
 
     return Observable.throw(message);
