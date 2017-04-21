@@ -151,6 +151,10 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
             data: acl
           });
 
+          this.reloadAclForm(
+            this.getCurrentPath()
+          );
+
           this.feedbackService.showSuccess(
             "Changes saved",
             this.viewContainerRef
