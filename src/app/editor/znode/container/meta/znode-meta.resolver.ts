@@ -50,6 +50,13 @@ export class ZNodeMetaResolver implements Resolve<ZNodeMeta> {
           .subscribe(
             () => this.router.navigate(["/editor"])
           );
+      })
+      .then((data) => {
+        if (!data) {
+          return Promise.reject("Couldn't fetch znode meta");
+        }
+
+        return Promise.resolve(data);
       });
   }
 }

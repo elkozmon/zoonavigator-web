@@ -51,6 +51,13 @@ export class ZNodeChildrenResolver implements Resolve<ZNodeMetaWith<ZNode[]>> {
           .subscribe(
             () => this.router.navigate(["/editor"])
           );
+      })
+      .then((data) => {
+        if (!data) {
+          return Promise.reject("Couldn't fetch znode children");
+        }
+
+        return Promise.resolve(data);
       });
   }
 }

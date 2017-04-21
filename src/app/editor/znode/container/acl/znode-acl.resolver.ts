@@ -51,6 +51,13 @@ export class ZNodeAclResolver implements Resolve<ZNodeMetaWith<ZNodeAcl>> {
           .subscribe(
             () => this.router.navigate(["/editor"])
           );
+      })
+      .then((data) => {
+        if (!data) {
+          return Promise.reject("Couldn't fetch znode ACL");
+        }
+
+        return Promise.resolve(data);
       });
   }
 }

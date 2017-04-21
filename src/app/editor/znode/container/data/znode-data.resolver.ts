@@ -51,6 +51,13 @@ export class ZNodeDataResolver implements Resolve<ZNodeMetaWith<ZNodeData>> {
           .subscribe(
             () => this.router.navigate(["/editor"])
           );
+      })
+      .then((data) => {
+        if (!data) {
+          return Promise.reject("Couldn't fetch znode data");
+        }
+
+        return Promise.resolve(data);
       });
   }
 }
