@@ -149,7 +149,10 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
     this.zNodeService
       .getData(path)
       .subscribe(
-        metaWithData => this.updateDataForm(metaWithData),
+        metaWithData => {
+          this.updateDataForm(metaWithData);
+          this.scheduleDataFormSelectionClear();
+        },
         error => this.feedbackService.showError(error, null)
       );
   }
@@ -157,8 +160,6 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
   private updateDataForm(metaWithData: ZNodeMetaWith<ZNodeData>): void {
     this.metaWithData = metaWithData;
     this.dataPristine = metaWithData.data;
-
-    this.scheduleDataFormSelectionClear();
   }
 
   private scheduleDataFormSelectionClear(): void {
