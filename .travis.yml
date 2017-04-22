@@ -4,6 +4,9 @@ dist: trusty
 
 language: node_js
 
+services:
+  - docker
+
 addons:
   apt:
     sources:
@@ -23,8 +26,15 @@ before_install:
 before_script:
   - npm install -g @angular/cli
   - npm install
-  - ng build --prod
 
 script:
   - ng test --watch=false
   - ng e2e
+  - ng build --prod
+
+deploy:
+  provider: script
+  script: docker/deploy.sh $TRAVIS_TAG
+  skip_cleanup: true
+  on:
+    tags: true
