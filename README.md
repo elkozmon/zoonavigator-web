@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/elkozmon/zoonavigator-web.svg?branch=master)](https://travis-ci.org/elkozmon/zoonavigator-web)
-
 ZooNavigator Web
 ================
+
+[![Build Status](https://travis-ci.org/elkozmon/zoonavigator-web.svg?branch=master)](https://travis-ci.org/elkozmon/zoonavigator-web)
 
 Web client for ZooNavigator, web-based GUI for ZooKeeper.
 
