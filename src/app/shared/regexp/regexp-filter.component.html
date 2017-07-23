@@ -17,6 +17,9 @@
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, HtmlFormInputWithoutLabel -->
 <md-input-container>
+  <span mdPrefix>
+      <md-icon>search</md-icon>
+  </span>
   <input
     mdInput
     #regexpFilter
@@ -24,7 +27,6 @@
     [value]="value"
     (change)="onChange(regexpFilter.value)"
     (keyup)="onChange(regexpFilter.value)"/>
-  <span md-prefix><md-icon>search</md-icon></span>
 </md-input-container>
 
 <div *ngIf="error" class="zoo-filter-info bgc-red-400 tc-white-4">

@@ -47,5 +47,7 @@
     (click)="$event.stopPropagation()"
     (change)="$event.checked ? onNodeChecked(node) : onNodeUnchecked(node)">
   </md-checkbox>
-  {{node.name}}
+  <span class="zoo-znode-name">
+    {{node.name}}
+  </span>
 </a>

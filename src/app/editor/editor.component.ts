@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AfterViewInit, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
 import {ZSessionHandler, ZSessionService} from "../core";
@@ -55,7 +55,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
     private zSessionService: ZSessionService,
     private zPathService: ZPathService,
     private feedbackService: FeedbackService,
-    private viewContainerRef: ViewContainerRef
+    private viewContainerRef: ViewContainerRef,
+    private changeDetectorRef: ChangeDetectorRef,
   ) {
   }
 
@@ -68,6 +69,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.mediaService.broadcast();
+    this.changeDetectorRef.detectChanges();
 
     // update values on query params change
     this.route

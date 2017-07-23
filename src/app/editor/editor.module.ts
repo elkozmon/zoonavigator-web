@@ -25,9 +25,20 @@ import {
   MdOptionModule,
   MdSelectModule,
   MdCheckboxModule,
-  MdMenuModule
+  MdButtonModule,
+  MdIconModule,
+  MdListModule,
+  MdMenuModule,
+  MdTooltipModule,
+  MdTabsModule,
+  MdToolbarModule
 } from "@angular/material";
-import {CovalentCommonModule, CovalentDialogsModule, CovalentLayoutModule} from "@covalent/core";
+import {
+  CovalentCommonModule,
+  CovalentDialogsModule,
+  CovalentLayoutModule,
+  CovalentMediaModule
+} from "@covalent/core";
 import {AceEditorModule} from "ng2-ace-editor";
 import {
   ApiZNodeService,
@@ -51,6 +62,7 @@ import {SharedModule} from "../shared";
     CovalentCommonModule,
     CovalentLayoutModule,
     CovalentDialogsModule,
+    CovalentMediaModule,
     AceEditorModule,
     EditorRoutingModule,
     SharedModule,
@@ -59,6 +71,12 @@ import {SharedModule} from "../shared";
     MdCardModule,
     MdInputModule,
     MdCheckboxModule,
+    MdButtonModule,
+    MdIconModule,
+    MdListModule,
+    MdToolbarModule,
+    MdTooltipModule,
+    MdTabsModule,
     MdMenuModule
   ],
   providers: [

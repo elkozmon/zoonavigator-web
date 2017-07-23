@@ -21,7 +21,7 @@
       "prefix": "app",
       "styles": [
         "./sass/styles.scss",
-        "../node_modules/@covalent/core/common/platform.scss",
+        "../node_modules/@covalent/core/common/platform.css",
         "../node_modules/font-awesome/css/font-awesome.css"
       ],
       "scripts": [],

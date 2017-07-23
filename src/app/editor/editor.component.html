@@ -16,66 +16,70 @@
   -->
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, JSBitwiseOperatorUsage -->
-<td-layout-nav toolbarTitle="ZooNavigator" logo="assets:paw" [navigationRoute]="'/editor'">
+<td-layout>
+  <td-layout-nav toolbarTitle="ZooNavigator" logo="assets:paw" [navigationRoute]="'/editor'">
 
-  <div td-toolbar-content layout="row" flex>
-    <span flex></span>
-    <button md-icon-button [mdMenuTriggerFor]="editorActionsMenu">
-      <md-icon class="md-24">more_vert</md-icon>
-    </button>
-    <md-menu #editorActionsMenu="mdMenu">
-      <button md-menu-item (click)="showSessionInfo()">Show session info</button>
-      <button md-menu-item (click)="disconnect()">Disconnect</button>
-    </md-menu>
-  </div>
-
-  <td-layout-manage-list
-    #manageList
-    [opened]="mediaService.registerQuery('gt-sm') | async"
-    [mode]="(mediaService.registerQuery('gt-sm') | async) ? 'side' :  'over'"
-    [sidenavWidth]="(mediaService.registerQuery('gt-xs') | async) ? '257px' : '100%'">
-
-    <md-toolbar td-sidenav-content>
-      <zoo-editor-nav-actions
-        [zPath]="currentZPath"
-        [zNodes]="selectedZNodes"
-        (reload)="reloadChildren()"
-        (selectAll)="toggleSelectAll()">
-      </zoo-editor-nav-actions>
-    </md-toolbar>
-
-    <md-nav-list
-      td-sidenav-content
-      (click)="!mediaService.query('gt-sm') && manageList.close()">
-      <zoo-regexp-filter #childrenFilter
-                         (regexpChange)="onFilterRegexpChange($event)">
-      </zoo-regexp-filter>
-      <zoo-editor-nav-list
-        [zPath]="currentZPath"
-        [zNodes]="filteredZNodes"
-        [zNodesSelected]="selectedZNodes"
-        (select)="selectZNode($event)"
-        (deselect)="deselectZNode($event)">
-      </zoo-editor-nav-list>
-      <div class="zoo-nav-info bgc-grey-200 tc-grey-900"
-           *ngIf="filteredZNodes.length === 0 && childrenZNodes.length > 0">
-        <md-icon class="md-18">info_outline</md-icon>
-        Your filter didn't match any children
-      </div>
-      <div class="zoo-nav-info bgc-grey-200 tc-grey-900" *ngIf="childrenZNodes.length === 0">
-        <md-icon class="md-18">info_outline</md-icon>
-        There are no children nodes
-      </div>
-    </md-nav-list>
-
-    <div td-toolbar-content layout="row" layout-align="start center" flex>
-      <zoo-editor-path [zPath]="currentZPath">
-      </zoo-editor-path>
+    <div td-toolbar-content layout="row" flex>
+      <span flex></span>
+      <button md-icon-button [mdMenuTriggerFor]="editorActionsMenu">
+        <md-icon class="md-24">more_vert</md-icon>
+      </button>
+      <md-menu #editorActionsMenu="mdMenu">
+        <button md-menu-item (click)="showSessionInfo()">Show session info</button>
+        <button md-menu-item (click)="disconnect()">Disconnect</button>
+      </md-menu>
     </div>
 
-    <router-outlet>
-    </router-outlet>
+    <td-layout-manage-list
+      #manageList
+      [opened]="mediaService.registerQuery('gt-sm') | async"
+      [mode]="(mediaService.registerQuery('gt-sm') | async) ? 'side' :  'over'"
+      [sidenavWidth]="(mediaService.registerQuery('gt-xs') | async) ? '257px' : '100%'">
 
-  </td-layout-manage-list>
+      <md-toolbar td-sidenav-content>
+        <zoo-editor-nav-actions
+          [zPath]="currentZPath"
+          [zNodes]="selectedZNodes"
+          (reload)="reloadChildren()"
+          (selectAll)="toggleSelectAll()">
+        </zoo-editor-nav-actions>
+      </md-toolbar>
 
-</td-layout-nav>
+      <md-nav-list
+        td-sidenav-content
+        (click)="!mediaService.query('gt-sm') && manageList.close()">
+        <zoo-regexp-filter #childrenFilter
+                           (regexpChange)="onFilterRegexpChange($event)">
+        </zoo-regexp-filter>
+        <zoo-editor-nav-list
+          [zPath]="currentZPath"
+          [zNodes]="filteredZNodes"
+          [zNodesSelected]="selectedZNodes"
+          (select)="selectZNode($event)"
+          (deselect)="deselectZNode($event)">
+        </zoo-editor-nav-list>
+        <div class="zoo-nav-info bgc-grey-200 tc-grey-900"
+             *ngIf="filteredZNodes.length === 0 && childrenZNodes.length > 0">
+          <md-icon class="md-18">info_outline</md-icon>
+          Your filter didn't match any children
+        </div>
+        <div class="zoo-nav-info bgc-grey-200 tc-grey-900" *ngIf="childrenZNodes.length === 0">
+          <md-icon class="md-18">info_outline</md-icon>
+          There are no children nodes
+        </div>
+      </md-nav-list>
+
+      <md-toolbar>
+        <div layout="row" layout-align="start center" flex>
+          <zoo-editor-path [zPath]="currentZPath">
+          </zoo-editor-path>
+        </div>
+      </md-toolbar>
+
+      <router-outlet>
+      </router-outlet>
+
+    </td-layout-manage-list>
+
+  </td-layout-nav>
+</td-layout>
