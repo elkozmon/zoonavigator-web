@@ -21,6 +21,7 @@ import {Observable} from "rxjs/Observable";
 import {ZSessionService, ApiRequest, ApiService} from "../../../core";
 import {ConnectionParams} from "../connection-params";
 import {ZSessionInfo} from "../zsession-info";
+import "rxjs/add/operator/map";
 
 @Injectable()
 export class ApiZSessionService implements ZSessionService {

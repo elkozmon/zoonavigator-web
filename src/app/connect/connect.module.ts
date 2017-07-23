@@ -17,7 +17,8 @@
 
 import {NgModule} from "@angular/core";
 import {ReactiveFormsModule} from "@angular/forms";
-import {CovalentCoreModule} from "@covalent/core";
+import {MdCardModule, MdInputModule, MdSnackBarModule} from "@angular/material";
+import {CovalentCommonModule, CovalentLoadingModule} from "@covalent/core";
 import {Angular2FontawesomeModule} from "angular2-fontawesome";
 import {ConnectRoutingModule} from "./connect-routing.module";
 import {ConnectComponent} from "./connect.component";
@@ -26,8 +27,12 @@ import {ConnectComponent} from "./connect.component";
   imports: [
     Angular2FontawesomeModule,
     ReactiveFormsModule,
-    CovalentCoreModule,
-    ConnectRoutingModule
+    CovalentCommonModule,
+    CovalentLoadingModule,
+    ConnectRoutingModule,
+    MdCardModule,
+    MdInputModule,
+    MdSnackBarModule
   ],
   declarations: [
     ConnectComponent

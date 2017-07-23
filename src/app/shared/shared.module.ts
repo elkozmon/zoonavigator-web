@@ -16,14 +16,17 @@
  */
 
 import {NgModule} from "@angular/core";
-import {CovalentCoreModule} from "@covalent/core";
+import {MdIconModule, MdInputModule} from "@angular/material";
+import {CovalentCommonModule} from "@covalent/core";
 import {RegexpFilterComponent} from "./regexp/regexp-filter.component";
 import {WindowRef} from "./window/window-ref";
 import {CanDeactivateComponentGuard} from "./guards";
 
 @NgModule({
   imports: [
-    CovalentCoreModule
+    CovalentCommonModule,
+    MdIconModule,
+    MdInputModule
   ],
   declarations: [
     RegexpFilterComponent

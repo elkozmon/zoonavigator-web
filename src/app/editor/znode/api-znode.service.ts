@@ -25,6 +25,7 @@ import {ZNodeService} from "./znode.service";
 import {ZNodeMetaWith} from "./container/meta/znode-meta-with";
 import {ZNodeAcl} from "./container/acl/znode-acl";
 import {ZNode} from "./znode";
+import "rxjs/add/operator/map";
 
 @Injectable()
 export class ApiZNodeService implements ZNodeService {
@@ -68,7 +69,7 @@ export class ApiZNodeService implements ZNodeService {
     const request = this.apiRequestFactory.getRequest("/znode/acl", params);
 
     return this.apiService
-      .dispatch(request)
+      .dispatch<ZNodeMetaWith<ZNodeAcl>>(request)
       .map(response => response.payload);
   }
 
@@ -89,7 +90,7 @@ export class ApiZNodeService implements ZNodeService {
     const request = this.apiRequestFactory.putRequest("/znode/acl", params, acl);
 
     return this.apiService
-      .dispatch(request)
+      .dispatch<ZNodeMeta>(request)
       .map(response => response.payload);
   }
 
@@ -100,7 +101,7 @@ export class ApiZNodeService implements ZNodeService {
     const request = this.apiRequestFactory.getRequest("/znode/data", params);
 
     return this.apiService
-      .dispatch(request)
+      .dispatch<ZNodeMetaWith<ZNodeData>>(request)
       .map(response => response.payload);
   }
 
@@ -116,7 +117,7 @@ export class ApiZNodeService implements ZNodeService {
     const request = this.apiRequestFactory.putRequest("/znode/data", params, data);
 
     return this.apiService
-      .dispatch(request)
+      .dispatch<ZNodeMeta>(request)
       .map(response => response.payload);
   }
 
@@ -127,7 +128,7 @@ export class ApiZNodeService implements ZNodeService {
     const request = this.apiRequestFactory.getRequest("/znode/meta", params);
 
     return this.apiService
-      .dispatch(request)
+      .dispatch<ZNodeMeta>(request)
       .map(response => response.payload);
   }
 
@@ -138,7 +139,7 @@ export class ApiZNodeService implements ZNodeService {
     const request = this.apiRequestFactory.getRequest("/znode/children", params);
 
     return this.apiService
-      .dispatch(request)
+      .dispatch<ZNodeMetaWith<ZNode[]>>(request)
       .map(response => response.payload);
   }
 

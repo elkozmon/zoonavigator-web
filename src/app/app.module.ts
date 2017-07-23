@@ -21,7 +21,7 @@ import {BrowserModule, Title} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ReactiveFormsModule} from "@angular/forms";
 import {HttpModule} from "@angular/http";
-import {CovalentCoreModule} from "@covalent/core";
+import {CovalentCommonModule} from "@covalent/core";
 import {Angular2FontawesomeModule} from "angular2-fontawesome/angular2-fontawesome";
 import {LocalStorageModule} from "angular-2-local-storage";
 import {ConfigService, getConfigLoader} from "./config";
@@ -42,7 +42,7 @@ import {EditorModule} from "./editor";
     ReactiveFormsModule,
     BrowserModule,
     HttpModule,
-    CovalentCoreModule,
+    CovalentCommonModule,
     CoreModule,
     ConnectModule,
     EditorModule,

@@ -18,33 +18,48 @@
 import {NgModule} from "@angular/core";
 import {DomSanitizer} from "@angular/platform-browser";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {MdIconRegistry} from "@angular/material";
-import {CovalentCoreModule, CovalentDialogsModule} from "@covalent/core";
+import {
+  MdCardModule,
+  MdIconRegistry,
+  MdInputModule,
+  MdOptionModule,
+  MdSelectModule,
+  MdCheckboxModule,
+  MdMenuModule
+} from "@angular/material";
+import {CovalentCommonModule, CovalentDialogsModule, CovalentLayoutModule} from "@covalent/core";
 import {AceEditorModule} from "ng2-ace-editor";
 import {
-  ZNodeContainerComponent,
+  ApiZNodeService,
   ZNodeAclComponent,
+  ZNodeContainerComponent,
   ZNodeDataComponent,
   ZNodeMetaComponent,
-  ZNodeService,
-  ApiZNodeService
+  ZNodeService
 } from "./znode";
 import {EditorPathComponent} from "./toolbar";
 import {NavActionsComponent, NavListComponent} from "./sidenav";
 import {EditorRoutingModule} from "./editor-routing.module";
 import {EditorComponent} from "./editor.component";
-import {ZPathService, DefaultZPathService} from "./zpath";
+import {DefaultZPathService, ZPathService} from "./zpath";
 import {SharedModule} from "../shared";
 
 @NgModule({
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    CovalentCoreModule,
+    CovalentCommonModule,
+    CovalentLayoutModule,
     CovalentDialogsModule,
     AceEditorModule,
     EditorRoutingModule,
-    SharedModule
+    SharedModule,
+    MdSelectModule,
+    MdOptionModule,
+    MdCardModule,
+    MdInputModule,
+    MdCheckboxModule,
+    MdMenuModule
   ],
   providers: [
     {provide: ZNodeService, useClass: ApiZNodeService},
@@ -63,10 +78,8 @@ import {SharedModule} from "../shared";
 })
 export class EditorModule {
 
-  constructor(
-    iconRegistry: MdIconRegistry,
-    domSanitizer: DomSanitizer
-  ) {
+  constructor(iconRegistry: MdIconRegistry,
+              domSanitizer: DomSanitizer) {
     iconRegistry.addSvgIconInNamespace(
       "assets",
       "paw",

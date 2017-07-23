@@ -24,6 +24,7 @@ import "rxjs/add/observable/throw";
 import "rxjs/add/operator/catch";
 import "rxjs/add/operator/timeoutWith";
 import "rxjs/add/operator/skip";
+import "rxjs/add/operator/map";
 import {ConfigService} from "../../../config";
 import {ApiRequest} from "../request";
 import {ApiResponse} from "../api-response";
@@ -68,17 +69,17 @@ export class DefaultApiService implements ApiService {
       });
     }
 
-    return this.http
+    return <Observable<ApiResponse<T>>> this.http
       .request(url, options)
       .timeoutWith(
         config.apiRequestTimeoutMillis,
         Observable.defer(() => Observable.throw(new Error("Request timed out")))
       )
-      .map(DefaultApiService.extractResponse)
+      .map((t) => DefaultApiService.extractResponse<T>(t))
       .catch(this.handleError.bind(this));
   }
 
-  private handleError<T>(error: Response | any): ObservableInput<T> {
+  private handleError<T>(error: Response | any): Observable<T> {
     let message: string = null;
 
     if (error instanceof Response) {
