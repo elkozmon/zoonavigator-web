@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot} from "@angular/router";
+import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs/Observable";
 import "rxjs/add/operator/toPromise";
 import {ZNodeService} from "../znode.service";
@@ -29,7 +29,6 @@ import {ZNode} from "../znode";
 export class ZNodeChildrenResolver implements Resolve<ZNodeMetaWith<ZNode[]>> {
 
   constructor(
-    private router: Router,
     private zNodeService: ZNodeService,
     private feedbackService: FeedbackService
   ) {
@@ -45,12 +44,7 @@ export class ZNodeChildrenResolver implements Resolve<ZNodeMetaWith<ZNode[]>> {
       .getChildren(nodePath)
       .toPromise()
       .catch(error => {
-        this.feedbackService
-          .showError(error, null)
-          .afterClosed()
-          .subscribe(
-            () => this.router.navigate(["/editor"])
-          );
+        this.feedbackService.showError(error, null);
       })
       .then((data) => {
         if (!data) {
