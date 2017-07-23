@@ -8,12 +8,12 @@ export abstract class RequestContent {
 
 export class JsonRequestContent extends RequestContent {
   constructor(data: any) {
-    super(data, "application/json");
+    super(data, "application/json; charset=UTF-8");
   }
 }
 
 export class TextRequestContent extends RequestContent {
   constructor(data: string) {
-    super(data, "text/plain");
+    super(data, "text/plain; charset=UTF-8");
   }
 }
