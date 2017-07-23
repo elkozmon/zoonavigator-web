@@ -22,6 +22,7 @@ import {ZSessionService, ApiRequest, ApiService} from "../../../core";
 import {ConnectionParams} from "../connection-params";
 import {ZSessionInfo} from "../zsession-info";
 import "rxjs/add/operator/map";
+import {JsonRequestContent} from "../../api/request/request-content";
 
 @Injectable()
 export class ApiZSessionService implements ZSessionService {
@@ -36,7 +37,7 @@ export class ApiZSessionService implements ZSessionService {
       "/zsession",
       RequestMethod.Post,
       null,
-      params
+      new JsonRequestContent(params)
     );
 
     return this.apiService

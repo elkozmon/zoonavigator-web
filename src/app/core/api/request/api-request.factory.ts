@@ -18,6 +18,7 @@
 import {Injectable} from "@angular/core";
 import {URLSearchParams} from "@angular/http";
 import {ApiRequest} from "./api-request";
+import {RequestContent} from "./request-content";
 
 @Injectable()
 export abstract class ApiRequestFactory {
@@ -30,13 +31,13 @@ export abstract class ApiRequestFactory {
   abstract postRequest<T>(
     path: string,
     params?: URLSearchParams,
-    payload?: any
+    content?: RequestContent
   ): ApiRequest<T>
 
   abstract putRequest<T>(
     path: string,
     params?: URLSearchParams,
-    payload?: any
+    content?: RequestContent
   ): ApiRequest<T>
 
   abstract deleteRequest<T>(

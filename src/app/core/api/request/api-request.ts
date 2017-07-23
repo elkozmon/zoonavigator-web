@@ -16,6 +16,7 @@
  */
 
 import {RequestMethod, URLSearchParams} from "@angular/http";
+import {RequestContent} from "./request-content";
 
 export class ApiRequest<T> {
 
@@ -23,7 +24,7 @@ export class ApiRequest<T> {
     public path: string,
     public method: RequestMethod,
     public params?: URLSearchParams,
-    public payload?: any,
+    public content?: RequestContent,
     public authToken?: string
   ) {
   }

@@ -18,7 +18,7 @@
 import {Injectable} from "@angular/core";
 import {URLSearchParams} from "@angular/http";
 import {Observable} from "rxjs/Observable";
-import {ApiService, ApiRequestFactory} from "../../core";
+import {ApiRequestFactory, ApiService} from "../../core";
 import {ZNodeMeta} from "./container/meta/znode-meta";
 import {ZNodeData} from "./container/data/znode-data";
 import {ZNodeService} from "./znode.service";
@@ -26,6 +26,7 @@ import {ZNodeMetaWith} from "./container/meta/znode-meta-with";
 import {ZNodeAcl} from "./container/acl/znode-acl";
 import {ZNode} from "./znode";
 import "rxjs/add/operator/map";
+import {JsonRequestContent, TextRequestContent} from "../../core/api/request/request-content";
 
 @Injectable()
 export class ApiZNodeService implements ZNodeService {
@@ -87,7 +88,7 @@ export class ApiZNodeService implements ZNodeService {
       params.set("recursive", "true");
     }
 
-    const request = this.apiRequestFactory.putRequest("/znode/acl", params, acl);
+    const request = this.apiRequestFactory.putRequest("/znode/acl", params, new JsonRequestContent(acl));
 
     return this.apiService
       .dispatch<ZNodeMeta>(request)
@@ -114,7 +115,7 @@ export class ApiZNodeService implements ZNodeService {
     params.set("path", path);
     params.set("version", version.toString());
 
-    const request = this.apiRequestFactory.putRequest("/znode/data", params, data);
+    const request = this.apiRequestFactory.putRequest("/znode/data", params, new TextRequestContent(data));
 
     return this.apiService
       .dispatch<ZNodeMeta>(request)

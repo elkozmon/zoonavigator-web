@@ -20,6 +20,7 @@ import {URLSearchParams, RequestMethod} from "@angular/http";
 import {ApiRequest} from "./api-request";
 import {ApiRequestFactory} from "./api-request.factory";
 import {ZSessionHandler} from "../../zsession/handler/zsession.handler";
+import {RequestContent} from "./request-content";
 
 @Injectable()
 export class ZSessionApiRequestFactory implements ApiRequestFactory {
@@ -45,13 +46,13 @@ export class ZSessionApiRequestFactory implements ApiRequestFactory {
   postRequest<T>(
     path: string,
     params?: URLSearchParams,
-    payload?: any
+    content?: RequestContent
   ): ApiRequest<T> {
     return new ApiRequest<T>(
       path,
       RequestMethod.Post,
       params,
-      payload,
+      content,
       this.sessionToken
     );
   }
@@ -59,13 +60,13 @@ export class ZSessionApiRequestFactory implements ApiRequestFactory {
   putRequest<T>(
     path: string,
     params?: URLSearchParams,
-    payload?: any
+    content?: RequestContent
   ): ApiRequest<T> {
     return new ApiRequest<T>(
       path,
       RequestMethod.Put,
       params,
-      payload,
+      content,
       this.sessionToken
     );
   }

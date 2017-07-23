@@ -17,7 +17,7 @@
 
 import {Injectable} from "@angular/core";
 import {Headers, Http, RequestOptionsArgs, Response} from "@angular/http";
-import {Observable, ObservableInput} from "rxjs/Observable";
+import {Observable} from "rxjs/Observable";
 import "rxjs/add/observable/defer";
 import "rxjs/add/observable/empty";
 import "rxjs/add/observable/throw";
@@ -60,13 +60,16 @@ export class DefaultApiService implements ApiService {
       url: url,
       search: apiRequest.params,
       method: apiRequest.method,
-      body: apiRequest.payload
+      headers: new Headers({})
     };
 
+    if (apiRequest.content) {
+      options.body = apiRequest.content.data;
+      options.headers.set("Content-Type", apiRequest.content.type);
+    }
+
     if (apiRequest.authToken) {
-      options.headers = new Headers({
-        "Authorization": apiRequest.authToken
-      });
+      options.headers.set("Authorization", apiRequest.authToken);
     }
 
     return <Observable<ApiResponse<T>>> this.http
