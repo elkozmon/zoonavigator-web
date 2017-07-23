@@ -9,6 +9,6 @@ describe("Connect page", () => {
 
   it("should display message saying 'ZooNavigator. An awesome Zookeeper web admin.'", () => {
     page.navigateTo();
-    expect(page.getHeaderText()).toEqual("ZooNavigator. An awesome Zookeeper web admin.");
+    expect<any>(page.getHeaderText()).toEqual("ZooNavigator. An awesome Zookeeper web admin.");
   });
 });
