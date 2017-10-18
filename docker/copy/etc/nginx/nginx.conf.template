@@ -1,4 +1,4 @@
-error_log /dev/error_log error;
+error_log /var/log/nginx/error.log error;
 
 worker_processes 4;
 
