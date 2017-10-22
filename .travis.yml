@@ -14,6 +14,7 @@ addons:
     packages:
       - google-chrome-stable
       - google-chrome-beta
+      - docker-ce
 
 node_js:
   - "7"
