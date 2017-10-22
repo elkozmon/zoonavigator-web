@@ -30,11 +30,9 @@ before_script:
 script:
   - ng test --watch=false
   - ng e2e
-  - ng build --prod
 
 deploy:
   provider: script
   script: docker/deploy.sh $TRAVIS_TAG
-  skip_cleanup: true
   on:
     tags: true

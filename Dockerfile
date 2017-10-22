@@ -1,5 +1,14 @@
-FROM nginx:1.11
+FROM mkenney/npm:7.0-alpine as npm
 MAINTAINER Lubos Kozmon <lubosh91@gmail.com>
+
+# Make dist files
+WORKDIR /app
+COPY . .
+RUN npm install -g @angular/cli && \
+    npm install && \
+    ng build --prod
+
+FROM nginx:1.11
 
 # Default config
 ENV SERVER_HTTP_PORT=8000 \
@@ -26,6 +35,6 @@ HEALTHCHECK --interval=5m --timeout=3s \
     CMD /app/healthcheck.sh
 
 # Copy dist files
-COPY ./dist /app
+COPY --from=npm /app/dist /app
 
 CMD ["/app/run.sh"]
