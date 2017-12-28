@@ -18,11 +18,12 @@
 import {Router} from "@angular/router";
 import {Injectable} from "@angular/core";
 import {Location} from "@angular/common";
+import {Observable} from "rxjs/Rx";
 import {ZSessionHandler} from "./zsession.handler";
 import {ZSessionInfo} from "../zsession-info";
-import {StorageService} from "../../../core";
+import {StorageService} from "../../storage";
 import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
-import {FeedbackService} from "../../feedback/feedback.service";
+import {FeedbackService} from "../../feedback";
 
 @Injectable()
 export class DefaultZSessionHandler implements ZSessionHandler {
@@ -37,53 +38,57 @@ export class DefaultZSessionHandler implements ZSessionHandler {
   ) {
   }
 
-  onSessionInvalid(reason: string): void {
-    if (!this.sessionInfo) {
-      return;
-    }
-
-    const tempSessionInfo = this.sessionInfo;
-    this.sessionInfo = null;
-
-    this.feedbackService
-      .showError(reason, null)
-      .afterClosed()
-      .subscribe(
-        () => {
-          this.router
-            .navigate(
-              ["/connect"], {
-                queryParams: {
-                  [CONNECT_QUERY_RETURN_URL]: this.location.path()
-                }
-              }
-            )
-            .then(
-              success => {
-                if (!success) {
-                  this.sessionInfo = tempSessionInfo;
-                }
-              }
-            );
+  onSessionInvalid(reason: string): Observable<void> {
+    return this.getSessionInfo()
+      // if session is set - unset it and pass it on
+      // if it isn't, it might have been handled already
+      .switchMap((sessionInfo) => {
+        if (!sessionInfo) {
+          return Observable.empty();
         }
-      );
+
+        return this
+          .setSessionInfo(null)
+          .mapTo(sessionInfo);
+      })
+      // show error message, pass on current session
+      .switchMap((sessionInfo: ZSessionInfo) =>
+        this.feedbackService
+          .showError(reason, null)
+          .afterClosed()
+          .mapTo(sessionInfo)
+      )
+      // redirect user to connect form, if that fails, restore session so this can be repeated
+      .map((sessionInfo: ZSessionInfo) => {
+        this.router
+          .navigateByUrl(
+            "/connect", {
+              queryParams: {
+                [CONNECT_QUERY_RETURN_URL]: this.location.path()
+              }
+            }
+          )
+          .then((success) => {
+            if (!success) {
+              return this.setSessionInfo(sessionInfo);
+            }
+          })
+      });
   }
 
-  get sessionInfo(): ZSessionInfo | null {
-    const json = this.storageService.get(this.sessionInfoKey);
-
-    if (json) {
-      return JSON.parse(json);
-    }
+  getSessionInfo(): Observable<ZSessionInfo | null> {
+    return this.storageService
+      .get(this.sessionInfoKey)
+      .map((value) => value ? JSON.parse(value) : null);
   }
 
-  set sessionInfo(value: ZSessionInfo | null) {
+  setSessionInfo(value: ZSessionInfo | null): Observable<void> {
     if (value) {
-      this.storageService.set(this.sessionInfoKey, JSON.stringify(value));
-
-      return;
+      return this.storageService
+        .set(this.sessionInfoKey, JSON.stringify(value));
     }
 
-    this.storageService.remove(this.sessionInfoKey);
+    return this.storageService
+      .remove(this.sessionInfoKey);
   }
 }

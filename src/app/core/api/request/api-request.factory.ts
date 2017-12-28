@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {URLSearchParams} from "@angular/http";
+import {HttpHeaders, HttpParams} from "@angular/common/http";
 import {ApiRequest} from "./api-request";
 import {RequestContent} from "./request-content";
 
@@ -25,23 +25,31 @@ export abstract class ApiRequestFactory {
 
   abstract getRequest<T>(
     path: string,
-    params?: URLSearchParams
+    params?: HttpParams,
+    headers?: HttpHeaders,
+    authToken?: string
   ): ApiRequest<T>
 
   abstract postRequest<T>(
     path: string,
-    params?: URLSearchParams,
-    content?: RequestContent
+    params?: HttpParams,
+    headers?: HttpHeaders,
+    content?: RequestContent,
+    authToken?: string
   ): ApiRequest<T>
 
   abstract putRequest<T>(
     path: string,
-    params?: URLSearchParams,
-    content?: RequestContent
+    params?: HttpParams,
+    headers?: HttpHeaders,
+    content?: RequestContent,
+    authToken?: string
   ): ApiRequest<T>
 
   abstract deleteRequest<T>(
     path: string,
-    params?: URLSearchParams
+    params?: HttpParams,
+    headers?: HttpHeaders,
+    authToken?: string
   ): ApiRequest<T>
 }

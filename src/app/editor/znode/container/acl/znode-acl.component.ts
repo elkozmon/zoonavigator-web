@@ -18,8 +18,7 @@
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ActivatedRoute} from "@angular/router";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/operator/skip";
+import {Observable} from "rxjs/Rx";
 import {ZNodeService} from "../../znode.service";
 import {Acl, FeedbackService, Permission, Scheme} from "../../../../core";
 import {CanDeactivateComponent} from "../../../../shared";
@@ -50,11 +49,14 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     this.route
       .queryParams
       .skip(1)
-      .forEach(queryParams => {
+      .switchMap(queryParams => {
         const newNodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
 
-        this.reloadAclForm(newNodePath);
-      });
+        return this
+          .reloadAclForm(newNodePath)
+          .catch(err => this.feedbackService.showErrorAndThrowOnClose(err));
+      })
+      .subscribe();
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
@@ -62,26 +64,33 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
       return this.feedbackService.showDiscardChanges(this.viewContainerRef);
     }
 
-    return true;
+    return Observable.of(true);
   }
 
   onRefresh(): void {
     const path = this.getCurrentPath();
 
     if (!this.aclForm.dirty) {
-      this.reloadAclForm(path);
+      this
+        .reloadAclForm(path)
+        .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+        .subscribe();
+
       return;
     }
 
     this.feedbackService
       .showDiscardChanges(this.viewContainerRef)
-      .subscribe(
-        discard => {
-          if (discard) {
-            this.reloadAclForm(path);
-          }
+      .switchMap(discard => {
+        if (discard) {
+          return this
+            .reloadAclForm(path)
+            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err));
         }
-      );
+
+        return Observable.empty<void>();
+      })
+      .subscribe();
   }
 
   onSubmit(): void {
@@ -110,6 +119,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     if (!this.aclForm.dirty) {
       removeAll();
       this.aclForm.markAsDirty();
+
       return;
     }
 
@@ -144,37 +154,24 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
         acl,
         this.getApplyRecursiveFormValue()
       )
-      .subscribe(
-        meta => {
-          this.updateAclForm({
-            meta: meta,
-            data: acl
-          });
-
-          this.reloadAclForm(
-            this.getCurrentPath()
-          );
-
-          this.feedbackService.showSuccess(
-            "Changes saved",
-            this.viewContainerRef
-          );
-        },
-        error => this.feedbackService.showError(error, null)
-      );
+      .map(meta => this.updateAclForm({meta: meta, data: acl}))
+      .switchMap(() => this.reloadAclForm(this.getCurrentPath()))
+      .switchMap(() => this.feedbackService
+        .showSuccess("Changes saved", this.viewContainerRef)
+        .afterOpened()
+      )
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+      .subscribe();
   }
 
   private getCurrentPath(): string | null {
     return this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH);
   }
 
-  private reloadAclForm(path: string): void {
-    this.zNodeService
+  private reloadAclForm(path: string): Observable<void> {
+    return this.zNodeService
       .getAcl(path)
-      .subscribe(
-        metaWithAcl => this.updateAclForm(metaWithAcl),
-        error => this.feedbackService.showError(error, null)
-      );
+      .map(metaWithAcl => this.updateAclForm(metaWithAcl));
   }
 
   private updateAclForm(metaWithAcl: ZNodeMetaWith<ZNodeAcl>): void {

@@ -17,13 +17,13 @@
 
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import "rxjs/add/operator/skip";
 import {ZPathService} from "../../../zpath/zpath.service";
 import {ZNodeService} from "../../znode.service";
 import {ZPath} from "../../../zpath/zpath";
 import {ZNodeMeta} from "./znode-meta";
 import {FeedbackService} from "../../../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
+import {Observable} from "rxjs/Rx";
 
 @Component({
   templateUrl: "znode-meta.component.html",
@@ -49,15 +49,21 @@ export class ZNodeMetaComponent implements OnInit {
     this.route
       .queryParams
       .skip(1)
-      .forEach(queryParams => {
+      .switchMap(queryParams => {
         const newNodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
 
-        this.reloadData(newNodePath);
-      });
+        return this
+          .reloadData(newNodePath)
+          .catch(err => this.feedbackService.showErrorAndThrowOnClose(err));
+      })
+      .subscribe();
   }
 
   onRefresh(): void {
-    this.reloadData(this.getCurrentPath());
+    this
+      .reloadData(this.getCurrentPath())
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+      .subscribe();
   }
 
   onDelete(): void {
@@ -70,31 +76,34 @@ export class ZNodeMetaComponent implements OnInit {
         this.viewContainerRef
       )
       .afterClosed()
-      .subscribe((accept: boolean) => {
+      .switchMap((accept) => {
         if (accept) {
-          this.zNodeService
+          return this
+            .zNodeService
             .deleteNode(
               this.getCurrentPath(),
               this.meta.dataVersion
-            )
-            .subscribe(
-              success => this.navigateToParent(),
-              error => this.feedbackService.showError(error, null)
             );
         }
-      });
+
+        return Observable.empty<void>();
+      })
+      .switchMap(this.navigateToParent)
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+      .subscribe();
   }
 
-  private reloadData(path: string): void {
-    this.zNodeService
+  private reloadData(path: string): Observable<void> {
+    return this.zNodeService
       .getMeta(path)
-      .subscribe(
-        meta => this.meta = meta,
-        error => this.feedbackService.showError(error, null)
-      );
+      .map(meta => this.updateData(meta));
   }
 
-  private navigateToParent() {
+  private updateData(meta: ZNodeMeta): void {
+    this.meta = meta;
+  }
+
+  private navigateToParent(): Observable<void> {
     const parentPath: ZPath = this.zPathService
       .parse(this.getCurrentPath())
       .goUp();

@@ -19,19 +19,19 @@ import {NgModule} from "@angular/core";
 import {DomSanitizer} from "@angular/platform-browser";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {
-  MdCardModule,
-  MdIconRegistry,
-  MdInputModule,
-  MdOptionModule,
-  MdSelectModule,
-  MdCheckboxModule,
-  MdButtonModule,
-  MdIconModule,
-  MdListModule,
-  MdMenuModule,
-  MdTooltipModule,
-  MdTabsModule,
-  MdToolbarModule
+  MatCardModule,
+  MatIconRegistry,
+  MatInputModule,
+  MatOptionModule,
+  MatSelectModule,
+  MatCheckboxModule,
+  MatButtonModule,
+  MatIconModule,
+  MatListModule,
+  MatMenuModule,
+  MatTooltipModule,
+  MatTabsModule,
+  MatToolbarModule
 } from "@angular/material";
 import {
   CovalentCommonModule,
@@ -66,18 +66,18 @@ import {SharedModule} from "../shared";
     AceEditorModule,
     EditorRoutingModule,
     SharedModule,
-    MdSelectModule,
-    MdOptionModule,
-    MdCardModule,
-    MdInputModule,
-    MdCheckboxModule,
-    MdButtonModule,
-    MdIconModule,
-    MdListModule,
-    MdToolbarModule,
-    MdTooltipModule,
-    MdTabsModule,
-    MdMenuModule
+    MatSelectModule,
+    MatOptionModule,
+    MatCardModule,
+    MatInputModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatIconModule,
+    MatListModule,
+    MatToolbarModule,
+    MatTooltipModule,
+    MatTabsModule,
+    MatMenuModule
   ],
   providers: [
     {provide: ZNodeService, useClass: ApiZNodeService},
@@ -96,7 +96,7 @@ import {SharedModule} from "../shared";
 })
 export class EditorModule {
 
-  constructor(iconRegistry: MdIconRegistry,
+  constructor(iconRegistry: MatIconRegistry,
               domSanitizer: DomSanitizer) {
     iconRegistry.addSvgIconInNamespace(
       "assets",

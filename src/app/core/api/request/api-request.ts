@@ -15,15 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {RequestMethod, URLSearchParams} from "@angular/http";
 import {RequestContent} from "./request-content";
+import {HttpParams} from "@angular/common/http";
+import {HttpHeaders} from "@angular/common/http/src/headers";
 
 export class ApiRequest<T> {
 
   constructor(
     public path: string,
-    public method: RequestMethod,
-    public params?: URLSearchParams,
+    public method: string,
+    public params?: HttpParams,
+    public headers?: HttpHeaders,
     public content?: RequestContent,
     public authToken?: string
   ) {

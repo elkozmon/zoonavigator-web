@@ -16,26 +16,25 @@
  */
 
 import {Injectable} from "@angular/core";
-import {RequestMethod} from "@angular/http";
-import {Observable} from "rxjs/Observable";
-import {ZSessionService, ApiRequest, ApiService} from "../../../core";
+import {Observable} from "rxjs/Rx";
+import {ZSessionService} from "./zsession.service";
 import {ConnectionParams} from "../connection-params";
 import {ZSessionInfo} from "../zsession-info";
-import "rxjs/add/operator/map";
-import {JsonRequestContent} from "../../api/request/request-content";
+import {ApiService, ApiRequestFactory, JsonRequestContent} from "../../api";
 
 @Injectable()
 export class ApiZSessionService implements ZSessionService {
 
   constructor(
-    private apiService: ApiService
+    private apiService: ApiService,
+    private apiRequestFactory: ApiRequestFactory
   ) {
   }
 
   create(params: ConnectionParams): Observable<ZSessionInfo> {
-    const request = new ApiRequest<ZSessionInfo>(
+    const request = this.apiRequestFactory.postRequest<ZSessionInfo>(
       "/zsession",
-      RequestMethod.Post,
+      null,
       null,
       new JsonRequestContent(params)
     );
@@ -46,9 +45,8 @@ export class ApiZSessionService implements ZSessionService {
   }
 
   close(session: ZSessionInfo): Observable<void> {
-    const request = new ApiRequest<string>(
+    const request = this.apiRequestFactory.deleteRequest<string>(
       "/zsession",
-      RequestMethod.Delete,
       null,
       null,
       session.token
@@ -56,6 +54,6 @@ export class ApiZSessionService implements ZSessionService {
 
     return this.apiService
       .dispatch(request)
-      .map(response => null);
+      .mapTo(null);
   }
 }

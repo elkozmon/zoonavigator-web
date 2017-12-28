@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Observable";
+import {Observable} from "rxjs/Rx";
 import {ConnectionParams} from "../connection-params";
 import {ZSessionInfo} from "../zsession-info";
 

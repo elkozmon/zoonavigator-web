@@ -16,4 +16,3 @@
  */
 
 export * from "./connect.module"
-export * from "./connect-routing.constants"

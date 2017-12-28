@@ -20,10 +20,10 @@ import {Location, LocationStrategy, PathLocationStrategy} from "@angular/common"
 import {BrowserModule, Title} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ReactiveFormsModule} from "@angular/forms";
-import {HttpModule} from "@angular/http";
+import {HttpClientModule} from "@angular/common/http";
 import {CovalentCommonModule} from "@covalent/core";
-import {Angular2FontawesomeModule} from "angular2-fontawesome/angular2-fontawesome";
-import {LocalStorageModule} from "angular-2-local-storage";
+import {AngularFontAwesomeModule} from "angular-font-awesome";
+import {AsyncLocalStorageModule} from "angular-async-local-storage";
 import {ConfigService, getConfigLoader} from "./config";
 import {AppComponent} from "./app.component";
 import {AppRoutingModule} from "./app-routing.module";
@@ -33,15 +33,12 @@ import {EditorModule} from "./editor";
 
 @NgModule({
   imports: [
-    LocalStorageModule.withConfig({
-      prefix: "zoonavigator",
-      storageType: "localStorage"
-    }),
+    AsyncLocalStorageModule,
     BrowserAnimationsModule,
-    Angular2FontawesomeModule,
+    AngularFontAwesomeModule,
     ReactiveFormsModule,
     BrowserModule,
-    HttpModule,
+    HttpClientModule,
     CovalentCommonModule,
     CoreModule,
     ConnectModule,

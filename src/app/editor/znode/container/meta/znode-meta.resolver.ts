@@ -17,8 +17,7 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/operator/toPromise";
+import {Observable} from "rxjs/Rx";
 import {ZNodeMeta} from "./znode-meta";
 import {ZNodeService} from "../../znode.service";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
@@ -42,21 +41,11 @@ export class ZNodeMetaResolver implements Resolve<ZNodeMeta> {
 
     return this.zNodeService
       .getMeta(nodePath)
-      .toPromise()
-      .catch((error) => {
-        this.feedbackService
-          .showError(error, null)
-          .afterClosed()
-          .subscribe(
-            () => this.router.navigate(["/editor"])
-          );
-      })
-      .then((data) => {
-        if (!data) {
-          return Promise.reject("Couldn't fetch znode meta");
-        }
-
-        return Promise.resolve(data);
-      });
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+      .catch(err =>
+        Observable
+          .fromPromise(this.router.navigate(["/editor"]))
+          .switchMap(() => Observable.throw(err))
+      );
   }
 }

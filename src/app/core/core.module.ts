@@ -16,16 +16,16 @@
  */
 
 import {NgModule} from "@angular/core";
-import {ApiRequestFactory, ApiService, DefaultApiService, ZSessionApiRequestFactory} from "./api";
+import {ApiRequestFactory, ApiService, DefaultApiService, DefaultApiRequestFactory} from "./api";
 import {ApiZSessionService, DefaultZSessionHandler, ZSessionHandler, ZSessionService} from "./zsession";
 import {DefaultFeedbackService, FeedbackService} from "./feedback";
-import {FallbackLocalStorageService, StorageService} from "./storage";
+import {DefaultLocalStorageService, StorageService} from "./storage";
 
 @NgModule({
   providers: [
     {provide: ApiService, useClass: DefaultApiService},
-    {provide: ApiRequestFactory, useClass: ZSessionApiRequestFactory},
-    {provide: StorageService, useClass: FallbackLocalStorageService},
+    {provide: ApiRequestFactory, useClass: DefaultApiRequestFactory},
+    {provide: StorageService, useClass: DefaultLocalStorageService},
     {provide: ZSessionService, useClass: ApiZSessionService},
     {provide: ZSessionHandler, useClass: DefaultZSessionHandler},
     {provide: FeedbackService, useClass: DefaultFeedbackService}

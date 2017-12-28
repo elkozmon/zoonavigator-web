@@ -17,31 +17,31 @@
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute -->
 <button
-  md-icon-button
+  mat-icon-button
   mdTooltip="Toggle select all"
   mdTooltipPosition="below"
   (click)="onSelectAllClick()">
-  <md-icon class="md-24">select_all</md-icon>
+  <mat-icon class="mat-24">select_all</mat-icon>
 </button>
 <button
-  md-icon-button
+  mat-icon-button
   mdTooltip="Refresh children list"
   mdTooltipPosition="below"
   (click)="onReloadClick()">
-  <md-icon class="md-24">refresh</md-icon>
+  <mat-icon class="mat-24">refresh</mat-icon>
 </button>
 <button
-  md-icon-button
+  mat-icon-button
   mdTooltip="Delete selected nodes"
   mdTooltipPosition="below"
   [disabled]="zNodes.length === 0"
   (click)="onDeleteClick()">
-  <md-icon class="md-24">delete_forever</md-icon>
+  <mat-icon class="mat-24">delete_forever</mat-icon>
 </button>
 <button
-  md-icon-button
+  mat-icon-button
   mdTooltip="Create child node"
   mdTooltipPosition="below"
   (click)="onCreateClick()">
-  <md-icon class="md-24">create_new_folder</md-icon>
+  <mat-icon class="mat-24">create_new_folder</mat-icon>
 </button>

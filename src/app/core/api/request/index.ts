@@ -17,5 +17,5 @@
 
 export * from "./api-request"
 export * from "./api-request.factory"
-export * from "./zsession-api-request.factory"
+export * from "./default-api-request.factory"
 export * from "./request-content"

@@ -18,7 +18,7 @@
 <!--suppress HtmlUnknownAttribute, HtmlFormInputWithoutLabel, HtmlUnknownTag -->
 <div layout="column" layout-fill>
 
-  <md-card layout="column" flex>
+  <mat-card layout="column" flex>
     <ace-editor ace-editor
                 flex
                 #dataEditor
@@ -30,16 +30,16 @@
                 [autoUpdateContent]="true"
                 style="height: 100%; overflow: auto;">
     </ace-editor>
-  </md-card>
+  </mat-card>
 
   <div class="zoo-actionbar">
-    <button md-button
+    <button mat-button
             type="button"
             (click)="onRefresh()">
       Refresh
     </button>
 
-    <button md-raised-button
+    <button mat-raised-button
             type="button"
             color="accent"
             (click)="onSubmit()"
@@ -48,10 +48,10 @@
     </button>
 
     <label for="editorMode" class="tc-grey-600">Mode:</label>
-    <md-select [(ngModel)]="editorMode" name="editorMode" id="editorMode">
-      <md-option *ngFor="let mode of editorModes" [value]="mode">
+    <mat-select [(ngModel)]="editorMode" name="editorMode" id="editorMode">
+      <mat-option *ngFor="let mode of editorModes" [value]="mode">
         {{mode}}
-      </md-option>
-    </md-select>
+      </mat-option>
+    </mat-select>
   </div>
 </div>

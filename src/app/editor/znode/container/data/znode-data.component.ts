@@ -17,8 +17,7 @@
 
 import {AfterViewChecked, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/operator/skip";
+import {Observable} from "rxjs/Rx";
 import "brace";
 import "brace/mode/text";
 import "brace/mode/json";
@@ -75,11 +74,14 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
     this.route
       .queryParams
       .skip(1)
-      .forEach(queryParams => {
+      .switchMap(queryParams => {
         const newNodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
 
-        this.reloadDataForm(newNodePath);
-      });
+        return this
+          .reloadDataForm(newNodePath)
+          .catch(err => this.feedbackService.showErrorAndThrowOnClose(err));
+      })
+      .subscribe();
   }
 
   ngAfterViewChecked(): void {
@@ -94,26 +96,33 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
       return this.feedbackService.showDiscardChanges(this.viewContainerRef);
     }
 
-    return true;
+    return Observable.of(true);
   }
 
   onRefresh(): void {
     const path = this.getCurrentPath();
 
     if (!this.editorDirty) {
-      this.reloadDataForm(path);
+      this
+        .reloadDataForm(path)
+        .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err))
+        .subscribe();
+
       return;
     }
 
     this.feedbackService
       .showDiscardChanges(this.viewContainerRef)
-      .subscribe(
-        discard => {
-          if (discard) {
-            this.reloadDataForm(path);
-          }
+      .switchMap(discard => {
+        if (discard) {
+          return this
+            .reloadDataForm(path)
+            .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err));
         }
-      );
+
+        return Observable.empty<void>();
+      })
+      .subscribe();
   }
 
   onSubmit(): void {
@@ -125,41 +134,36 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
         this.metaWithData.meta.dataVersion,
         data
       )
-      .subscribe(
-        meta => {
-          this.updateDataForm({
-            data: data,
-            meta: meta
-          });
-
-          this.feedbackService.showSuccess(
+      .map(meta => this.updateDataForm({data: data, meta: meta}))
+      .switchMap(() =>
+        this
+          .feedbackService
+          .showSuccess(
             "Changes saved",
             this.viewContainerRef
-          );
-        },
-        error => this.feedbackService.showError(error, null)
-      );
+          )
+          .afterOpened()
+      )
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+      .subscribe();
   }
 
-  private getCurrentPath(): string | null {
-    return this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH);
-  }
-
-  private reloadDataForm(path: string): void {
-    this.zNodeService
+  private reloadDataForm(path: string): Observable<void> {
+    return this.zNodeService
       .getData(path)
-      .subscribe(
-        metaWithData => {
-          this.updateDataForm(metaWithData);
-          this.scheduleDataFormSelectionClear();
-        },
-        error => this.feedbackService.showError(error, null)
-      );
+      .map(metaWithData => {
+        this.updateDataForm(metaWithData);
+        this.scheduleDataFormSelectionClear();
+      });
   }
 
   private updateDataForm(metaWithData: ZNodeMetaWith<ZNodeData>): void {
     this.metaWithData = metaWithData;
     this.dataPristine = metaWithData.data;
+  }
+
+  private getCurrentPath(): string | null {
+    return this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH);
   }
 
   private scheduleDataFormSelectionClear(): void {

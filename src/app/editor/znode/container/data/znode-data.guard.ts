@@ -17,7 +17,7 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Observable";
+import {Observable} from "rxjs/Rx";
 import {EDITOR_QUERY_NODE_PATH, EDITOR_QUERY_NODE_TAB} from "../../../editor-routing.constants";
 
 @Injectable()
@@ -32,17 +32,17 @@ export class ZNodeDataGuard implements CanActivate {
   ): Observable<boolean> | Promise<boolean> | boolean {
     // workaround for data tab not being active without query params
     if (!route.queryParamMap.has(EDITOR_QUERY_NODE_TAB)) {
-      this.router.navigate(["/editor/node/data"], {
-        replaceUrl: true,
-        queryParams: {
-          [EDITOR_QUERY_NODE_TAB]: "data",
-          [EDITOR_QUERY_NODE_PATH]: route.queryParamMap.get(EDITOR_QUERY_NODE_PATH)
-        }
-      });
-
-      return false;
+      return this.router
+        .navigate(["/editor/node/data"], {
+          replaceUrl: true,
+          queryParams: {
+            [EDITOR_QUERY_NODE_TAB]: "data",
+            [EDITOR_QUERY_NODE_PATH]: route.queryParamMap.get(EDITOR_QUERY_NODE_PATH)
+          }
+        })
+        .catch(() => false);
     }
 
-    return true;
+    return Observable.of(true);
   }
 }

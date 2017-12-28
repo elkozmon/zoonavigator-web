@@ -16,21 +16,25 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Observable";
+import {Observable} from "rxjs/Rx";
 import {ZNodeAcl, ZNodeData, ZNodeMeta, ZNodeMetaWith} from "./container";
 import {ZNode} from "./znode";
 
 @Injectable()
 export abstract class ZNodeService {
 
-  abstract createNode(path: string): Observable<void>
+  abstract createNode(
+    path: string
+  ): Observable<void>
 
   abstract deleteNode(
     path: string,
     version: number
   ): Observable<void>
 
-  abstract getAcl(path: string): Observable<ZNodeMetaWith<ZNodeAcl>>
+  abstract getAcl(
+    path: string
+  ): Observable<ZNodeMetaWith<ZNodeAcl>>
 
   abstract setAcl(
     path: string,
@@ -39,7 +43,9 @@ export abstract class ZNodeService {
     recursively: boolean
   ): Observable<ZNodeMeta>
 
-  abstract getData(path: string): Observable<ZNodeMetaWith<ZNodeData>>
+  abstract getData(
+    path: string
+  ): Observable<ZNodeMetaWith<ZNodeData>>
 
   abstract setData(
     path: string,
@@ -47,9 +53,13 @@ export abstract class ZNodeService {
     data: ZNodeData
   ): Observable<ZNodeMeta>
 
-  abstract getMeta(path: string): Observable<ZNodeMeta>
+  abstract getMeta(
+    path: string
+  ): Observable<ZNodeMeta>
 
-  abstract getChildren(path: string): Observable<ZNodeMetaWith<ZNode[]>>
+  abstract getChildren(
+    path: string
+  ): Observable<ZNodeMetaWith<ZNode[]>>
 
   abstract deleteChildren(
     path: string,

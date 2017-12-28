@@ -16,13 +16,14 @@
  */
 
 import {Injectable} from "@angular/core";
+import {Observable} from "rxjs/Rx";
 
 @Injectable()
 export abstract class StorageService {
 
-  abstract set(key: string, value: any): void
+  abstract set(key: string, value: any): Observable<void>
 
-  abstract get(key: string): any
+  abstract get(key: string): Observable<any>
 
-  abstract remove(key: string): void
+  abstract remove(key: string): Observable<void>
 }

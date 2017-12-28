@@ -16,77 +16,78 @@
  */
 
 import {Injectable} from "@angular/core";
-import {URLSearchParams, RequestMethod} from "@angular/http";
 import {ApiRequest} from "./api-request";
 import {ApiRequestFactory} from "./api-request.factory";
-import {ZSessionHandler} from "../../zsession/handler/zsession.handler";
 import {RequestContent} from "./request-content";
+import {RequestMethods} from "./request-methods";
+import {HttpHeaders, HttpParams} from "@angular/common/http";
 
 @Injectable()
-export class ZSessionApiRequestFactory implements ApiRequestFactory {
-
-  constructor(
-    private zSessionHandler: ZSessionHandler
-  ) {
-  }
+export class DefaultApiRequestFactory implements ApiRequestFactory {
 
   getRequest<T>(
     path: string,
-    params?: URLSearchParams
+    params?: HttpParams,
+    headers?: HttpHeaders,
+    authToken?: string
   ): ApiRequest<T> {
     return new ApiRequest<T>(
       path,
-      RequestMethod.Get,
+      RequestMethods.Get,
       params,
+      headers,
       null,
-      this.sessionToken
+      authToken
     );
   }
 
   postRequest<T>(
     path: string,
-    params?: URLSearchParams,
-    content?: RequestContent
+    params?: HttpParams,
+    headers?: HttpHeaders,
+    content?: RequestContent,
+    authToken?: string
   ): ApiRequest<T> {
     return new ApiRequest<T>(
       path,
-      RequestMethod.Post,
+      RequestMethods.Post,
       params,
+      headers,
       content,
-      this.sessionToken
+      authToken
     );
   }
 
   putRequest<T>(
     path: string,
-    params?: URLSearchParams,
-    content?: RequestContent
+    params?: HttpParams,
+    headers?: HttpHeaders,
+    content?: RequestContent,
+    authToken?: string
   ): ApiRequest<T> {
     return new ApiRequest<T>(
       path,
-      RequestMethod.Put,
+      RequestMethods.Put,
       params,
+      headers,
       content,
-      this.sessionToken
+      authToken
     );
   }
 
   deleteRequest<T>(
     path: string,
-    params?: URLSearchParams
+    params?: HttpParams,
+    headers?: HttpHeaders,
+    authToken?: string
   ): ApiRequest<T> {
     return new ApiRequest<T>(
       path,
-      RequestMethod.Delete,
+      RequestMethods.Delete,
       params,
+      headers,
       null,
-      this.sessionToken
+      authToken
     );
-  }
-
-  private get sessionToken(): string | null {
-    return this.zSessionHandler.sessionInfo
-      ? this.zSessionHandler.sessionInfo.token
-      : null;
   }
 }

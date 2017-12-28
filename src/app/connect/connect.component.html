@@ -18,10 +18,10 @@
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute -->
 <div layout="column" layout-align="start center" layout-fill class="bgc-grey-200">
   <div layout="column" layout-align="center center" class="zoo-header">
-    <span layout-margin class="md-display-3 tc-blue-grey-600">
-      <i fa [name]="'paw'" [border]=true></i>
+    <span layout-margin class="mat-display-3 tc-blue-grey-600">
+      <fa name="paw"></fa>
     </span>
-    <p layout-margin class="md-subhead">
+    <p layout-margin class="mat-subhead">
       <span class="tc-blue-grey-600 zoo-bold">
         ZooNavigator.
       </span>
@@ -30,48 +30,48 @@
       </i>
     </p>
   </div>
-  <md-card>
-    <md-card-content>
+  <mat-card>
+    <mat-card-content>
       <form [formGroup]="connectForm"
             layout="column"
             layout-align="center center">
         <div *ngIf="errorMsg" class="zoo-error-bar">
           {{errorMsg}}
         </div>
-        <md-input-container>
-          <input mdInput
+        <mat-input-container>
+          <input matInput
                  type="text"
                  placeholder="Connection string"
                  formControlName="connectionString"
                  name="connectionString"/>
-          <!--<span md-prefix><md-icon>public</md-icon></span>-->
-        </md-input-container>
+          <!--<span mat-prefix><mat-icon>public</mat-icon></span>-->
+        </mat-input-container>
         <div formArrayName="credentialsArray">
           <div layout="row"
                *ngFor="let credentials of credentialsFormArray.controls; let i = index"
                [formGroup]="credentials">
-            <md-input-container>
-              <input mdInput
+            <mat-input-container>
+              <input matInput
                      type="text"
                      placeholder="Auth username"
                      formControlName="username"
                      (change)="onCredentialsChange(i)"/>
-              <!--<span md-prefix><md-icon>person</md-icon></span>-->
-            </md-input-container>
-            <md-input-container>
-              <input mdInput
+              <!--<span mat-prefix><mat-icon>person</mat-icon></span>-->
+            </mat-input-container>
+            <mat-input-container>
+              <input matInput
                      type="password"
                      placeholder="Auth password"
                      formControlName="password"
                      (change)="onCredentialsChange(i)"/>
-              <!--<span md-prefix><md-icon>lock</md-icon></span>-->
-            </md-input-container>
+              <!--<span mat-prefix><mat-icon>lock</mat-icon></span>-->
+            </mat-input-container>
           </div>
         </div>
-        <button md-raised-button color="primary" [disabled]="!connectForm.valid" (click)="onSubmit()">
+        <button mat-raised-button color="primary" [disabled]="!connectForm.valid" (click)="onSubmit()">
           Connect
         </button>
       </form>
-    </md-card-content>
-  </md-card>
+    </mat-card-content>
+  </mat-card>
 </div>

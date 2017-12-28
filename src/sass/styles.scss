@@ -23,7 +23,7 @@ div.zoo-actionbar {
     margin: 0 1em;
   }
 
-  md-select {
+  mat-select {
     vertical-align: middle;
   }
 
@@ -34,7 +34,7 @@ div.zoo-actionbar {
 }
 
 .mat-icon-button {
-  .md-18 {
+  .mat-18 {
     line-height: 18px !important;
   }
 }
@@ -47,7 +47,7 @@ div.zoo-actionbar {
   color: #d03e3c;
 }
 
-md-toolbar md-icon {
+mat-toolbar mat-icon {
   width: 40px !important;
 }
 
@@ -59,6 +59,6 @@ button.mat-menu-item {
   text-transform: none;
 }
 
-md-checkbox.zoo-nolabel .mat-checkbox-label {
+mat-checkbox.zoo-nolabel .mat-checkbox-label {
   display: none;
 }

@@ -17,7 +17,7 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Observable";
+import {Observable} from "rxjs/Rx";
 import {EDITOR_QUERY_NODE_PATH, EDITOR_QUERY_NODE_TAB} from "../../editor-routing.constants";
 
 @Injectable()
@@ -33,12 +33,15 @@ export class ZNodeContainerGuard implements CanActivate, CanActivateChild {
     const maybeNodePath = route.queryParamMap.get(EDITOR_QUERY_NODE_PATH);
 
     if (maybeNodePath) {
-      return true;
+      return Observable.of(true);
     }
 
-    this.router.navigate(["/editor"]);
-
-    return false;
+    return this.router
+      .navigate(["/editor"])
+      .then(
+        () => false,
+        () => false
+      );
   }
 
   canActivateChild(
@@ -49,14 +52,17 @@ export class ZNodeContainerGuard implements CanActivate, CanActivateChild {
     const urlTab = childRoute.url[childRoute.url.length - 1].toString();
 
     if (queryTab && urlTab !== queryTab) {
-      this.router.navigate(["/editor/node/" + queryTab], {
-        queryParams: {
-          [EDITOR_QUERY_NODE_TAB]: queryTab,
-          [EDITOR_QUERY_NODE_PATH]: childRoute.queryParamMap.get(EDITOR_QUERY_NODE_PATH)
-        }
-      });
-
-      return false;
+      return this.router
+        .navigate(["/editor/node/" + queryTab], {
+          queryParams: {
+            [EDITOR_QUERY_NODE_TAB]: queryTab,
+            [EDITOR_QUERY_NODE_PATH]: childRoute.queryParamMap.get(EDITOR_QUERY_NODE_PATH)
+          }
+        })
+        .then(
+          () => false,
+          () => false
+        );
     }
 
     return this.canActivate(childRoute, state);

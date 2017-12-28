@@ -16,27 +16,18 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Headers, Http, RequestOptionsArgs, Response} from "@angular/http";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/observable/defer";
-import "rxjs/add/observable/empty";
-import "rxjs/add/observable/throw";
-import "rxjs/add/operator/catch";
-import "rxjs/add/operator/timeoutWith";
-import "rxjs/add/operator/skip";
-import "rxjs/add/operator/map";
+import {HttpClient, HttpHeaders, HttpResponse} from "@angular/common/http";
+import {Observable} from "rxjs/Rx";
 import {ConfigService} from "../../../config";
 import {ApiRequest} from "../request";
 import {ApiResponse} from "../api-response";
 import {ApiService} from "./api.service";
-import {ZSessionHandler} from "../../zsession/handler/zsession.handler";
+import {ZSessionHandler} from "../../zsession/handler";
 
 @Injectable()
 export class DefaultApiService implements ApiService {
 
-  private static extractResponse<T>(response: Response): ApiResponse<T> {
-    const body = response.json();
-
+  private static extractResponse<T>(body: any): ApiResponse<T> {
     return new ApiResponse(
       body.success,
       body.payload,
@@ -45,7 +36,7 @@ export class DefaultApiService implements ApiService {
   }
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     private zSessionHandler: ZSessionHandler,
     private configService: ConfigService
   ) {
@@ -56,24 +47,24 @@ export class DefaultApiService implements ApiService {
 
     const url: string = config.apiUrlPath.replace(/\/$/, "") + apiRequest.path;
 
-    const options: RequestOptionsArgs = {
+    const options = {
+      body: null,
       url: url,
-      search: apiRequest.params,
-      method: apiRequest.method,
-      headers: new Headers({})
+      params: apiRequest.params,
+      headers: apiRequest.headers || new HttpHeaders()
     };
 
     if (apiRequest.content) {
       options.body = apiRequest.content.data;
-      options.headers.set("Content-Type", apiRequest.content.type);
+      options.headers = options.headers.set("Content-Type", apiRequest.content.type);
     }
 
     if (apiRequest.authToken) {
-      options.headers.set("Authorization", apiRequest.authToken);
+      options.headers = options.headers.set("Authorization", apiRequest.authToken);
     }
 
     return <Observable<ApiResponse<T>>> this.http
-      .request(url, options)
+      .request(apiRequest.method, url, options)
       .timeoutWith(
         config.apiRequestTimeoutMillis,
         Observable.defer(() => Observable.throw(new Error("Request timed out")))
@@ -82,10 +73,10 @@ export class DefaultApiService implements ApiService {
       .catch(this.handleError.bind(this));
   }
 
-  private handleError<T>(error: Response | any): Observable<T> {
+  private handleError<T>(error: any): Observable<T> {
     let message: string = null;
 
-    if (error instanceof Response) {
+    if (error instanceof HttpResponse) {
       message = DefaultApiService
         .extractResponse(error)
         .message;
@@ -100,9 +91,9 @@ export class DefaultApiService implements ApiService {
     }
 
     if (error.status === 401) {
-      this.zSessionHandler.onSessionInvalid(message);
-
-      return Observable.empty();
+      return this.zSessionHandler
+        .onSessionInvalid(message)
+        .mapTo(null);
     }
 
     return Observable.throw(message);

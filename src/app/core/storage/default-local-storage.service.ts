@@ -16,12 +16,33 @@
  */
 
 import {Injectable} from "@angular/core";
+import {AsyncLocalStorage} from "angular-async-local-storage";
+import {StorageService} from "./storage.service";
 import {Observable} from "rxjs/Rx";
-import {ApiResponse} from "../api-response";
-import {ApiRequest} from "../request/api-request";
 
 @Injectable()
-export abstract class ApiService {
+export class DefaultLocalStorageService implements StorageService {
 
-  abstract dispatch<T>(apiRequest: ApiRequest<T>): Observable<ApiResponse<T>>
+  constructor(private asyncLocalStorage: AsyncLocalStorage) {
+  }
+
+  set(key: string, value: any): Observable<void> {
+    return this.asyncLocalStorage
+      .setItem(key, value)
+      .mapTo(null)
+      .first();
+  }
+
+  get(key: string): Observable<any> {
+    return this.asyncLocalStorage
+      .getItem(key)
+      .first();
+  }
+
+  remove(key: string): Observable<void> {
+    return this.asyncLocalStorage
+      .removeItem(key)
+      .mapTo(null)
+      .first();
+  }
 }

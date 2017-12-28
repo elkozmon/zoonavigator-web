@@ -16,11 +16,10 @@
  */
 
 import {Component, OnInit} from "@angular/core";
-import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
+import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {LoadingMode, LoadingType, TdLoadingService} from "@covalent/core";
-import {AuthInfo, ZSessionHandler, ZSessionService} from "../core";
-import {Scheme} from "../core/acl/scheme";
+import {AuthInfo, ZSessionHandler, ZSessionService, Scheme} from "../core";
 import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 
 @Component({
@@ -88,19 +87,12 @@ export class ConnectComponent implements OnInit {
         connectionString: this.getConnectionStringFormValue(),
         authInfo: this.getAuthInfoFormValue()
       })
+      .switchMap((sessionInfo) => this.zSessionHandler.setSessionInfo(sessionInfo))
+      .first()
+      .finally(() => this.stopLoader())
       .subscribe(
-        sessionInfo => {
-          this.zSessionHandler.sessionInfo = sessionInfo;
-          this.router.navigateByUrl(this.redirectUrl);
-          this.stopLoader();
-        },
-        error => {
-          this.errorMsg = error;
-          this.stopLoader();
-        },
-        () => {
-          this.stopLoader();
-        }
+        () => this.router.navigateByUrl(this.redirectUrl),
+        error => this.errorMsg = error
       );
   }
 

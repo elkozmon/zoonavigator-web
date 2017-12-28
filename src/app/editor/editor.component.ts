@@ -25,6 +25,7 @@ import {ZNodeService} from "./znode/znode.service";
 import {FeedbackService} from "../core/feedback/feedback.service";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
 import {RegexpFilterComponent} from "../shared/regexp/regexp-filter.component";
+import {Observable} from "rxjs/Rx";
 
 @Component({
   templateUrl: "editor.component.html",
@@ -75,16 +76,21 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.route
       .queryParams
       .skip(1)
-      .forEach(queryParams => {
+      .switchMap(queryParams => {
         const nodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
 
         if (nodePath !== this.currentZPath.toString()) {
           this.currentZPath = this.zPathService.parse(nodePath);
           this.childrenFilter.clear();
 
-          this.reloadChildren();
+          return this
+            .reloadChildren()
+            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err));
         }
-      });
+
+        return Observable.empty();
+      })
+      .subscribe();
   }
 
   onFilterRegexpChange(regexp: RegExp): void {
@@ -93,24 +99,39 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   disconnect(): void {
-    this.router
-      .navigate(["/connect"])
-      .then(success => {
+    Observable
+      .fromPromise(this.router.navigate(["/connect"]))
+      .switchMap((success) => {
         if (success) {
-          this.zSessionService
-            .close(this.zSessionHandler.sessionInfo)
-            .subscribe(() => this.zSessionHandler.sessionInfo = null);
+          return this.zSessionHandler
+            .getSessionInfo()
+            .switchMap((sessionInfo) => this.zSessionService.close(sessionInfo));
         }
-      });
+
+        return Observable.empty<void>();
+      })
+      .subscribe();
   }
 
   showSessionInfo(): void {
-    this.feedbackService.showAlert(
-      "Session info",
-      "Connection string: " + this.zSessionHandler.sessionInfo.connectionString,
-      "Dismiss",
-      this.viewContainerRef
-    );
+    this.zSessionHandler
+      .getSessionInfo()
+      .switchMap((sessionInfo) => {
+          if (sessionInfo) {
+            this.feedbackService
+              .showAlert(
+                "Session info",
+                "Connection string: " + sessionInfo.connectionString,
+                "Dismiss",
+                this.viewContainerRef
+              )
+              .afterClosed();
+          }
+
+          return Observable.empty();
+        }
+      )
+      .subscribe();
   }
 
   selectZNode(zNode: ZNode): void {
@@ -121,13 +142,10 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.selectedZNodes = this.selectedZNodes.filter(selectedZNode => selectedZNode !== zNode);
   }
 
-  reloadChildren(): void {
-    this.zNodeService
+  reloadChildren(): Observable<void> {
+    return this.zNodeService
       .getChildren(this.currentZPath.toString())
-      .subscribe(
-        metaWithChildren => this.updateChildren(metaWithChildren.data),
-        error => this.feedbackService.showError(error, null)
-      );
+      .map(metaWithChildren => this.updateChildren(metaWithChildren.data));
   }
 
   toggleSelectAll(): void {

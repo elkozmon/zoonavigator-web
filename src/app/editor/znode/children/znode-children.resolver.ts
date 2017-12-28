@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Injectable} from "@angular/core";
+import {Injectable, ViewContainerRef} from "@angular/core";
 import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/operator/toPromise";
+import {Observable} from "rxjs/Rx";
 import {ZNodeService} from "../znode.service";
-import {ZNodeMetaWith} from "../container/meta/znode-meta-with";
+import {ZNodeMetaWith} from "../container/meta";
 import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
 import {FeedbackService} from "../../../core";
 import {ZNode} from "../znode";
@@ -42,16 +41,6 @@ export class ZNodeChildrenResolver implements Resolve<ZNodeMetaWith<ZNode[]>> {
 
     return this.zNodeService
       .getChildren(nodePath)
-      .toPromise()
-      .catch(error => {
-        this.feedbackService.showError(error, null);
-      })
-      .then((data) => {
-        if (!data) {
-          return Promise.reject("Couldn't fetch znode children");
-        }
-
-        return Promise.resolve(data);
-      });
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose<ZNodeMetaWith<ZNode[]>>(err));
   }
 }

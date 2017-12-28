@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Scheme} from "../acl/scheme";
+import {Scheme} from "../acl";
 
 export interface AuthInfo {
   id: string;

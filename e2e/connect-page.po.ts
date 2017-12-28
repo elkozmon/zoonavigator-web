@@ -6,6 +6,6 @@ export class ConnectPage {
   }
 
   getHeaderText() {
-    return element(by.css(".md-subhead")).getText();
+    return element(by.css(".mat-subhead")).getText();
   }
 }

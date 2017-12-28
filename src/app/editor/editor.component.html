@@ -21,13 +21,13 @@
 
     <div td-toolbar-content layout="row" flex>
       <span flex></span>
-      <button md-icon-button [mdMenuTriggerFor]="editorActionsMenu">
-        <md-icon class="md-24">more_vert</md-icon>
+      <button mat-icon-button [matMenuTriggerFor]="editorActionsMenu">
+        <mat-icon class="mat-24">more_vert</mat-icon>
       </button>
-      <md-menu #editorActionsMenu="mdMenu">
-        <button md-menu-item (click)="showSessionInfo()">Show session info</button>
-        <button md-menu-item (click)="disconnect()">Disconnect</button>
-      </md-menu>
+      <mat-menu #editorActionsMenu="matMenu">
+        <button mat-menu-item (click)="showSessionInfo()">Show session info</button>
+        <button mat-menu-item (click)="disconnect()">Disconnect</button>
+      </mat-menu>
     </div>
 
     <td-layout-manage-list
@@ -36,16 +36,16 @@
       [mode]="(mediaService.registerQuery('gt-sm') | async) ? 'side' :  'over'"
       [sidenavWidth]="(mediaService.registerQuery('gt-xs') | async) ? '257px' : '100%'">
 
-      <md-toolbar td-sidenav-content>
+      <mat-toolbar td-sidenav-content>
         <zoo-editor-nav-actions
           [zPath]="currentZPath"
           [zNodes]="selectedZNodes"
           (reload)="reloadChildren()"
           (selectAll)="toggleSelectAll()">
         </zoo-editor-nav-actions>
-      </md-toolbar>
+      </mat-toolbar>
 
-      <md-nav-list
+      <mat-nav-list
         td-sidenav-content
         (click)="!mediaService.query('gt-sm') && manageList.close()">
         <zoo-regexp-filter #childrenFilter
@@ -60,21 +60,21 @@
         </zoo-editor-nav-list>
         <div class="zoo-nav-info bgc-grey-200 tc-grey-900"
              *ngIf="filteredZNodes.length === 0 && childrenZNodes.length > 0">
-          <md-icon class="md-18">info_outline</md-icon>
+          <mat-icon class="mat-18">info_outline</mat-icon>
           Your filter didn't match any children
         </div>
         <div class="zoo-nav-info bgc-grey-200 tc-grey-900" *ngIf="childrenZNodes.length === 0">
-          <md-icon class="md-18">info_outline</md-icon>
+          <mat-icon class="mat-18">info_outline</mat-icon>
           There are no children nodes
         </div>
-      </md-nav-list>
+      </mat-nav-list>
 
-      <md-toolbar>
+      <mat-toolbar>
         <div layout="row" layout-align="start center" flex>
           <zoo-editor-path [zPath]="currentZPath">
           </zoo-editor-path>
         </div>
-      </md-toolbar>
+      </mat-toolbar>
 
       <router-outlet>
       </router-outlet>

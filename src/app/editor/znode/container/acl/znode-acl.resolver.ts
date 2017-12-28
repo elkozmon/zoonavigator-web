@@ -17,8 +17,7 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/operator/toPromise";
+import {Observable} from "rxjs/Rx";
 import {ZNodeAcl} from "./znode-acl";
 import {ZNodeService} from "../../znode.service";
 import {ZNodeMetaWith} from "../meta/znode-meta-with";
@@ -43,21 +42,11 @@ export class ZNodeAclResolver implements Resolve<ZNodeMetaWith<ZNodeAcl>> {
 
     return this.zNodeService
       .getAcl(nodePath)
-      .toPromise()
-      .catch((error) => {
-        this.feedbackService
-          .showError(error, null)
-          .afterClosed()
-          .subscribe(
-            () => this.router.navigate(["/editor"])
-          );
-      })
-      .then((data) => {
-        if (!data) {
-          return Promise.reject("Couldn't fetch znode ACL");
-        }
-
-        return Promise.resolve(data);
-      });
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+      .catch(err =>
+        Observable
+          .fromPromise(this.router.navigate(["/editor"]))
+          .switchMap(() => Observable.throw(err))
+      );
   }
 }

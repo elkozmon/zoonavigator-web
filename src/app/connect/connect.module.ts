@@ -17,23 +17,23 @@
 
 import {NgModule} from "@angular/core";
 import {ReactiveFormsModule} from "@angular/forms";
-import {MdCardModule, MdInputModule, MdButtonModule, MdSnackBarModule} from "@angular/material";
+import {MatCardModule, MatInputModule, MatButtonModule, MatSnackBarModule} from "@angular/material";
 import {CovalentCommonModule, CovalentLoadingModule} from "@covalent/core";
-import {Angular2FontawesomeModule} from "angular2-fontawesome";
+import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {ConnectRoutingModule} from "./connect-routing.module";
 import {ConnectComponent} from "./connect.component";
 
 @NgModule({
   imports: [
-    Angular2FontawesomeModule,
+    AngularFontAwesomeModule,
     ReactiveFormsModule,
     CovalentCommonModule,
     CovalentLoadingModule,
     ConnectRoutingModule,
-    MdCardModule,
-    MdInputModule,
-    MdButtonModule,
-    MdSnackBarModule
+    MatCardModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSnackBarModule
   ],
   declarations: [
     ConnectComponent

@@ -16,4 +16,4 @@
  */
 
 export * from "./storage.service"
-export * from "./fallback-local-storage.service"
+export * from "./default-local-storage.service"

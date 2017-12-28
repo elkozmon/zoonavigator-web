@@ -17,13 +17,25 @@
 
 import {Injectable, ViewContainerRef} from "@angular/core";
 import {TdAlertDialogComponent, TdConfirmDialogComponent, TdPromptDialogComponent} from "@covalent/core";
-import {MdDialogRef, MdSnackBarRef, SimpleSnackBar} from "@angular/material";
-import {Observable} from "rxjs/Observable";
+import {MatDialogRef, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
+import {Observable} from "rxjs/Rx";
 
 @Injectable()
 export abstract class FeedbackService {
 
-  abstract showDiscardChanges(viewRef: ViewContainerRef): Observable<boolean>
+  showErrorAndThrowOnClose<T>(
+    error: string,
+    viewRef?: ViewContainerRef
+  ): Observable<T> {
+    return this
+      .showError(error, viewRef)
+      .afterClosed()
+      .switchMap(() => Observable.throw(error));
+  }
+
+  abstract showDiscardChanges(
+    viewRef: ViewContainerRef
+  ): Observable<boolean>
 
   abstract showPrompt(
     title: string,
@@ -31,7 +43,7 @@ export abstract class FeedbackService {
     acceptBtn: string,
     cancelBtn: string,
     viewRef: ViewContainerRef
-  ): MdDialogRef<TdPromptDialogComponent>
+  ): MatDialogRef<TdPromptDialogComponent>
 
   abstract showConfirm(
     title: string,
@@ -39,22 +51,22 @@ export abstract class FeedbackService {
     acceptBtn: string,
     cancelBtn: string,
     viewRef: ViewContainerRef
-  ): MdDialogRef<TdConfirmDialogComponent>
+  ): MatDialogRef<TdConfirmDialogComponent>
 
   abstract showAlert(
     title: string,
     message: string,
     closeBtn: string,
     viewRef: ViewContainerRef
-  ): MdDialogRef<TdAlertDialogComponent>
+  ): MatDialogRef<TdAlertDialogComponent>
 
   abstract showError(
     message: string,
     viewRef: ViewContainerRef
-  ): MdDialogRef<TdAlertDialogComponent>
+  ): MatDialogRef<TdAlertDialogComponent>
 
   abstract showSuccess(
     message: string,
     viewRef: ViewContainerRef
-  ): MdSnackBarRef<SimpleSnackBar>
+  ): MatSnackBarRef<SimpleSnackBar>
 }

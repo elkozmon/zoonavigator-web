@@ -16,62 +16,101 @@
  */
 
 import {Injectable} from "@angular/core";
-import {URLSearchParams} from "@angular/http";
-import {Observable} from "rxjs/Observable";
-import {ApiRequestFactory, ApiService} from "../../core";
-import {ZNodeMeta} from "./container/meta/znode-meta";
-import {ZNodeData} from "./container/data/znode-data";
+import {HttpParams} from "@angular/common/http";
+import {Observable} from "rxjs/Rx";
+import {ApiRequestFactory, ApiService, JsonRequestContent, TextRequestContent, ZSessionHandler} from "../../core";
+import {ZNodeAcl, ZNodeData, ZNodeMeta, ZNodeMetaWith} from "./container";
 import {ZNodeService} from "./znode.service";
-import {ZNodeMetaWith} from "./container/meta/znode-meta-with";
-import {ZNodeAcl} from "./container/acl/znode-acl";
 import {ZNode} from "./znode";
-import "rxjs/add/operator/map";
-import {JsonRequestContent, TextRequestContent} from "../../core/api/request/request-content";
 
 @Injectable()
 export class ApiZNodeService implements ZNodeService {
 
+
   constructor(
     private apiService: ApiService,
+    private zSessionHandler: ZSessionHandler,
     private apiRequestFactory: ApiRequestFactory
   ) {
   }
 
-  createNode(path: string): Observable<void> {
-    const params = new URLSearchParams();
-    params.set("path", path);
+  private withAuthToken<T>(fun: (string) => Observable<T>): Observable<T> {
+    return this.zSessionHandler
+      .getSessionInfo()
+      .map(info => info ? info.token : null)
+      .switchMap(fun)
+  }
 
-    const request = this.apiRequestFactory.postRequest("/znode", params);
+  createNode(
+    path: string
+  ): Observable<void> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path
+        }
+      });
 
-    return this.apiService
-      .dispatch(request)
-      .map(response => null);
+      const request = this.apiRequestFactory.postRequest(
+        "/znode",
+        params,
+        null,
+        null,
+        token
+      );
+
+      return this.apiService
+        .dispatch(request)
+        .mapTo(null);
+    });
   }
 
   deleteNode(
     path: string,
     version: number
   ): Observable<void> {
-    const params = new URLSearchParams();
-    params.set("path", path);
-    params.set("version", version.toString());
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path,
+          version: version.toString()
+        }
+      });
 
-    const request = this.apiRequestFactory.deleteRequest("/znode", params);
+      const request = this.apiRequestFactory.deleteRequest(
+        "/znode",
+        params,
+        null,
+        token
+      );
 
-    return this.apiService
-      .dispatch(request)
-      .map(response => null);
+      return this.apiService
+        .dispatch(request)
+        .mapTo(null);
+    });
   }
 
-  getAcl(path: string): Observable<ZNodeMetaWith<ZNodeAcl>> {
-    const params = new URLSearchParams();
-    params.set("path", path);
+  getAcl(
+    path: string
+  ): Observable<ZNodeMetaWith<ZNodeAcl>> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path
+        }
+      });
 
-    const request = this.apiRequestFactory.getRequest("/znode/acl", params);
+      const request = this.apiRequestFactory.getRequest(
+        "/znode/acl",
+        params,
+        null,
+        token
+      );
 
-    return this.apiService
-      .dispatch<ZNodeMetaWith<ZNodeAcl>>(request)
-      .map(response => response.payload);
+      return this.apiService
+        .dispatch<ZNodeMetaWith<ZNodeAcl>>(request)
+        .map(response => response.payload);
+    });
   }
 
   setAcl(
@@ -80,30 +119,53 @@ export class ApiZNodeService implements ZNodeService {
     acl: ZNodeAcl,
     recursively: boolean
   ): Observable<ZNodeMeta> {
-    const params = new URLSearchParams();
-    params.set("path", path);
-    params.set("version", version.toString());
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path,
+          version: version.toString()
+        }
+      });
 
-    if (recursively) {
-      params.set("recursive", "true");
-    }
+      if (recursively) {
+        params.set("recursive", "true");
+      }
 
-    const request = this.apiRequestFactory.putRequest("/znode/acl", params, new JsonRequestContent(acl));
+      const request = this.apiRequestFactory.putRequest(
+        "/znode/acl",
+        params,
+        null,
+        new JsonRequestContent(acl),
+        token
+      );
 
-    return this.apiService
-      .dispatch<ZNodeMeta>(request)
-      .map(response => response.payload);
+      return this.apiService
+        .dispatch<ZNodeMeta>(request)
+        .map(response => response.payload);
+    });
   }
 
-  getData(path: string): Observable<ZNodeMetaWith<ZNodeData>> {
-    const params = new URLSearchParams();
-    params.set("path", path);
+  getData(
+    path: string
+  ): Observable<ZNodeMetaWith<ZNodeData>> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path
+        }
+      });
 
-    const request = this.apiRequestFactory.getRequest("/znode/data", params);
+      const request = this.apiRequestFactory.getRequest(
+        "/znode/data",
+        params,
+        null,
+        token
+      );
 
-    return this.apiService
-      .dispatch<ZNodeMetaWith<ZNodeData>>(request)
-      .map(response => response.payload);
+      return this.apiService
+        .dispatch<ZNodeMetaWith<ZNodeData>>(request)
+        .map(response => response.payload);
+    });
   }
 
   setData(
@@ -111,51 +173,96 @@ export class ApiZNodeService implements ZNodeService {
     version: number,
     data: ZNodeData
   ): Observable<ZNodeMeta> {
-    const params = new URLSearchParams();
-    params.set("path", path);
-    params.set("version", version.toString());
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path,
+          version: version.toString()
+        }
+      });
 
-    const request = this.apiRequestFactory.putRequest("/znode/data", params, new TextRequestContent(data));
+      const request = this.apiRequestFactory.putRequest(
+        "/znode/data",
+        params,
+        null,
+        new TextRequestContent(data),
+        token
+      );
 
-    return this.apiService
-      .dispatch<ZNodeMeta>(request)
-      .map(response => response.payload);
+      return this.apiService
+        .dispatch<ZNodeMeta>(request)
+        .map(response => response.payload);
+    });
   }
 
-  getMeta(path: string): Observable<ZNodeMeta> {
-    const params = new URLSearchParams();
-    params.set("path", path);
+  getMeta(
+    path: string
+  ): Observable<ZNodeMeta> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path
+        }
+      });
 
-    const request = this.apiRequestFactory.getRequest("/znode/meta", params);
+      const request = this.apiRequestFactory.getRequest(
+        "/znode/meta",
+        params,
+        null,
+        token
+      );
 
-    return this.apiService
-      .dispatch<ZNodeMeta>(request)
-      .map(response => response.payload);
+      return this.apiService
+        .dispatch<ZNodeMeta>(request)
+        .map(response => response.payload);
+    });
   }
 
-  getChildren(path: string): Observable<ZNodeMetaWith<ZNode[]>> {
-    const params = new URLSearchParams();
-    params.set("path", path);
+  getChildren(
+    path: string
+  ): Observable<ZNodeMetaWith<ZNode[]>> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path
+        }
+      });
 
-    const request = this.apiRequestFactory.getRequest("/znode/children", params);
+      const request = this.apiRequestFactory.getRequest(
+        "/znode/children",
+        params,
+        null,
+        token
+      );
 
-    return this.apiService
-      .dispatch<ZNodeMetaWith<ZNode[]>>(request)
-      .map(response => response.payload);
+      return this.apiService
+        .dispatch<ZNodeMetaWith<ZNode[]>>(request)
+        .map(response => response.payload);
+    });
   }
 
   deleteChildren(
     path: string,
     names: string[]
   ): Observable<void> {
-    const params = new URLSearchParams();
-    params.set("path", path);
-    params.set("names", names.join("/"));
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path,
+          names: names.join("/")
+        }
+      });
 
-    const request = this.apiRequestFactory.deleteRequest("/znode/children", params);
+      const request = this.apiRequestFactory.deleteRequest(
+        "/znode/children",
+        params,
+        null,
+        token
+      );
 
-    return this.apiService
-      .dispatch(request)
-      .map(response => null);
+      return this.apiService
+        .dispatch(request)
+        .mapTo(null);
+    });
   }
 }

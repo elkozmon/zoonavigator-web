@@ -19,6 +19,7 @@ import {Component, EventEmitter, Output, Input, ViewContainerRef} from "@angular
 import {ZPath} from "../zpath";
 import {ZNode, ZNodeService} from "../znode";
 import {FeedbackService} from "../../core";
+import {Observable} from "rxjs/Rx";
 
 @Component({
   selector: "zoo-editor-nav-actions",
@@ -60,16 +61,17 @@ export class NavActionsComponent {
         this.viewContainerRef
       )
       .afterClosed()
-      .subscribe((name: string) => {
+      .switchMap((name: string) => {
         if (name) {
-          this.zNodeService
+          return this.zNodeService
             .createNode(snapshotZPath.goDown(name).toString())
-            .subscribe(
-              success => this.reload.emit(),
-              error => this.feedbackService.showError(error, null)
-            );
+            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+            .map(() => this.reload.emit());
         }
-      });
+
+        return Observable.empty<void>();
+      })
+      .subscribe();
   }
 
   onDeleteClick(): void {
@@ -78,23 +80,25 @@ export class NavActionsComponent {
 
     const message = `Do you want to delete ${names.length} ${names.length === 1 ? "node and its" : "nodes and their"} children?`;
 
-    this.feedbackService.showConfirm(
-      "Confirm recursive delete",
-      message,
-      "Confirm",
-      "Cancel",
-      this.viewContainerRef
-    )
+    this.feedbackService
+      .showConfirm(
+        "Confirm recursive delete",
+        message,
+        "Confirm",
+        "Cancel",
+        this.viewContainerRef
+      )
       .afterClosed()
-      .subscribe((accept: boolean) => {
+      .switchMap((accept: boolean) => {
         if (accept) {
-          this.zNodeService
+          return this.zNodeService
             .deleteChildren(path, names)
-            .subscribe(
-              success => this.reload.emit(),
-              error => this.feedbackService.showError(error, null)
-            );
+            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+            .map(() => this.reload.emit());
         }
-      });
+
+        return Observable.empty<void>();
+      })
+      .subscribe();
   }
 }

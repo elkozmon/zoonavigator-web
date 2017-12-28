@@ -17,36 +17,36 @@
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, UnnecessaryLabelJS -->
 <a
-  md-list-item
+  mat-list-item
   *ngIf="!zPath.isRoot() && zPath.goUp()?.isRoot()"
   routerLink="/editor">
-  <md-icon>
+  <mat-icon>
     arrow_back
-  </md-icon>
+  </mat-icon>
   ../
 </a>
 <a
-  md-list-item
+  mat-list-item
   *ngIf="!zPath.isRoot() && !zPath.goUp()?.isRoot()"
   routerLink="/editor/node"
   queryParamsHandling="merge"
   [queryParams]="{path: zPath.goUp()?.toString()}">
-  <md-icon>
+  <mat-icon>
     arrow_back
-  </md-icon>
+  </mat-icon>
   ../
 </a>
 <a
-  md-list-item
+  mat-list-item
   *ngFor="let node of zNodes; trackBy: trackByPath"
   routerLink="/editor/node"
   queryParamsHandling="merge"
   [queryParams]="{path: node.path}">
-  <md-checkbox
+  <mat-checkbox
     [checked]="zNodesSelected.indexOf(node) >= 0"
     (click)="$event.stopPropagation()"
     (change)="$event.checked ? onNodeChecked(node) : onNodeUnchecked(node)">
-  </md-checkbox>
+  </mat-checkbox>
   <span class="zoo-znode-name">
     {{node.name}}
   </span>

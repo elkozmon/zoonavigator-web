@@ -16,20 +16,20 @@
   -->
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, HtmlFormInputWithoutLabel -->
-<md-input-container>
+<mat-input-container>
   <span mdPrefix>
-      <md-icon>search</md-icon>
+      <mat-icon>search</mat-icon>
   </span>
   <input
-    mdInput
+    matInput
     #regexpFilter
     placeholder="Regexp filter"
     [value]="value"
     (change)="onChange(regexpFilter.value)"
     (keyup)="onChange(regexpFilter.value)"/>
-</md-input-container>
+</mat-input-container>
 
 <div *ngIf="error" class="zoo-filter-info bgc-red-400 tc-white-4">
-  <md-icon class="md-18">error_outline</md-icon>
+  <mat-icon class="mat-18">error_outline</mat-icon>
   {{error}}
 </div>

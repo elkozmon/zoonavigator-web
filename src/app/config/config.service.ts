@@ -15,34 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Http} from "@angular/http";
+import {HttpClient} from "@angular/common/http";
 import {Injectable} from "@angular/core";
 import {Config} from "./config";
-import "rxjs/add/operator/map";
 
 @Injectable()
 export class ConfigService {
 
   private _config: Config;
 
-  constructor(private http: Http) {
+  constructor(private httpClient: HttpClient) {
   }
 
   load() {
-    return new Promise((resolve, reject) => {
-      this.http
-        .get("/config.json")
-        .map(res => res.json())
-        .subscribe(
-          data => {
-            this._config = data;
-            resolve(true);
-          },
-          error => {
-            reject(error);
-          }
-        );
-    });
+    return this.httpClient
+      .get("/config.json")
+      .forEach((data: Config) => this._config = data);
   }
 
   get config(): Config {
