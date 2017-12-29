@@ -20,7 +20,7 @@ import {ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot} from "@ang
 import {Observable} from "rxjs/Rx";
 import {ZNodeAcl} from "./znode-acl";
 import {ZNodeService} from "../../znode.service";
-import {ZNodeMetaWith} from "../meta/znode-meta-with";
+import {ZNodeMetaWith} from "../meta";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
 import {FeedbackService} from "../../../../core";
 

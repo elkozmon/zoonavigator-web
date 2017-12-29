@@ -29,6 +29,7 @@ import {FeedbackService} from "../../feedback";
 export class DefaultZSessionHandler implements ZSessionHandler {
 
   private sessionInfoKey = "sessionInfo";
+  private sessionInvalid = false;
 
   constructor(
     private router: Router,
@@ -39,41 +40,30 @@ export class DefaultZSessionHandler implements ZSessionHandler {
   }
 
   onSessionInvalid(reason: string): Observable<void> {
-    return this.getSessionInfo()
-      // if session is set - unset it and pass it on
-      // if it isn't, it might have been handled already
-      .switchMap((sessionInfo) => {
-        if (!sessionInfo) {
-          return Observable.empty();
-        }
+    if (this.sessionInvalid) {
+      return Observable.empty();
+    }
 
-        return this
-          .setSessionInfo(null)
-          .mapTo(sessionInfo);
-      })
-      // show error message, pass on current session
-      .switchMap((sessionInfo: ZSessionInfo) =>
-        this.feedbackService
-          .showError(reason, null)
-          .afterClosed()
-          .mapTo(sessionInfo)
-      )
-      // redirect user to connect form, if that fails, restore session so this can be repeated
-      .map((sessionInfo: ZSessionInfo) => {
-        this.router
-          .navigateByUrl(
-            "/connect", {
-              queryParams: {
-                [CONNECT_QUERY_RETURN_URL]: this.location.path()
-              }
-            }
-          )
-          .then((success) => {
-            if (!success) {
-              return this.setSessionInfo(sessionInfo);
+    this.sessionInvalid = true;
+
+    return this.feedbackService
+      .showError(reason, null)
+      .afterClosed()
+      .map(() => {
+        this
+          .router
+          .navigateByUrl("/connect", {
+            queryParams: {
+              [CONNECT_QUERY_RETURN_URL]: this.location.path()
             }
           })
-      });
+          .then((success) => {
+            if (success) {
+              return this.setSessionInfo(null);
+            }
+          });
+      })
+      .finally(() => this.sessionInvalid = false);
   }
 
   getSessionInfo(): Observable<ZSessionInfo | null> {
