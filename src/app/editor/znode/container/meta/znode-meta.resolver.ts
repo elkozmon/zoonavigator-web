@@ -41,11 +41,10 @@ export class ZNodeMetaResolver implements Resolve<ZNodeMeta> {
 
     return this.zNodeService
       .getMeta(nodePath)
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
       .catch(err =>
-        Observable
-          .fromPromise(this.router.navigate(["/editor"]))
-          .switchMap(() => Observable.throw(err))
+        this.feedbackService
+          .showErrorAndThrowOnClose<ZNodeMeta>(err)
+          .finally(() => this.router.navigateByUrl("/editor"))
       );
   }
 }

@@ -42,11 +42,10 @@ export class ZNodeDataResolver implements Resolve<ZNodeMetaWith<ZNodeData>> {
 
     return this.zNodeService
       .getData(nodePath)
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
       .catch(err =>
-        Observable
-          .fromPromise(this.router.navigate(["/editor"]))
-          .switchMap(() => Observable.throw(err))
+        this.feedbackService
+          .showErrorAndThrowOnClose<ZNodeMetaWith<ZNodeData>>(err)
+          .finally(() => this.router.navigateByUrl("/editor"))
       );
   }
 }

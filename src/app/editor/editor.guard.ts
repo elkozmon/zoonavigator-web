@@ -47,23 +47,19 @@ export class EditorGuard implements CanActivate, CanActivateChild {
   private checkSession(url: string): Observable<boolean> {
     return this.zSessionHandler
       .getSessionInfo()
-      .switchMap((sessionInfo) => {
+      .map((sessionInfo) => {
         if (sessionInfo) {
-          return Observable.of(true);
+          return true;
         }
 
-        return this.router
-          .navigate(
-            ["/connect"], {
-              queryParams: {
-                [CONNECT_QUERY_RETURN_URL]: url
-              }
+        this.router.navigateByUrl("/connect", {
+            queryParams: {
+              [CONNECT_QUERY_RETURN_URL]: url
             }
-          )
-          .then(
-            () => false,
-            () => false
-          );
+          }
+        );
+
+        return false;
       });
   }
 }

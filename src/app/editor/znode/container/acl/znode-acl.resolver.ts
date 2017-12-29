@@ -42,11 +42,10 @@ export class ZNodeAclResolver implements Resolve<ZNodeMetaWith<ZNodeAcl>> {
 
     return this.zNodeService
       .getAcl(nodePath)
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
       .catch(err =>
-        Observable
-          .fromPromise(this.router.navigate(["/editor"]))
-          .switchMap(() => Observable.throw(err))
+        this.feedbackService
+          .showErrorAndThrowOnClose<ZNodeMetaWith<ZNodeAcl>>(err)
+          .finally(() => this.router.navigateByUrl("/editor"))
       );
   }
 }

@@ -18,4 +18,3 @@
 export * from "./znode-data"
 export * from "./znode-data.component"
 export * from "./znode-data.resolver"
-export * from "./znode-data.guard"

@@ -27,7 +27,6 @@ import {
   ZNodeContainerGuard,
   ZNodeDataComponent,
   ZNodeDataResolver,
-  ZNodeDataGuard,
   ZNodeMetaComponent,
   ZNodeMetaResolver
 } from "./znode";
@@ -37,8 +36,8 @@ const editorRoutes = [
   {
     path: "editor",
     component: EditorComponent,
-    // canActivate: [EditorGuard],
-    // canActivateChild: [EditorGuard],
+    canActivate: [EditorGuard],
+    canActivateChild: [EditorGuard],
     resolve: {
       children: ZNodeChildrenResolver
     },
@@ -46,22 +45,21 @@ const editorRoutes = [
       {
         path: "node",
         component: ZNodeContainerComponent,
-        // canActivate: [ZNodeContainerGuard],
-        // canActivateChild: [ZNodeContainerGuard],
+        canActivate: [ZNodeContainerGuard],
+        canActivateChild: [ZNodeContainerGuard],
         children: [
           {
             path: "data",
             component: ZNodeDataComponent,
-            // canActivate: [ZNodeDataGuard],
-            // canDeactivate: [CanDeactivateComponentGuard],
-            // resolve: {
-            //   data: ZNodeDataResolver
-            // }
+            canDeactivate: [CanDeactivateComponentGuard],
+            resolve: {
+              data: ZNodeDataResolver
+            }
           },
           {
             path: "acl",
             component: ZNodeAclComponent,
-            // canDeactivate: [CanDeactivateComponentGuard],
+            canDeactivate: [CanDeactivateComponentGuard],
             resolve: {
               acl: ZNodeAclResolver
             }
@@ -73,10 +71,10 @@ const editorRoutes = [
               meta: ZNodeMetaResolver
             }
           },
-          // {
-          //   path: "**",
-          //   redirectTo: "data"
-          // }
+          {
+            path: "**",
+            redirectTo: "data"
+          }
         ]
       }
     ]
@@ -95,7 +93,6 @@ const editorRoutes = [
     ZNodeContainerGuard,
     ZNodeChildrenResolver,
     ZNodeDataResolver,
-    ZNodeDataGuard,
     ZNodeAclResolver,
     ZNodeMetaResolver
   ]
