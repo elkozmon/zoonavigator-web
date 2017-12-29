@@ -45,7 +45,7 @@ export class ZNodeDataResolver implements Resolve<ZNodeMetaWith<ZNodeData>> {
       .catch(err =>
         this.feedbackService
           .showErrorAndThrowOnClose<ZNodeMetaWith<ZNodeData>>(err)
-          .finally(() => this.router.navigateByUrl("/editor"))
+          .finally(() => this.router.navigate(["/editor"]))
       );
   }
 }

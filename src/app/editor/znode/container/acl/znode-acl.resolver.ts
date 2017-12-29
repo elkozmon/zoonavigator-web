@@ -45,7 +45,7 @@ export class ZNodeAclResolver implements Resolve<ZNodeMetaWith<ZNodeAcl>> {
       .catch(err =>
         this.feedbackService
           .showErrorAndThrowOnClose<ZNodeMetaWith<ZNodeAcl>>(err)
-          .finally(() => this.router.navigateByUrl("/editor"))
+          .finally(() => this.router.navigate(["/editor"]))
       );
   }
 }

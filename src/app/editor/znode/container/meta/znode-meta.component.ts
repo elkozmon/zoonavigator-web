@@ -105,12 +105,12 @@ export class ZNodeMetaComponent implements OnInit {
       .goUp();
 
     if (parentPath.isRoot()) {
-      this.router.navigateByUrl("/editor");
+      this.router.navigate(["/editor"]);
 
       return;
     }
 
-    this.router.navigateByUrl("./", {
+    this.router.navigate(["./"], {
       relativeTo: this.route,
       queryParams: {
         [EDITOR_QUERY_NODE_PATH]: parentPath.toString()

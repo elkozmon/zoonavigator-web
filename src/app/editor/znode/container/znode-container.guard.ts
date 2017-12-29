@@ -36,7 +36,7 @@ export class ZNodeContainerGuard implements CanActivate, CanActivateChild {
       return Observable.of(true);
     }
 
-    this.router.navigateByUrl("/editor");
+    this.router.navigate(["/editor"]);
 
     return Observable.of(false);
   }

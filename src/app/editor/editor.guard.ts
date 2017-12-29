@@ -52,7 +52,7 @@ export class EditorGuard implements CanActivate, CanActivateChild {
           return true;
         }
 
-        this.router.navigateByUrl("/connect", {
+        this.router.navigate(["/connect"], {
             queryParams: {
               [CONNECT_QUERY_RETURN_URL]: url
             }

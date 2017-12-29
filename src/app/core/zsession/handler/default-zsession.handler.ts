@@ -17,7 +17,6 @@
 
 import {Router} from "@angular/router";
 import {Injectable} from "@angular/core";
-import {Location} from "@angular/common";
 import {Observable} from "rxjs/Rx";
 import {ZSessionHandler} from "./zsession.handler";
 import {ZSessionInfo} from "../zsession-info";
@@ -33,7 +32,6 @@ export class DefaultZSessionHandler implements ZSessionHandler {
 
   constructor(
     private router: Router,
-    private location: Location,
     private storageService: StorageService,
     private feedbackService: FeedbackService
   ) {
@@ -52,14 +50,16 @@ export class DefaultZSessionHandler implements ZSessionHandler {
       .map(() => {
         this
           .router
-          .navigateByUrl("/connect", {
+          .navigate(["/connect"], {
             queryParams: {
-              [CONNECT_QUERY_RETURN_URL]: this.location.path()
+              [CONNECT_QUERY_RETURN_URL]: this.router.routerState.snapshot.url
             }
           })
           .then((success) => {
             if (success) {
-              return this.setSessionInfo(null);
+              this
+                .setSessionInfo(null)
+                .subscribe();
             }
           });
       })
