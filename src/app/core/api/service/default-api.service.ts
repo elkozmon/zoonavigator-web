@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {HttpClient, HttpHeaders, HttpResponse} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs/Rx";
 import {ConfigService} from "../../../config";
 import {ApiRequest} from "../request";
@@ -74,26 +74,24 @@ export class DefaultApiService implements ApiService {
   }
 
   private handleError<T>(error: any): Observable<T> {
-    let message: string = null;
+    let message: string = error.toString();
 
-    if (error instanceof HttpResponse) {
-      message = DefaultApiService
-        .extractResponse(error)
-        .message;
-    } else if (error.message) {
-      message = error.message;
-    } else {
-      message = error.toString();
-    }
+    if (error instanceof HttpErrorResponse) {
+      try {
+        message = DefaultApiService
+          .extractResponse(error.error)
+          .message;
+      } catch {
+        message = error.message;
+      }
 
-    if (!message && error.status === 0) {
-      message = "Unable to receive a response.";
-    }
-
-    if (error.status === 401) {
-      return this.zSessionHandler
-        .onSessionInvalid(message)
-        .mapTo(null);
+      if (error.status === 401) {
+        return this.zSessionHandler
+          .onSessionInvalid(message)
+          .mapTo(null);
+      } else if (!message && error.status === 0) {
+        message = "Unable to receive a response.";
+      }
     }
 
     return Observable.throw(message);
