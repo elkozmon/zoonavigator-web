@@ -35,11 +35,11 @@
               <th></th>
             </tr>
             <tr>
-              <th mdTooltip="Create" mdTooltipPosition="below">C</th>
-              <th mdTooltip="Read" mdTooltipPosition="below">R</th>
-              <th mdTooltip="Delete" mdTooltipPosition="below">D</th>
-              <th mdTooltip="Write" mdTooltipPosition="below">W</th>
-              <th mdTooltip="Admin" mdTooltipPosition="below">A</th>
+              <th matTooltip="Create" matTooltipPosition="below">C</th>
+              <th matTooltip="Read" matTooltipPosition="below">R</th>
+              <th matTooltip="Delete" matTooltipPosition="below">D</th>
+              <th matTooltip="Write" matTooltipPosition="below">W</th>
+              <th matTooltip="Admin" matTooltipPosition="below">A</th>
               <th></th>
             </tr>
             </thead>
@@ -64,40 +64,40 @@
               </td>
               <td>
                 <mat-checkbox [formControl]="acl.get('permissions').get('canCreate')"
-                             mdTooltip="Create"
-                             mdTooltipPosition="below"
+                             matTooltip="Create"
+                             matTooltipPosition="below"
                              class="zoo-nolabel"
                              color="primary">
                 </mat-checkbox>
               </td>
               <td>
                 <mat-checkbox [formControl]="acl.get('permissions').get('canRead')"
-                             mdTooltip="Read"
-                             mdTooltipPosition="below"
+                             matTooltip="Read"
+                             matTooltipPosition="below"
                              class="zoo-nolabel"
                              color="primary">
                 </mat-checkbox>
               </td>
               <td>
                 <mat-checkbox [formControl]="acl.get('permissions').get('canDelete')"
-                             mdTooltip="Delete"
-                             mdTooltipPosition="below"
+                             matTooltip="Delete"
+                             matTooltipPosition="below"
                              class="zoo-nolabel"
                              color="primary">
                 </mat-checkbox>
               </td>
               <td>
                 <mat-checkbox [formControl]="acl.get('permissions').get('canWrite')"
-                             mdTooltip="Write"
-                             mdTooltipPosition="below"
+                             matTooltip="Write"
+                             matTooltipPosition="below"
                              class="zoo-nolabel"
                              color="primary">
                 </mat-checkbox>
               </td>
               <td>
                 <mat-checkbox [formControl]="acl.get('permissions').get('canAdmin')"
-                             mdTooltip="Admin"
-                             mdTooltipPosition="below"
+                             matTooltip="Admin"
+                             matTooltipPosition="below"
                              class="zoo-nolabel"
                              color="primary">
                 </mat-checkbox>

@@ -18,30 +18,30 @@
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute -->
 <button
   mat-icon-button
-  mdTooltip="Toggle select all"
-  mdTooltipPosition="below"
+  matTooltip="Toggle select all"
+  matTooltipPosition="below"
   (click)="onSelectAllClick()">
   <mat-icon class="mat-24">select_all</mat-icon>
 </button>
 <button
   mat-icon-button
-  mdTooltip="Refresh children list"
-  mdTooltipPosition="below"
+  matTooltip="Refresh children list"
+  matTooltipPosition="below"
   (click)="onReloadClick()">
   <mat-icon class="mat-24">refresh</mat-icon>
 </button>
 <button
   mat-icon-button
-  mdTooltip="Delete selected nodes"
-  mdTooltipPosition="below"
+  matTooltip="Delete selected nodes"
+  matTooltipPosition="below"
   [disabled]="zNodes.length === 0"
   (click)="onDeleteClick()">
   <mat-icon class="mat-24">delete_forever</mat-icon>
 </button>
 <button
   mat-icon-button
-  mdTooltip="Create child node"
-  mdTooltipPosition="below"
+  matTooltip="Create child node"
+  matTooltipPosition="below"
   (click)="onCreateClick()">
   <mat-icon class="mat-24">create_new_folder</mat-icon>
 </button>

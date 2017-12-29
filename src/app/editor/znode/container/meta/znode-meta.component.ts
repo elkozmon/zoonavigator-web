@@ -17,9 +17,8 @@
 
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {ZPathService} from "../../../zpath/zpath.service";
 import {ZNodeService} from "../../znode.service";
-import {ZPath} from "../../../zpath/zpath";
+import {ZPath, ZPathService} from "../../../zpath";
 import {ZNodeMeta} from "./znode-meta";
 import {FeedbackService} from "../../../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
@@ -85,9 +84,8 @@ export class ZNodeMetaComponent implements OnInit {
 
         return Observable.empty<void>();
       })
-      .switchMap(this.navigateToParent)
       .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
-      .subscribe();
+      .subscribe(() => this.navigateToParent());
   }
 
   private reloadData(path: string): Observable<void> {
@@ -101,18 +99,18 @@ export class ZNodeMetaComponent implements OnInit {
     this.meta = meta;
   }
 
-  private navigateToParent(): Observable<void> {
+  private navigateToParent(): void {
     const parentPath: ZPath = this.zPathService
       .parse(this.getCurrentPath())
       .goUp();
 
     if (parentPath.isRoot()) {
-      this.router.navigate(["/editor"]);
+      this.router.navigateByUrl("/editor");
 
       return;
     }
 
-    this.router.navigate(["./"], {
+    this.router.navigateByUrl("./", {
       relativeTo: this.route,
       queryParams: {
         [EDITOR_QUERY_NODE_PATH]: parentPath.toString()

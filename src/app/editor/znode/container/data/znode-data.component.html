@@ -48,10 +48,12 @@
     </button>
 
     <label for="editorMode" class="tc-grey-600">Mode:</label>
-    <mat-select [(ngModel)]="editorMode" name="editorMode" id="editorMode">
-      <mat-option *ngFor="let mode of editorModes" [value]="mode">
-        {{mode}}
-      </mat-option>
-    </mat-select>
+    <mat-form-field>
+      <mat-select [(ngModel)]="editorMode" name="editorMode" id="editorMode">
+        <mat-option *ngFor="let mode of editorModes" [value]="mode">
+          {{mode}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
 </div>
