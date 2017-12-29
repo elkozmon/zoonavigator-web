@@ -83,12 +83,10 @@ export class EditorComponent implements OnInit, AfterViewInit {
           this.currentZPath = this.zPathService.parse(nodePath);
           this.childrenFilter.clear();
 
-          return this
-            .reloadChildren()
-            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err));
+          return this.reloadChildren();
         }
 
-        return Observable.empty();
+        return Observable.empty<void>();
       })
       .subscribe();
   }
@@ -145,7 +143,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
   reloadChildren(): Observable<void> {
     return this.zNodeService
       .getChildren(this.currentZPath.toString())
-      .map(metaWithChildren => this.updateChildren(metaWithChildren.data));
+      .map(metaWithChildren => this.updateChildren(metaWithChildren.data))
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err));
   }
 
   toggleSelectAll(): void {

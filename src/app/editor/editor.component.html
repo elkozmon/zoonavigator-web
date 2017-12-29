@@ -40,7 +40,7 @@
         <zoo-editor-nav-actions
           [zPath]="currentZPath"
           [zNodes]="selectedZNodes"
-          (reload)="reloadChildren()"
+          (reload)="reloadChildren().subscribe()"
           (selectAll)="toggleSelectAll()">
         </zoo-editor-nav-actions>
       </mat-toolbar>

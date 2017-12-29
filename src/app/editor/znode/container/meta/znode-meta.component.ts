@@ -52,9 +52,7 @@ export class ZNodeMetaComponent implements OnInit {
       .switchMap(queryParams => {
         const newNodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
 
-        return this
-          .reloadData(newNodePath)
-          .catch(err => this.feedbackService.showErrorAndThrowOnClose(err));
+        return this.reloadData(newNodePath);
       })
       .subscribe();
   }
@@ -62,7 +60,6 @@ export class ZNodeMetaComponent implements OnInit {
   onRefresh(): void {
     this
       .reloadData(this.getCurrentPath())
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
       .subscribe();
   }
 
@@ -96,7 +93,8 @@ export class ZNodeMetaComponent implements OnInit {
   private reloadData(path: string): Observable<void> {
     return this.zNodeService
       .getMeta(path)
-      .map(meta => this.updateData(meta));
+      .map(meta => this.updateData(meta))
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err));
   }
 
   private updateData(meta: ZNodeMeta): void {

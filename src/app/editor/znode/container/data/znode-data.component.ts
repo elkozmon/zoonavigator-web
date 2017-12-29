@@ -77,9 +77,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
       .switchMap(queryParams => {
         const newNodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
 
-        return this
-          .reloadDataForm(newNodePath)
-          .catch(err => this.feedbackService.showErrorAndThrowOnClose(err));
+        return this.reloadDataForm(newNodePath);
       })
       .subscribe();
   }
@@ -103,10 +101,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
     const path = this.getCurrentPath();
 
     if (!this.editorDirty) {
-      this
-        .reloadDataForm(path)
-        .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err))
-        .subscribe();
+      this.reloadDataForm(path).subscribe();
 
       return;
     }
@@ -115,9 +110,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
       .showDiscardChanges(this.viewContainerRef)
       .switchMap(discard => {
         if (discard) {
-          return this
-            .reloadDataForm(path)
-            .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err));
+          return this.reloadDataForm(path);
         }
 
         return Observable.empty<void>();
@@ -154,7 +147,8 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
       .map(metaWithData => {
         this.updateDataForm(metaWithData);
         this.scheduleDataFormSelectionClear();
-      });
+      })
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err));
   }
 
   private updateDataForm(metaWithData: ZNodeMetaWith<ZNodeData>): void {

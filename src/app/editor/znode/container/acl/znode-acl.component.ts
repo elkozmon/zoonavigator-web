@@ -52,9 +52,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
       .switchMap(queryParams => {
         const newNodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
 
-        return this
-          .reloadAclForm(newNodePath)
-          .catch(err => this.feedbackService.showErrorAndThrowOnClose(err));
+        return this.reloadAclForm(newNodePath);
       })
       .subscribe();
   }
@@ -71,10 +69,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     const path = this.getCurrentPath();
 
     if (!this.aclForm.dirty) {
-      this
-        .reloadAclForm(path)
-        .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
-        .subscribe();
+      this.reloadAclForm(path).subscribe();
 
       return;
     }
@@ -83,9 +78,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
       .showDiscardChanges(this.viewContainerRef)
       .switchMap(discard => {
         if (discard) {
-          return this
-            .reloadAclForm(path)
-            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err));
+          return this.reloadAclForm(path);
         }
 
         return Observable.empty<void>();
@@ -171,7 +164,8 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
   private reloadAclForm(path: string): Observable<void> {
     return this.zNodeService
       .getAcl(path)
-      .map(metaWithAcl => this.updateAclForm(metaWithAcl));
+      .map(metaWithAcl => this.updateAclForm(metaWithAcl))
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err));
   }
 
   private updateAclForm(metaWithAcl: ZNodeMetaWith<ZNodeAcl>): void {
