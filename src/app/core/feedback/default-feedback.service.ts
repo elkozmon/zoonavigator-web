@@ -24,18 +24,20 @@ import {
 } from "@covalent/core";
 import {MatDialogRef, MatSnackBar, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
 import {Observable} from "rxjs/Rx";
+import {FeedbackService} from "./feedback.service";
 
 @Injectable()
-export class DefaultFeedbackService {
+export class DefaultFeedbackService extends FeedbackService {
 
   constructor(
     private dialogService: TdDialogService,
     private snackBar: MatSnackBar
   ) {
+    super();
   }
 
   showDiscardChanges(
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef
   ): Observable<boolean> {
     const confirm = this.showConfirm(
       "Discard changes?",
@@ -53,7 +55,8 @@ export class DefaultFeedbackService {
     message: string,
     acceptBtn: string,
     cancelBtn: string,
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef,
+    value?: string
   ): MatDialogRef<TdPromptDialogComponent> {
     return this.dialogService.openPrompt({
       message: message,
@@ -61,7 +64,8 @@ export class DefaultFeedbackService {
       viewContainerRef: viewRef,
       title: title,
       cancelButton: cancelBtn,
-      acceptButton: acceptBtn
+      acceptButton: acceptBtn,
+      value: value
     });
   }
 
@@ -70,7 +74,7 @@ export class DefaultFeedbackService {
     message: string,
     acceptBtn: string,
     cancelBtn: string,
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef
   ): MatDialogRef<TdConfirmDialogComponent> {
     return this.dialogService.openConfirm({
       message: message,
@@ -86,7 +90,7 @@ export class DefaultFeedbackService {
     title: string,
     message: string,
     closeBtn: string,
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef
   ): MatDialogRef<TdAlertDialogComponent> {
     return this.dialogService.openAlert({
       message: message,
@@ -99,7 +103,7 @@ export class DefaultFeedbackService {
 
   showError(
     message: string,
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef
   ): MatDialogRef<TdAlertDialogComponent> {
     return this.dialogService.openAlert({
       message: message,
@@ -112,7 +116,7 @@ export class DefaultFeedbackService {
 
   showSuccess(
     message: string,
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef
   ): MatSnackBarRef<SimpleSnackBar> {
     return this.snackBar.open(
       message,

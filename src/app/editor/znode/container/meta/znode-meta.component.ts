@@ -67,7 +67,7 @@ export class ZNodeMetaComponent implements OnInit {
       .showConfirm(
         "Confirm recursive delete",
         "Do you want to delete this node and all its children?",
-        "Confirm",
+        "Delete",
         "Cancel",
         this.viewContainerRef
       )
@@ -84,7 +84,7 @@ export class ZNodeMetaComponent implements OnInit {
 
         return Observable.empty<void>();
       })
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
       .subscribe(() => this.navigateToParent());
   }
 
@@ -92,7 +92,7 @@ export class ZNodeMetaComponent implements OnInit {
     return this.zNodeService
       .getMeta(path)
       .map(meta => this.updateData(meta))
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err));
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef));
   }
 
   private updateData(meta: ZNodeMeta): void {

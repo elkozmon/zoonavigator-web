@@ -36,18 +36,30 @@
   </mat-icon>
   ../
 </a>
-<a
+<div
   mat-list-item
   *ngFor="let node of zNodes; trackBy: trackByPath"
-  routerLink="/editor/node"
-  queryParamsHandling="merge"
-  [queryParams]="{path: node.path}">
+  class="zoo-node-item">
   <mat-checkbox
     [checked]="zNodesSelected.indexOf(node) >= 0"
     (click)="$event.stopPropagation()"
     (change)="$event.checked ? onNodeChecked(node) : onNodeUnchecked(node)">
   </mat-checkbox>
-  <span class="zoo-znode-name">
+  <a
+    routerLink="/editor/node"
+    queryParamsHandling="merge"
+    [queryParams]="{path: node.path}"
+    class="zoo-node-name">
     {{node.name}}
-  </span>
-</a>
+  </a>
+  <div class="zoo-node-actions">
+    <button mat-icon-button #nodeMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="nodeMenu">
+      <mat-icon class="mat-24">more_vert</mat-icon>
+    </button>
+    <mat-menu #nodeMenu="matMenu">
+      <button mat-menu-item (click)="onNodeDeleteClick(node)">Delete</button>
+      <button mat-menu-item (click)="onNodeDuplicateClick(node)">Duplicate</button>
+      <button mat-menu-item (click)="onNodeMoveClick(node)">Move</button>
+    </mat-menu>
+  </div>
+</div>

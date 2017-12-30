@@ -55,8 +55,8 @@ export class NavActionsComponent {
   private reloadButtonRotatedState = "default";
 
   constructor(
-    private feedbackService: FeedbackService,
     private zNodeService: ZNodeService,
+    private feedbackService: FeedbackService,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -103,7 +103,7 @@ export class NavActionsComponent {
         if (name) {
           return this.zNodeService
             .createNode(snapshotZPath.goDown(name).toString())
-            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .map(() => this.reload.emit());
         }
 
@@ -122,7 +122,7 @@ export class NavActionsComponent {
       .showConfirm(
         "Confirm recursive delete",
         message,
-        "Confirm",
+        "Delete",
         "Cancel",
         this.viewContainerRef
       )
@@ -131,7 +131,7 @@ export class NavActionsComponent {
         if (accept) {
           return this.zNodeService
             .deleteChildren(path, names)
-            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .map(() => this.reload.emit());
         }
 

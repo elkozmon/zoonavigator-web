@@ -62,6 +62,7 @@
           [zNodes]="filteredZNodes"
           [zNodesSelected]="selectedZNodes"
           [zNodesOrdering]="childrenOrdering"
+          (reload)="reloadChildren().subscribe()"
           (select)="selectZNode($event)"
           (deselect)="deselectZNode($event)">
         </zoo-editor-nav-list>

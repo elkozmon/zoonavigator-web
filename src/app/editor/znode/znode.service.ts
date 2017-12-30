@@ -32,6 +32,16 @@ export abstract class ZNodeService {
     version: number
   ): Observable<void>
 
+  abstract duplicateNode(
+    sourcePath: string,
+    destinationPath: string
+  ): Observable<void>
+
+  abstract moveNode(
+    sourcePath: string,
+    destinationPath: string
+  ): Observable<void>
+
   abstract getAcl(
     path: string
   ): Observable<ZNodeMetaWith<ZNodeAcl>>

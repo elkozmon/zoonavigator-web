@@ -137,7 +137,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
           )
           .afterOpened()
       )
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
       .subscribe();
   }
 
@@ -148,7 +148,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
         this.updateDataForm(metaWithData);
         this.scheduleDataFormSelectionClear();
       })
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err));
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef));
   }
 
   private updateDataForm(metaWithData: ZNodeMetaWith<ZNodeData>): void {

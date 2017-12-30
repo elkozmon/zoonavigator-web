@@ -26,7 +26,6 @@ import {ZNode} from "./znode";
 @Injectable()
 export class ApiZNodeService implements ZNodeService {
 
-
   constructor(
     private apiService: ApiService,
     private zSessionHandler: ZSessionHandler,
@@ -80,6 +79,58 @@ export class ApiZNodeService implements ZNodeService {
       const request = this.apiRequestFactory.deleteRequest(
         "/znode",
         params,
+        null,
+        token
+      );
+
+      return this.apiService
+        .dispatch(request)
+        .mapTo(null);
+    });
+  }
+
+  duplicateNode(
+    sourcePath: string,
+    destinationPath: string
+  ): Observable<void> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          source: sourcePath,
+          destination: destinationPath
+        }
+      });
+
+      const request = this.apiRequestFactory.postRequest(
+        "/znode/duplicate",
+        params,
+        null,
+        null,
+        token
+      );
+
+      return this.apiService
+        .dispatch(request)
+        .mapTo(null);
+    });
+  }
+
+  moveNode(
+    sourcePath: string,
+    destinationPath: string
+  ): Observable<void> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          source: sourcePath,
+          destination: destinationPath
+        }
+      });
+
+      const request = this.apiRequestFactory.postRequest(
+        "/znode/move",
+        params,
+        null,
         null,
         token
       );

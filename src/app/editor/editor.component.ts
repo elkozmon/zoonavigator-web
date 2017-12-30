@@ -146,7 +146,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
     return this.zNodeService
       .getChildren(this.currentZPath.toString())
       .map(metaWithChildren => this.updateChildren(metaWithChildren.data))
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err));
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef));
   }
 
   toggleSelectAll(): void {

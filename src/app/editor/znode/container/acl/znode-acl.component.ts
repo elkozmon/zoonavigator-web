@@ -118,9 +118,9 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
 
     this.feedbackService
       .showConfirm(
-        "Remove all",
+        "Confirm removing all ACLs",
         "Do you want to remove all ACL inputs? Changes will not be applied yet.",
-        "Confirm",
+        "Remove",
         "Cancel",
         this.viewContainerRef
       )
@@ -153,7 +153,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
         .showSuccess("Changes saved", this.viewContainerRef)
         .afterOpened()
       )
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err))
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
       .subscribe();
   }
 
@@ -165,7 +165,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     return this.zNodeService
       .getAcl(path)
       .map(metaWithAcl => this.updateAclForm(metaWithAcl))
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err));
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef));
   }
 
   private updateAclForm(metaWithAcl: ZNodeMetaWith<ZNodeAcl>): void {

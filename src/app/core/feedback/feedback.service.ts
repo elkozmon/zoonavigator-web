@@ -34,7 +34,7 @@ export abstract class FeedbackService {
   }
 
   abstract showDiscardChanges(
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef
   ): Observable<boolean>
 
   abstract showPrompt(
@@ -42,7 +42,8 @@ export abstract class FeedbackService {
     message: string,
     acceptBtn: string,
     cancelBtn: string,
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef,
+    value?: string
   ): MatDialogRef<TdPromptDialogComponent>
 
   abstract showConfirm(
@@ -50,23 +51,23 @@ export abstract class FeedbackService {
     message: string,
     acceptBtn: string,
     cancelBtn: string,
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef
   ): MatDialogRef<TdConfirmDialogComponent>
 
   abstract showAlert(
     title: string,
     message: string,
     closeBtn: string,
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef
   ): MatDialogRef<TdAlertDialogComponent>
 
   abstract showError(
     message: string,
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef
   ): MatDialogRef<TdAlertDialogComponent>
 
   abstract showSuccess(
     message: string,
-    viewRef: ViewContainerRef
+    viewRef?: ViewContainerRef
   ): MatSnackBarRef<SimpleSnackBar>
 }

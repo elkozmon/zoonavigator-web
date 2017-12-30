@@ -15,10 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, Input, EventEmitter, Output, OnChanges, SimpleChanges} from "@angular/core";
-import {ZNode} from "../znode";
-import {ZPath} from "../zpath";
+import {Component, Input, EventEmitter, Output, OnChanges, SimpleChanges, ViewContainerRef} from "@angular/core";
+import {ZNode, ZNodeService} from "../znode";
+import {ZPath, ZPathService} from "../zpath";
 import {Ordering} from "../ordering";
+import {FeedbackService} from "../../core";
+import {Observable} from "rxjs/Rx";
 
 @Component({
   selector: "zoo-editor-nav-list",
@@ -27,6 +29,7 @@ import {Ordering} from "../ordering";
 })
 export class NavListComponent implements OnChanges {
 
+  @Output() reload: EventEmitter<any> = new EventEmitter();
   @Output() select: EventEmitter<ZNode> = new EventEmitter();
   @Output() deselect: EventEmitter<ZNode> = new EventEmitter();
 
@@ -34,6 +37,38 @@ export class NavListComponent implements OnChanges {
   @Input() zNodes: ZNode[];
   @Input() zNodesSelected: ZNode[];
   @Input() zNodesOrdering: Ordering;
+
+  private static compareZNodesAscending(a: ZNode, b: ZNode): number {
+    if (a.name > b.name) {
+      return 1;
+    }
+
+    if (a.name < b.name) {
+      return -1;
+    }
+
+    return 0;
+  }
+
+  private static compareZNodesDescending(a: ZNode, b: ZNode): number {
+    if (a.name > b.name) {
+      return -1;
+    }
+
+    if (a.name < b.name) {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  constructor(
+    private zNodeService: ZNodeService,
+    private zPathService: ZPathService,
+    private feedbackService: FeedbackService,
+    private viewContainerRef: ViewContainerRef
+  ) {
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.hasOwnProperty("zNodes") || changes.hasOwnProperty("zNodesOrdering")) {
@@ -49,6 +84,79 @@ export class NavListComponent implements OnChanges {
     this.deselect.emit(zNode);
   }
 
+  onNodeDeleteClick(zNode: ZNode): void {
+    this.feedbackService
+      .showConfirm(
+        "Confirm recursive delete",
+        `Do you want to delete node '${zNode.name}'and its children?`,
+        "Delete",
+        "Cancel",
+        this.viewContainerRef
+      )
+      .afterClosed()
+      .switchMap((name: string) => {
+        if (name) {
+          const dir = this.zPathService.parse(zNode.path).goUp().toString();
+
+          return this.zNodeService
+            .deleteChildren(dir, [zNode.name])
+            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+            .map(() => this.reload.emit());
+        }
+
+        return Observable.empty<void>();
+      })
+      .subscribe();
+  }
+
+  onNodeDuplicateClick(zNode: ZNode): void {
+    this.feedbackService
+      .showPrompt(
+        "Duplicate node",
+        "Type in new node path",
+        "Duplicate",
+        "Cancel",
+        this.viewContainerRef,
+        zNode.path
+      )
+      .afterClosed()
+      .switchMap((dest: string) => {
+        if (dest) {
+          return this.zNodeService
+            .duplicateNode(zNode.path, dest)
+            .catch((err) => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+            .map(() => this.reload.emit());
+        }
+
+        return Observable.empty<void>();
+      })
+      .subscribe();
+  }
+
+  onNodeMoveClick(zNode: ZNode): void {
+    this.feedbackService
+      .showPrompt(
+        "Move node",
+        "Type in new node path",
+        "Move",
+        "Cancel",
+        this.viewContainerRef,
+        zNode.path
+      )
+      .afterClosed()
+      .switchMap((dest: string) => {
+        if (dest) {
+          return this.zNodeService
+            .moveNode(zNode.path, dest)
+            .catch((err) => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+            .map(() => this.reload.emit());
+        }
+
+        return Observable.empty<void>();
+      })
+      .subscribe();
+  }
+
   //noinspection JSMethodCanBeStatic,JSUnusedLocalSymbols
   trackByPath(index: number, zNode: ZNode): string {
     return zNode.path;
@@ -56,34 +164,10 @@ export class NavListComponent implements OnChanges {
 
   private sortZNodes(): void {
     if (this.zNodesOrdering === Ordering.Ascending) {
-      this.zNodes = this.zNodes.sort(this.compareZNodesAscending);
+      this.zNodes = this.zNodes.sort(NavListComponent.compareZNodesAscending);
       return;
     }
 
-    this.zNodes = this.zNodes.sort(this.compareZNodesDescending);
-  }
-
-  private compareZNodesAscending(a: ZNode, b: ZNode): number {
-    if (a.name > b.name) {
-      return 1;
-    }
-
-    if (a.name < b.name) {
-      return -1;
-    }
-
-    return 0;
-  }
-
-  private compareZNodesDescending(a: ZNode, b: ZNode): number {
-    if (a.name > b.name) {
-      return -1;
-    }
-
-    if (a.name < b.name) {
-      return 1;
-    }
-
-    return 0;
+    this.zNodes = this.zNodes.sort(NavListComponent.compareZNodesDescending);
   }
 }
