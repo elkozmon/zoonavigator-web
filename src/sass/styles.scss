@@ -33,9 +33,12 @@ div.zoo-actionbar {
   }
 }
 
-.mat-icon-button {
+.mat-icon {
   .mat-18 {
-    line-height: 18px !important;
+    @include mat-icon-size(18px);
+  }
+  .mat-16 {
+    @include mat-icon-size(16px);
   }
 }
 

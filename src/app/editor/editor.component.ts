@@ -26,6 +26,7 @@ import {FeedbackService} from "../core/feedback/feedback.service";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
 import {RegexpFilterComponent} from "../shared/regexp/regexp-filter.component";
 import {Observable} from "rxjs/Rx";
+import {Ordering} from "./ordering";
 
 @Component({
   templateUrl: "editor.component.html",
@@ -37,6 +38,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   currentZPath: ZPath;
 
+  childrenOrdering: Ordering = Ordering.Ascending;
   childrenZNodes: ZNode[] = [];
   filteredZNodes: ZNode[] = [];
   selectedZNodes: ZNode[] = [];

@@ -40,6 +40,7 @@
         <zoo-editor-nav-actions
           [zPath]="currentZPath"
           [zNodes]="selectedZNodes"
+          [(ordering)]="childrenOrdering"
           (reload)="reloadChildren().subscribe()"
           (selectAll)="toggleSelectAll()">
         </zoo-editor-nav-actions>
@@ -48,13 +49,19 @@
       <mat-nav-list
         td-sidenav-content
         (click)="!mediaService.query('gt-sm') && manageList.close()">
-        <zoo-regexp-filter #childrenFilter
-                           (regexpChange)="onFilterRegexpChange($event)">
-        </zoo-regexp-filter>
+        <div class="zoo-list-actions">
+          <zoo-regexp-filter
+            #childrenFilter
+            matTooltip="Regexp filter"
+            matTooltipPosition="below"
+            (regexpChange)="onFilterRegexpChange($event)">
+          </zoo-regexp-filter>
+        </div>
         <zoo-editor-nav-list
           [zPath]="currentZPath"
           [zNodes]="filteredZNodes"
           [zNodesSelected]="selectedZNodes"
+          [zNodesOrdering]="childrenOrdering"
           (select)="selectZNode($event)"
           (deselect)="deselectZNode($event)">
         </zoo-editor-nav-list>

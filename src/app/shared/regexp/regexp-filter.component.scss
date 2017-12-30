@@ -15,6 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+mat-input-container {
+  width: 100%;
+
+  mat-icon {
+    bottom: -3px;
+    position: relative;
+  }
+}
+
 div.zoo-filter-info {
   font-size: 80%;
   padding: 1.2em 1em;

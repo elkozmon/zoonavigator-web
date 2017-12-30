@@ -39,6 +39,7 @@ import {
   CovalentLayoutModule,
   CovalentMediaModule
 } from "@covalent/core";
+import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {AceEditorModule} from "ng2-ace-editor";
 import {
   ApiZNodeService,
@@ -57,6 +58,7 @@ import {SharedModule} from "../shared";
 
 @NgModule({
   imports: [
+    AngularFontAwesomeModule,
     FormsModule,
     ReactiveFormsModule,
     CovalentCommonModule,

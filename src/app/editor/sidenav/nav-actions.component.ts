@@ -16,15 +16,28 @@
  */
 
 import {Component, EventEmitter, Output, Input, ViewContainerRef} from "@angular/core";
+import {trigger, state, style, animate, transition} from "@angular/animations";
 import {ZPath} from "../zpath";
 import {ZNode, ZNodeService} from "../znode";
 import {FeedbackService} from "../../core";
 import {Observable} from "rxjs/Rx";
+import {Ordering} from "../ordering";
 
 @Component({
   selector: "zoo-editor-nav-actions",
   templateUrl: "nav-actions.component.html",
-  styleUrls: ["nav-actions.component.scss"]
+  styleUrls: ["nav-actions.component.scss"],
+  animations: [
+    trigger("rotatedState", [
+      state("default", style({transform: "rotate(0)"})),
+      state("rotated", style({transform: "rotate(360deg)"})),
+      transition("default => rotated", animate("400ms ease-in"))
+    ]),
+    trigger("flippedState", [
+      state("default", style({transform: "scale(1, 1)"})),
+      state("flipped", style({transform: "scale(1, -1) translate(0, -2px)"}))
+    ])
+  ]
 })
 export class NavActionsComponent {
 
@@ -34,6 +47,13 @@ export class NavActionsComponent {
   @Input() zPath: ZPath;
   @Input() zNodes: ZNode[];
 
+  @Input() ordering: Ordering;
+  @Output() orderingChange = new EventEmitter<Ordering>();
+
+  private toggleSortButtonFlippedState = "flipped";
+
+  private reloadButtonRotatedState = "default";
+
   constructor(
     private feedbackService: FeedbackService,
     private zNodeService: ZNodeService,
@@ -41,12 +61,30 @@ export class NavActionsComponent {
   ) {
   }
 
-  onReloadClick(): void {
-    this.reload.emit();
-  }
-
   onSelectAllClick(): void {
     this.selectAll.emit();
+  }
+
+  onToggleSortClick(): void {
+    let newOrdering: Ordering;
+
+    if (this.ordering === Ordering.Descending) {
+      newOrdering = Ordering.Ascending;
+      this.toggleSortButtonFlippedState = "flipped";
+    } else {
+      newOrdering = Ordering.Descending;
+      this.toggleSortButtonFlippedState = "default";
+    }
+
+    this.ordering = newOrdering;
+    this.orderingChange.emit(newOrdering);
+  }
+
+  onReloadClick(): void {
+    this.reloadButtonRotatedState = "default";
+    setTimeout(() => this.reloadButtonRotatedState = "rotated", 0);
+
+    this.reload.emit();
   }
 
   onCreateClick(): void {

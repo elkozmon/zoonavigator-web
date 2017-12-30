@@ -16,8 +16,6 @@
  */
 
 mat-nav-list {
-  text-align: center;
-
   div.zoo-nav-info {
     font-size: 80%;
     padding: 1.2em 1em;
@@ -27,4 +25,8 @@ mat-nav-list {
       padding-right: .2em;
     }
   }
+}
+
+.zoo-list-actions {
+  padding: 0 1em;
 }

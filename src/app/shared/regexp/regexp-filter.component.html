@@ -17,16 +17,16 @@
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, HtmlFormInputWithoutLabel -->
 <mat-input-container>
-  <span matPrefix>
-      <mat-icon>search</mat-icon>
-  </span>
   <input
     matInput
     #regexpFilter
-    placeholder="Regexp filter"
+    placeholder=""
     [value]="value"
     (change)="onChange(regexpFilter.value)"
     (keyup)="onChange(regexpFilter.value)"/>
+  <span matPrefix>
+      <mat-icon class="mat-18">search</mat-icon>
+  </span>
 </mat-input-container>
 
 <div *ngIf="error" class="zoo-filter-info bgc-red-400 tc-white-4">

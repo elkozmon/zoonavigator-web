@@ -19,31 +19,34 @@
 <div layout="column" layout-fill>
 
   <mat-card layout="column" flex>
-    <ace-editor ace-editor
-                flex
-                #dataEditor
-                theme="chrome"
-                [(text)]="metaWithData.data"
-                [mode]="editorMode"
-                [options]="editorOpts"
-                [readOnly]="false"
-                [autoUpdateContent]="true"
-                style="height: 100%; overflow: auto;">
+    <ace-editor
+      ace-editor
+      flex
+      #dataEditor
+      theme="chrome"
+      [(text)]="metaWithData.data"
+      [mode]="editorMode"
+      [options]="editorOpts"
+      [readOnly]="false"
+      [autoUpdateContent]="true"
+      style="height: 100%; overflow: auto;">
     </ace-editor>
   </mat-card>
 
   <div class="zoo-actionbar">
-    <button mat-button
-            type="button"
-            (click)="onRefresh()">
+    <button
+      mat-button
+      type="button"
+      (click)="onRefresh()">
       Refresh
     </button>
 
-    <button mat-raised-button
-            type="button"
-            color="accent"
-            (click)="onSubmit()"
-            [disabled]="!editorDirty">
+    <button
+      mat-raised-button
+      type="button"
+      color="accent"
+      (click)="onSubmit()"
+      [disabled]="!editorDirty">
       Save
     </button>
 

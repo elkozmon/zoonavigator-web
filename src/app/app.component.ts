@@ -18,7 +18,7 @@
 import {Component, OnInit} from "@angular/core";
 import {Title} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
-import {EDITOR_QUERY_NODE_PATH} from "./editor/editor-routing.constants";
+import {EDITOR_QUERY_NODE_PATH} from "./editor";
 
 @Component({
   selector: "zoo-app",

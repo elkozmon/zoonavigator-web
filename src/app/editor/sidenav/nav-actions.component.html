@@ -25,8 +25,17 @@
 </button>
 <button
   mat-icon-button
-  matTooltip="Refresh children list"
+  matTooltip="Toggle ordering direction"
   matTooltipPosition="below"
+  [@flippedState]="toggleSortButtonFlippedState"
+  (click)="onToggleSortClick()">
+  <mat-icon class="mat-24">sort</mat-icon>
+</button>
+<button
+  mat-icon-button
+  matTooltip="Reload children list"
+  matTooltipPosition="below"
+  [@rotatedState]="reloadButtonRotatedState"
   (click)="onReloadClick()">
   <mat-icon class="mat-24">refresh</mat-icon>
 </button>
