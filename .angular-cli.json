@@ -22,7 +22,8 @@
       "styles": [
         "./sass/styles.scss",
         "../node_modules/@covalent/core/common/platform.css",
-        "../node_modules/font-awesome/css/font-awesome.css"
+        "../node_modules/font-awesome/css/font-awesome.css",
+        "../node_modules/roboto-fontface/css/roboto/sass/roboto-fontface.scss"
       ],
       "scripts": [],
       "environmentSource": "environments/environment.ts",
