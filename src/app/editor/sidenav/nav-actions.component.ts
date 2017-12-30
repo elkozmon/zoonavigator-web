@@ -88,21 +88,20 @@ export class NavActionsComponent {
   }
 
   onCreateClick(): void {
-    const snapshotZPath = this.zPath.clone();
-
     this.feedbackService
       .showPrompt(
-        "Create child node",
-        "Type in new node name",
+        "Create node",
+        "Type in new node path",
         "Create",
         "Cancel",
-        this.viewContainerRef
+        this.viewContainerRef,
+        this.zPath.toString().concat("/")
       )
       .afterClosed()
-      .switchMap((name: string) => {
-        if (name) {
+      .switchMap((path: string) => {
+        if (path) {
           return this.zNodeService
-            .createNode(snapshotZPath.goDown(name).toString())
+            .createNode(path)
             .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .map(() => this.reload.emit());
         }
