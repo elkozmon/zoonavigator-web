@@ -88,7 +88,7 @@ export class NavListComponent implements OnChanges {
     this.feedbackService
       .showConfirm(
         "Confirm recursive delete",
-        `Do you want to delete node '${zNode.name}'and its children?`,
+        `Do you want to delete node '${zNode.name}' and its children?`,
         "Delete",
         "Cancel",
         this.viewContainerRef
