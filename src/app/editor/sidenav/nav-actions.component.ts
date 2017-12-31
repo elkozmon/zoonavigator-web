@@ -28,11 +28,6 @@ import {Ordering} from "../ordering";
   templateUrl: "nav-actions.component.html",
   styleUrls: ["nav-actions.component.scss"],
   animations: [
-    trigger("rotatedState", [
-      state("default", style({transform: "rotate(0)"})),
-      state("rotated", style({transform: "rotate(360deg)"})),
-      transition("default => rotated", animate("400ms ease-in"))
-    ]),
     trigger("flippedState", [
       state("default", style({transform: "scale(1, 1)"})),
       state("flipped", style({transform: "scale(1, -1) translate(0, -2px)"}))
@@ -42,7 +37,7 @@ import {Ordering} from "../ordering";
 export class NavActionsComponent {
 
   @Output() selectAll: EventEmitter<any> = new EventEmitter();
-  @Output() reload: EventEmitter<any> = new EventEmitter();
+  @Output() refresh: EventEmitter<any> = new EventEmitter();
 
   @Input() zPath: ZPath;
   @Input() zNodes: ZNode[];
@@ -51,8 +46,6 @@ export class NavActionsComponent {
   @Output() orderingChange = new EventEmitter<Ordering>();
 
   toggleSortButtonFlippedState = "flipped";
-
-  reloadButtonRotatedState = "default";
 
   constructor(
     private zNodeService: ZNodeService,
@@ -80,13 +73,6 @@ export class NavActionsComponent {
     this.orderingChange.emit(newOrdering);
   }
 
-  onReloadClick(): void {
-    this.reloadButtonRotatedState = "default";
-    setTimeout(() => this.reloadButtonRotatedState = "rotated", 0);
-
-    this.reload.emit();
-  }
-
   onCreateClick(): void {
     this.feedbackService
       .showPrompt(
@@ -103,7 +89,7 @@ export class NavActionsComponent {
           return this.zNodeService
             .createNode(path)
             .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.reload.emit());
+            .map(() => this.refresh.emit());
         }
 
         return Observable.empty<void>();
@@ -131,7 +117,7 @@ export class NavActionsComponent {
           return this.zNodeService
             .deleteChildren(path, names)
             .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.reload.emit());
+            .map(() => this.refresh.emit());
         }
 
         return Observable.empty<void>();

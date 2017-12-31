@@ -16,8 +16,7 @@
   -->
 
 <!--suppress HtmlUnknownAttribute, HtmlFormInputWithoutLabel, HtmlUnknownTag -->
-<div layout="column" layout-fill>
-
+<div layout="column" layout-fill *ngIf="metaWithData">
   <mat-card layout="column" flex>
     <ace-editor
       ace-editor
@@ -34,13 +33,6 @@
   </mat-card>
 
   <div class="zoo-actionbar">
-    <button
-      mat-button
-      type="button"
-      (click)="onRefresh()">
-      Refresh
-    </button>
-
     <button
       mat-raised-button
       type="button"

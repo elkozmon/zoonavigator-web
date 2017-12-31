@@ -29,7 +29,7 @@ import {Observable} from "rxjs/Rx";
 })
 export class NavListComponent implements OnChanges {
 
-  @Output() reload: EventEmitter<any> = new EventEmitter();
+  @Output() refresh: EventEmitter<any> = new EventEmitter();
   @Output() select: EventEmitter<ZNode> = new EventEmitter();
   @Output() deselect: EventEmitter<ZNode> = new EventEmitter();
 
@@ -101,7 +101,7 @@ export class NavListComponent implements OnChanges {
           return this.zNodeService
             .deleteChildren(dir, [zNode.name])
             .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.reload.emit());
+            .map(() => this.refresh.emit());
         }
 
         return Observable.empty<void>();
@@ -125,7 +125,7 @@ export class NavListComponent implements OnChanges {
           return this.zNodeService
             .duplicateNode(zNode.path, dest)
             .catch((err) => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.reload.emit());
+            .map(() => this.refresh.emit());
         }
 
         return Observable.empty<void>();
@@ -149,7 +149,7 @@ export class NavListComponent implements OnChanges {
           return this.zNodeService
             .moveNode(zNode.path, dest)
             .catch((err) => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.reload.emit());
+            .map(() => this.refresh.emit());
         }
 
         return Observable.empty<void>();

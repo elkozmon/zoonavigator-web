@@ -33,14 +33,6 @@
 </button>
 <button
   mat-icon-button
-  matTooltip="Reload children list"
-  matTooltipPosition="below"
-  [@rotatedState]="reloadButtonRotatedState"
-  (click)="onReloadClick()">
-  <mat-icon class="mat-24">refresh</mat-icon>
-</button>
-<button
-  mat-icon-button
   matTooltip="Delete selected nodes"
   matTooltipPosition="below"
   [disabled]="zNodes.length === 0"

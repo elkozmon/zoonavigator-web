@@ -16,8 +16,10 @@
   -->
 
 <!--suppress HtmlUnknownAttribute, HtmlUnknownTag -->
-<div layout="column"
-     layout-fill>
+<div
+  *ngIf="meta"
+  layout="column"
+  layout-fill>
   <div flex>
     <mat-card>
       <mat-card-content>
@@ -65,19 +67,5 @@
         </table>
       </mat-card-content>
     </mat-card>
-  </div>
-
-  <div class="zoo-actionbar">
-    <button mat-button
-            type="button"
-            (click)="onRefresh()">
-      Refresh
-    </button>
-    <button mat-raised-button
-            type="button"
-            color="warn"
-            (click)="onDelete()">
-      Delete node
-    </button>
   </div>
 </div>

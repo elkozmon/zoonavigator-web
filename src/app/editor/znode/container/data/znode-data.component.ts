@@ -68,25 +68,16 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   }
 
   ngOnInit(): void {
-    (<Either<Error, ZNodeMetaWith<ZNodeData>>> this.route.snapshot.data["data"])
-      .caseOf<void>({
-        left: err => this.feedbackService.showError(err.message, this.viewContainerRef),
-        right: meta => this.updateDataForm(meta)
-      });
-
-    this.route
-      .queryParams
-      .skip(1)
-      .switchMap(queryParams => {
-        const newNodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
-
-        return this.reloadDataForm(newNodePath).catch(err => {
-          this.feedbackService.showError(err, this.viewContainerRef);
-
-          return Observable.empty();
-        });
-      })
-      .subscribe();
+    (<Observable<Either<Error, ZNodeMetaWith<ZNodeData>>>> this.route.data.pluck("data"))
+      .forEach(either =>
+        either.caseOf<void>({
+          left: err => {
+            this.feedbackService.showError(err.message, this.viewContainerRef);
+            this.metaWithData = null;
+          },
+          right: meta => this.updateDataForm(meta)
+        })
+      );
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
@@ -95,31 +86,6 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
     }
 
     return Observable.of(true);
-  }
-
-  onRefresh(): void {
-    const path = this.getCurrentPath();
-
-    if (!this.editorDirty) {
-      this.reloadDataForm(path)
-        .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef))
-        .subscribe();
-
-      return;
-    }
-
-    this.feedbackService
-      .showDiscardChanges(this.viewContainerRef)
-      .switchMap(discard => {
-        if (discard) {
-          return this
-            .reloadDataForm(path)
-            .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef));
-        }
-
-        return Observable.empty<void>();
-      })
-      .subscribe();
   }
 
   onSubmit(): void {
@@ -143,12 +109,6 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
       )
       .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
       .subscribe();
-  }
-
-  private reloadDataForm(path: string): Observable<void> {
-    return this.zNodeService
-      .getData(path)
-      .map(metaWithData => this.updateDataForm(metaWithData));
   }
 
   private updateDataForm(metaWithData: ZNodeMetaWith<ZNodeData>): void {

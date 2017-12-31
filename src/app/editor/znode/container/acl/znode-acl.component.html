@@ -16,14 +16,17 @@
   -->
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, HtmlFormInputWithoutLabel -->
-<form [formGroup]="aclForm"
-      layout="column"
-      layout-fill>
+<form
+  *ngIf="aclForm"
+  [formGroup]="aclForm"
+  layout="column"
+  layout-fill>
   <div flex>
     <mat-card>
       <mat-card-content>
-        <input type="hidden"
-               formControlName="aclVersion"/>
+        <input
+          type="hidden"
+          formControlName="aclVersion"/>
         <div formArrayName="aclArray">
           <table *ngIf="aclFormArray.length > 0">
             <colgroup>4</colgroup>
@@ -63,43 +66,48 @@
                 </mat-input-container>
               </td>
               <td>
-                <mat-checkbox [formControl]="acl.get('permissions').get('canCreate')"
-                             matTooltip="Create"
-                             matTooltipPosition="below"
-                             class="zoo-nolabel"
-                             color="primary">
+                <mat-checkbox
+                  [formControl]="acl.get('permissions').get('canCreate')"
+                  matTooltip="Create"
+                  matTooltipPosition="below"
+                  class="zoo-nolabel"
+                  color="primary">
                 </mat-checkbox>
               </td>
               <td>
-                <mat-checkbox [formControl]="acl.get('permissions').get('canRead')"
-                             matTooltip="Read"
-                             matTooltipPosition="below"
-                             class="zoo-nolabel"
-                             color="primary">
+                <mat-checkbox
+                  [formControl]="acl.get('permissions').get('canRead')"
+                  matTooltip="Read"
+                  matTooltipPosition="below"
+                  class="zoo-nolabel"
+                  color="primary">
                 </mat-checkbox>
               </td>
               <td>
-                <mat-checkbox [formControl]="acl.get('permissions').get('canDelete')"
-                             matTooltip="Delete"
-                             matTooltipPosition="below"
-                             class="zoo-nolabel"
-                             color="primary">
+                <mat-checkbox
+                  [formControl]="acl.get('permissions').get('canDelete')"
+                  matTooltip="Delete"
+                  matTooltipPosition="below"
+                  class="zoo-nolabel"
+                  color="primary">
                 </mat-checkbox>
               </td>
               <td>
-                <mat-checkbox [formControl]="acl.get('permissions').get('canWrite')"
-                             matTooltip="Write"
-                             matTooltipPosition="below"
-                             class="zoo-nolabel"
-                             color="primary">
+                <mat-checkbox
+                  [formControl]="acl.get('permissions').get('canWrite')"
+                  matTooltip="Write"
+                  matTooltipPosition="below"
+                  class="zoo-nolabel"
+                  color="primary">
                 </mat-checkbox>
               </td>
               <td>
-                <mat-checkbox [formControl]="acl.get('permissions').get('canAdmin')"
-                             matTooltip="Admin"
-                             matTooltipPosition="below"
-                             class="zoo-nolabel"
-                             color="primary">
+                <mat-checkbox
+                  [formControl]="acl.get('permissions').get('canAdmin')"
+                  matTooltip="Admin"
+                  matTooltipPosition="below"
+                  class="zoo-nolabel"
+                  color="primary">
                 </mat-checkbox>
               </td>
               <td>
@@ -116,15 +124,17 @@
         </div>
 
         <div layout="row" class="zoo-form-controls">
-          <button mat-button
-                  type="button"
-                  (click)="addAclFormGroup()">
+          <button
+            mat-button
+            type="button"
+            (click)="addAclFormGroup()">
             Add new
           </button>
-          <button mat-button
-                  type="button"
-                  *ngIf="aclFormArray.length > 0"
-                  (click)="clearAclFormArray()">
+          <button
+            mat-button
+            type="button"
+            *ngIf="aclFormArray.length > 0"
+            (click)="clearAclFormArray()">
             Remove all
           </button>
         </div>
@@ -133,19 +143,16 @@
   </div>
 
   <div class="zoo-actionbar">
-    <button mat-button
-            type="button"
-            (click)="onRefresh()">
-      Refresh
-    </button>
-    <button mat-raised-button
-            color="accent"
-            [disabled]="!aclForm.valid || !aclForm.dirty || aclFormArray.controls.length === 0"
-            (click)="onSubmit()">
+    <button
+      mat-raised-button
+      color="accent"
+      [disabled]="!aclForm.valid || !aclForm.dirty || aclFormArray.controls.length === 0"
+      (click)="onSubmit()">
       Save
     </button>
-    <mat-checkbox formControlName="applyRecursive"
-                 color="accent">
+    <mat-checkbox
+      formControlName="applyRecursive"
+      color="accent">
       <small>Apply recursively</small>
     </mat-checkbox>
   </div>

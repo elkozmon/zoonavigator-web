@@ -18,17 +18,14 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
-import {ZSessionHandler, ZSessionService} from "../core";
-import {ZNode} from "./znode";
-import {ZPath, ZPathService} from "./zpath";
-import {ZNodeService} from "./znode/znode.service";
-import {FeedbackService} from "../core/feedback/feedback.service";
-import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
-import {RegexpFilterComponent} from "../shared/regexp/regexp-filter.component";
 import {Observable} from "rxjs/Rx";
-import {Ordering} from "./ordering";
 import {Either} from "tsmonad";
-import {ZNodeMetaWith} from "./znode/container/meta";
+import {ZNode, ZNodeMetaWith, ZNodeService} from "./znode";
+import {ZPath, ZPathService} from "./zpath";
+import {Ordering} from "./ordering";
+import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
+import {FeedbackService, ZSessionHandler, ZSessionService} from "../core";
+import {RegexpFilterComponent} from "../shared";
 
 @Component({
   templateUrl: "editor.component.html",
@@ -38,7 +35,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   @ViewChild("childrenFilter") childrenFilter: RegexpFilterComponent;
 
-  currentZPath: ZPath;
+  currentZPath: Observable<ZPath>;
 
   childrenOrdering: Ordering = Ordering.Ascending;
   childrenZNodes: ZNode[] = [];
@@ -66,41 +63,44 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    const nodePath = this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/";
-    this.currentZPath = this.zPathService.parse(nodePath);
+    this.currentZPath = this.route
+      .queryParams
+      .pluck(EDITOR_QUERY_NODE_PATH)
+      .map((maybePath: string) => this.zPathService.parse(maybePath || "/"));
 
-    (<Either<Error, ZNodeMetaWith<ZNode[]>>> this.route.snapshot.data["children"])
-      .caseOf<void>({
-        left: err => this.feedbackService.showError(err.message, this.viewContainerRef),
-        right: meta => this.updateChildren(meta.data)
-      });
+    (<Observable<Either<Error, ZNodeMetaWith<ZNode[]>>>> this.route.data.pluck("children"))
+      .forEach(either =>
+        either.caseOf<void>({
+          left: err => this.feedbackService.showError(err.message, this.viewContainerRef),
+          right: meta => this.updateChildren(meta.data)
+        })
+      );
   }
+
+  // TODO use this on delete
+  // private navigateToParent(): void {
+  //   const parentPath: ZPath = this.zPathService
+  //     .parse(this.getCurrentPath())
+  //     .goUp();
+  //
+  //   if (parentPath.isRoot()) {
+  //     this.router.navigate(["/editor"]);
+  //
+  //     return;
+  //   }
+  //
+  //   this.router.navigate(["./"], {
+  //     relativeTo: this.route,
+  //     queryParams: {
+  //       [EDITOR_QUERY_NODE_PATH]: parentPath.toString()
+  //     },
+  //     queryParamsHandling: "merge"
+  //   });
+  // }
 
   ngAfterViewInit(): void {
     this.mediaService.broadcast();
     this.changeDetectorRef.detectChanges();
-
-    // update values on query params change
-    this.route
-      .queryParams
-      .skip(1)
-      .switchMap(queryParams => {
-        const nodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
-
-        if (nodePath !== this.currentZPath.toString()) {
-          this.currentZPath = this.zPathService.parse(nodePath);
-          this.childrenFilter.clear();
-
-          return this.reloadChildren().catch(err => {
-            this.feedbackService.showError(err, this.viewContainerRef);
-
-            return Observable.empty();
-          });
-        }
-
-        return Observable.empty<void>();
-      })
-      .subscribe();
   }
 
   onFilterRegexpChange(regexp: RegExp): void {
@@ -152,10 +152,30 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.selectedZNodes = this.selectedZNodes.filter(selectedZNode => selectedZNode !== zNode);
   }
 
-  reloadChildren(): Observable<void> {
-    return this.zNodeService
-      .getChildren(this.currentZPath.toString())
-      .map(metaWithChildren => this.updateChildren(metaWithChildren.data));
+  reloadEditor(): void {
+    const urlTree = this.router.parseUrl(this.router.url);
+    const urlSegments = urlTree.root.children["primary"].segments.map(it => it.path);
+
+    this.router
+      .navigate(urlSegments, {
+        queryParams: {
+          i: ((parseInt(this.route.snapshot.queryParamMap.get("i"), 0) || 0) + 1) % 2
+        },
+        queryParamsHandling: "merge"
+      })
+      .catch(err => this.feedbackService.showError(err, this.viewContainerRef))
+  }
+
+  reloadChildren(): void {
+    this.currentZPath
+      .first()
+      .switchMap(zPath =>
+        this.zNodeService
+          .getChildren(zPath.toString())
+          .map(metaWithChildren => this.updateChildren(metaWithChildren.data))
+      )
+      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      .subscribe();
   }
 
   toggleSelectAll(): void {

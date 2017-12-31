@@ -26,6 +26,15 @@
 
   <button
     mat-icon-button
+    matTooltip="Refresh"
+    matTooltipPosition="below"
+    [@rotatedState]="refreshButtonRotatedState"
+    (click)="onRefreshClick()">
+    <mat-icon class="mat-24">refresh</mat-icon>
+  </button>
+
+  <button
+    mat-icon-button
     matTooltip="Go to root"
     routerLink="/editor">
     <mat-icon class="mat-24">home</mat-icon>

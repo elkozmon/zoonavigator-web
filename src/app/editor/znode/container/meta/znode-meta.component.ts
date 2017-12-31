@@ -16,12 +16,9 @@
  */
 
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
-import {ActivatedRoute, Router} from "@angular/router";
-import {ZNodeService} from "../../znode.service";
-import {ZPath, ZPathService} from "../../../zpath";
+import {ActivatedRoute} from "@angular/router";
 import {ZNodeMeta} from "./znode-meta";
 import {FeedbackService} from "../../../../core";
-import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
 import {Observable} from "rxjs/Rx";
 import {Either} from "tsmonad";
 
@@ -36,96 +33,21 @@ export class ZNodeMetaComponent implements OnInit {
   constructor(
     private feedbackService: FeedbackService,
     private viewContainerRef: ViewContainerRef,
-    private router: Router,
-    private route: ActivatedRoute,
-    private zNodeService: ZNodeService,
-    private zPathService: ZPathService
+    private route: ActivatedRoute
   ) {
   }
 
   ngOnInit(): void {
-    (<Either<Error, ZNodeMeta>> this.route.snapshot.data["meta"])
-      .caseOf<void>({
-        left: err => this.feedbackService.showError(err.message, this.viewContainerRef),
-        right: meta => this.meta = meta
-      });
-
-    this.route
-      .queryParams
-      .skip(1)
-      .switchMap(queryParams => {
-        const newNodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
-
-        return this.reloadData(newNodePath);
-      })
-      .subscribe();
-  }
-
-  onRefresh(): void {
-    this
-      .reloadData(this.getCurrentPath())
-      .subscribe();
-  }
-
-  onDelete(): void {
-    this.feedbackService
-      .showConfirm(
-        "Confirm recursive delete",
-        "Do you want to delete this node and all its children?",
-        "Delete",
-        "Cancel",
-        this.viewContainerRef
-      )
-      .afterClosed()
-      .switchMap((accept) => {
-        if (accept) {
-          return this
-            .zNodeService
-            .deleteNode(
-              this.getCurrentPath(),
-              this.meta.dataVersion
-            );
-        }
-
-        return Observable.empty<void>();
-      })
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-      .subscribe(() => this.navigateToParent());
-  }
-
-  private reloadData(path: string): Observable<void> {
-    return this.zNodeService
-      .getMeta(path)
-      .map(meta => this.updateData(meta))
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef));
-  }
-
-  private updateData(meta: ZNodeMeta): void {
-    this.meta = meta;
-  }
-
-  private navigateToParent(): void {
-    const parentPath: ZPath = this.zPathService
-      .parse(this.getCurrentPath())
-      .goUp();
-
-    if (parentPath.isRoot()) {
-      this.router.navigate(["/editor"]);
-
-      return;
-    }
-
-    this.router.navigate(["./"], {
-      relativeTo: this.route,
-      queryParams: {
-        [EDITOR_QUERY_NODE_PATH]: parentPath.toString()
-      },
-      queryParamsHandling: "merge"
-    });
-  }
-
-  private getCurrentPath(): string | null {
-    return this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH);
+    (<Observable<Either<Error, ZNodeMeta>>> this.route.data.pluck("meta"))
+      .forEach(either =>
+        either.caseOf<void>({
+          left: err => {
+            this.feedbackService.showError(err.message, this.viewContainerRef);
+            this.meta = null;
+          },
+          right: meta => this.meta = meta
+        })
+      );
   }
 }
 

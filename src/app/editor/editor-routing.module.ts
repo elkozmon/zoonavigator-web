@@ -16,7 +16,7 @@
  */
 
 import {NgModule} from "@angular/core";
-import {RouterModule} from "@angular/router";
+import {RouterModule, RunGuardsAndResolvers} from "@angular/router";
 import {CanDeactivateComponentGuard} from "../shared";
 import {EditorComponent} from "./editor.component";
 import {
@@ -38,6 +38,7 @@ const editorRoutes = [
     component: EditorComponent,
     canActivate: [EditorGuard],
     canActivateChild: [EditorGuard],
+    runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange",
     resolve: {
       children: ZNodeChildrenResolver
     },
@@ -52,6 +53,7 @@ const editorRoutes = [
             path: "data",
             component: ZNodeDataComponent,
             canDeactivate: [CanDeactivateComponentGuard],
+            runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange",
             resolve: {
               data: ZNodeDataResolver
             }
@@ -60,6 +62,7 @@ const editorRoutes = [
             path: "acl",
             component: ZNodeAclComponent,
             canDeactivate: [CanDeactivateComponentGuard],
+            runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange",
             resolve: {
               acl: ZNodeAclResolver
             }
@@ -67,6 +70,7 @@ const editorRoutes = [
           {
             path: "meta",
             component: ZNodeMetaComponent,
+            runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange",
             resolve: {
               meta: ZNodeMetaResolver
             }

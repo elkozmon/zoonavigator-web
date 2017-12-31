@@ -15,29 +15,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, Input, ViewChild} from "@angular/core";
+import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {ZPath, ZPathService} from "../zpath";
 import {MatButton, MatInput} from "@angular/material";
 import {Router} from "@angular/router";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
+import {animate, state, style, transition, trigger} from "@angular/animations";
 
 @Component({
   selector: "zoo-editor-path",
   templateUrl: "editor-path.component.html",
-  styleUrls: ["editor-path.component.scss"]
+  styleUrls: ["editor-path.component.scss"],
+  animations: [
+    trigger("rotatedState", [
+      state("default", style({transform: "rotate(0)"})),
+      state("rotated", style({transform: "rotate(360deg)"})),
+      transition("default => rotated", animate("400ms ease-in"))
+    ])
+  ]
 })
 export class EditorPathComponent {
 
   @ViewChild("pathInput") pathInput: MatInput;
 
+  @Output() refresh: EventEmitter<any> = new EventEmitter();
+
   @Input() zPath: ZPath;
 
   navigationError: string;
+
+  refreshButtonRotatedState = "default";
 
   constructor(
     private router: Router,
     private zPathService: ZPathService
   ) {
+  }
+
+  onRefreshClick(): void {
+    this.refreshButtonRotatedState = "default";
+    setTimeout(() => this.refreshButtonRotatedState = "rotated", 0);
+
+    this.refresh.emit();
   }
 
   onPathKeyPress(event: KeyboardEvent): void {
