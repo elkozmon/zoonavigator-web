@@ -67,6 +67,10 @@ export class EditorPathComponent {
   }
 
   navigatePath(path: string): void {
+    if (path.endsWith("/")) {
+      path = path.slice(0, -1);
+    }
+
     const zPath = this.zPathService.parse(path);
 
     if (zPath.isRoot()) {
