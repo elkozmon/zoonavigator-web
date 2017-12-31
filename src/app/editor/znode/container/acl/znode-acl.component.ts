@@ -25,6 +25,7 @@ import {CanDeactivateComponent} from "../../../../shared";
 import {ZNodeMetaWith} from "../meta/znode-meta-with";
 import {ZNodeAcl} from "./znode-acl";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
+import {Either} from "tsmonad";
 
 @Component({
   templateUrl: "znode-acl.component.html",
@@ -44,7 +45,11 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
   }
 
   ngOnInit(): void {
-    this.updateAclForm(this.route.snapshot.data["acl"]);
+    (<Either<Error, ZNodeMetaWith<ZNodeAcl>>> this.route.snapshot.data["acl"])
+      .caseOf<void>({
+        left: err => this.feedbackService.showError(err.message, this.viewContainerRef),
+        right: meta => this.updateAclForm(meta)
+      });
 
     this.route
       .queryParams

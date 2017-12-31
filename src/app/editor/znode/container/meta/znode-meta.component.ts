@@ -23,6 +23,7 @@ import {ZNodeMeta} from "./znode-meta";
 import {FeedbackService} from "../../../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
 import {Observable} from "rxjs/Rx";
+import {Either} from "tsmonad";
 
 @Component({
   templateUrl: "znode-meta.component.html",
@@ -43,7 +44,11 @@ export class ZNodeMetaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.meta = this.route.snapshot.data["meta"];
+    (<Either<Error, ZNodeMeta>> this.route.snapshot.data["meta"])
+      .caseOf<void>({
+        left: err => this.feedbackService.showError(err.message, this.viewContainerRef),
+        right: meta => this.meta = meta
+      });
 
     this.route
       .queryParams

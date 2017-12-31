@@ -70,7 +70,7 @@ export class DefaultApiService implements ApiService {
         Observable.defer(() => Observable.throw(new Error("Request timed out")))
       )
       .map((t) => DefaultApiService.extractResponse<T>(t))
-      .catch(this.handleError.bind(this));
+      .catch(err => this.handleError(err));
   }
 
   private handleError<T>(error: any): Observable<T> {
@@ -88,7 +88,7 @@ export class DefaultApiService implements ApiService {
       if (error.status === 401) {
         return this.zSessionHandler
           .onSessionInvalid(message)
-          .mapTo(null);
+          .switchMapTo(Observable.throw(message));
       } else if (!message && error.status === 0) {
         message = "Unable to receive a response.";
       }

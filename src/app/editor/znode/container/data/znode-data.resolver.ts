@@ -16,36 +16,29 @@
  */
 
 import {Injectable} from "@angular/core";
-import {ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot} from "@angular/router";
+import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs/Rx";
 import {ZNodeData} from "./znode-data";
-import {ZNodeMetaWith} from "../meta/znode-meta-with";
+import {ZNodeMetaWith} from "../meta";
 import {ZNodeService} from "../../znode.service";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
-import {FeedbackService} from "../../../../core";
+import {Either} from "tsmonad";
 
 @Injectable()
-export class ZNodeDataResolver implements Resolve<ZNodeMetaWith<ZNodeData>> {
+export class ZNodeDataResolver implements Resolve<Either<Error, ZNodeMetaWith<ZNodeData>>> {
 
-  constructor(
-    private router: Router,
-    private zNodeService: ZNodeService,
-    private feedbackService: FeedbackService
-  ) {
+  constructor(private zNodeService: ZNodeService) {
   }
 
   resolve(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<ZNodeMetaWith<ZNodeData>> | Promise<ZNodeMetaWith<ZNodeData>> | ZNodeMetaWith<ZNodeData> {
+  ) {
     const nodePath = route.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/";
 
     return this.zNodeService
       .getData(nodePath)
-      .catch(err =>
-        this.feedbackService
-          .showErrorAndThrowOnClose<ZNodeMetaWith<ZNodeData>>(err)
-          .finally(() => this.router.navigate(["/editor"]))
-      );
+      .map(Either.right)
+      .catch(err => Observable.of(Either.left<Error, ZNodeMetaWith<ZNodeData>>(new Error(err))));
   }
 }

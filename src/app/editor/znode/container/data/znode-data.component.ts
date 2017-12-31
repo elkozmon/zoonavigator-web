@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AfterViewChecked, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
+import {Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {Observable} from "rxjs/Rx";
 import "brace";
@@ -24,19 +24,20 @@ import "brace/mode/json";
 import "brace/mode/yaml";
 import "brace/mode/xml";
 import "brace/theme/chrome";
-import {ZNodeMetaWith} from "../meta/znode-meta-with";
+import {ZNodeMetaWith} from "../meta";
 import {ZNodeData} from "./znode-data";
 import {ZNodeService} from "../../znode.service";
 import {FeedbackService} from "../../../../core";
 import {CanDeactivateComponent} from "../../../../shared";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
 import {AceEditorComponent} from "ng2-ace-editor";
+import {Either} from "tsmonad";
 
 @Component({
   templateUrl: "znode-data.component.html",
   styleUrls: ["znode-data.component.scss"]
 })
-export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactivateComponent {
+export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
   @ViewChild("dataEditor") editor: AceEditorComponent;
 
@@ -48,7 +49,6 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
 
   metaWithData: ZNodeMetaWith<ZNodeData>;
 
-  private shouldClearDataFormSelection: boolean;
   private dataPristine: string;
 
   constructor(
@@ -68,8 +68,11 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
   }
 
   ngOnInit(): void {
-    this.updateDataForm(this.route.snapshot.data["data"]);
-    this.scheduleDataFormSelectionClear();
+    (<Either<Error, ZNodeMetaWith<ZNodeData>>> this.route.snapshot.data["data"])
+      .caseOf<void>({
+        left: err => this.feedbackService.showError(err.message, this.viewContainerRef),
+        right: meta => this.updateDataForm(meta)
+      });
 
     this.route
       .queryParams
@@ -77,16 +80,13 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
       .switchMap(queryParams => {
         const newNodePath = queryParams[EDITOR_QUERY_NODE_PATH] || "/";
 
-        return this.reloadDataForm(newNodePath);
+        return this.reloadDataForm(newNodePath).catch(err => {
+          this.feedbackService.showError(err, this.viewContainerRef);
+
+          return Observable.empty();
+        });
       })
       .subscribe();
-  }
-
-  ngAfterViewChecked(): void {
-    // https://github.com/fxmontigny/ng2-ace-editor/issues/34
-    if (this.shouldClearDataFormSelection) {
-      this.clearDataFormSelection();
-    }
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
@@ -101,7 +101,9 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
     const path = this.getCurrentPath();
 
     if (!this.editorDirty) {
-      this.reloadDataForm(path).subscribe();
+      this.reloadDataForm(path)
+        .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef))
+        .subscribe();
 
       return;
     }
@@ -110,7 +112,9 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
       .showDiscardChanges(this.viewContainerRef)
       .switchMap(discard => {
         if (discard) {
-          return this.reloadDataForm(path);
+          return this
+            .reloadDataForm(path)
+            .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef));
         }
 
         return Observable.empty<void>();
@@ -144,11 +148,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
   private reloadDataForm(path: string): Observable<void> {
     return this.zNodeService
       .getData(path)
-      .map(metaWithData => {
-        this.updateDataForm(metaWithData);
-        this.scheduleDataFormSelectionClear();
-      })
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef));
+      .map(metaWithData => this.updateDataForm(metaWithData));
   }
 
   private updateDataForm(metaWithData: ZNodeMetaWith<ZNodeData>): void {
@@ -158,18 +158,5 @@ export class ZNodeDataComponent implements OnInit, AfterViewChecked, CanDeactiva
 
   private getCurrentPath(): string | null {
     return this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH);
-  }
-
-  private scheduleDataFormSelectionClear(): void {
-    this.shouldClearDataFormSelection = true;
-  }
-
-  private clearDataFormSelection(): void {
-    const editor = this.editor.getEditor();
-
-    editor.selection.moveCursorFileStart();
-    editor.clearSelection();
-
-    this.shouldClearDataFormSelection = false;
   }
 }

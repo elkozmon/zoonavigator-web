@@ -14,15 +14,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-.zoo-path-separator {
-  margin: 0 2px;
+mat-form-field {
+  margin-left: 12px;
+  flex: 1;
 }
 
-a {
-  text-decoration: none;
-
-  &:hover {
-    opacity: 0.6;
-  }
+button {
+  margin: 0;
 }
+

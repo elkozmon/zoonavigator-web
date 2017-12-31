@@ -27,6 +27,8 @@ import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
 import {RegexpFilterComponent} from "../shared/regexp/regexp-filter.component";
 import {Observable} from "rxjs/Rx";
 import {Ordering} from "./ordering";
+import {Either} from "tsmonad";
+import {ZNodeMetaWith} from "./znode/container/meta";
 
 @Component({
   templateUrl: "editor.component.html",
@@ -67,7 +69,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
     const nodePath = this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/";
     this.currentZPath = this.zPathService.parse(nodePath);
 
-    this.updateChildren(this.route.snapshot.data["children"].data);
+    (<Either<Error, ZNodeMetaWith<ZNode[]>>> this.route.snapshot.data["children"])
+      .caseOf<void>({
+        left: err => this.feedbackService.showError(err.message, this.viewContainerRef),
+        right: meta => this.updateChildren(meta.data)
+      });
   }
 
   ngAfterViewInit(): void {
@@ -85,7 +91,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
           this.currentZPath = this.zPathService.parse(nodePath);
           this.childrenFilter.clear();
 
-          return this.reloadChildren();
+          return this.reloadChildren().catch(err => {
+            this.feedbackService.showError(err, this.viewContainerRef);
+
+            return Observable.empty();
+          });
         }
 
         return Observable.empty<void>();
@@ -145,8 +155,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
   reloadChildren(): Observable<void> {
     return this.zNodeService
       .getChildren(this.currentZPath.toString())
-      .map(metaWithChildren => this.updateChildren(metaWithChildren.data))
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose<void>(err, this.viewContainerRef));
+      .map(metaWithChildren => this.updateChildren(metaWithChildren.data));
   }
 
   toggleSelectAll(): void {

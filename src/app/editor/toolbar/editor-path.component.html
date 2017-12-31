@@ -16,20 +16,37 @@
   -->
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute -->
-<div *ngIf="zPath">
-  <a routerLink="/editor" class="tc-deep-orange-600">
-    <small>
-      ROOT
-    </small>
-  </a>
+<div *ngIf="zPath" layout="row" layout-align="start center" flex>
+  <button
+    mat-icon-button
+    matTooltip="More actions"
+    [disabled]="zPath.isRoot()">
+    <mat-icon class="mat-24">more_vert</mat-icon>
+  </button>
 
-  <span *ngFor="let node of zPath.allNodes">
-    <span class="zoo-path-separator">/</span>
-    <a routerLink="/editor/node"
-       queryParamsHandling="merge"
-       [queryParams]="{path: node.path}"
-       class="tc-deep-orange-600">
-      {{node.name}}
-    </a>
-  </span>
+  <button
+    mat-icon-button
+    matTooltip="Go to root"
+    routerLink="/editor">
+    <mat-icon class="mat-24">home</mat-icon>
+  </button>
+
+  <mat-form-field>
+    <input
+      matInput
+      #pathInput="matInput"
+      (keypress)="onPathKeyPress($event)"
+      [value]="zPath.toString()">
+    <mat-error *ngIf="navigationError">
+      {{navigationError}}
+    </mat-error>
+  </mat-form-field>
+
+  <button
+    mat-icon-button
+    #goToAddress
+    matTooltip="Go to address"
+    (click)="navigatePath(pathInput.value)">
+    <mat-icon class="mat-24">arrow_forward</mat-icon>
+  </button>
 </div>

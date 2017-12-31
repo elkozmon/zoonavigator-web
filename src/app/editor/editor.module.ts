@@ -98,8 +98,10 @@ import {SharedModule} from "../shared";
 })
 export class EditorModule {
 
-  constructor(iconRegistry: MatIconRegistry,
-              domSanitizer: DomSanitizer) {
+  constructor(
+    iconRegistry: MatIconRegistry,
+    domSanitizer: DomSanitizer
+  ) {
     iconRegistry.addSvgIconInNamespace(
       "assets",
       "paw",

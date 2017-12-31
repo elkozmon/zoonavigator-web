@@ -50,9 +50,9 @@ export class NavActionsComponent {
   @Input() ordering: Ordering;
   @Output() orderingChange = new EventEmitter<Ordering>();
 
-  private toggleSortButtonFlippedState = "flipped";
+  toggleSortButtonFlippedState = "flipped";
 
-  private reloadButtonRotatedState = "default";
+  reloadButtonRotatedState = "default";
 
   constructor(
     private zNodeService: ZNodeService,

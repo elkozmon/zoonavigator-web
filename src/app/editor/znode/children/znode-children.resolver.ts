@@ -15,32 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Injectable, ViewContainerRef} from "@angular/core";
+import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs/Rx";
 import {ZNodeService} from "../znode.service";
 import {ZNodeMetaWith} from "../container/meta";
 import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
-import {FeedbackService} from "../../../core";
 import {ZNode} from "../znode";
+import {Either} from "tsmonad";
 
 @Injectable()
-export class ZNodeChildrenResolver implements Resolve<ZNodeMetaWith<ZNode[]>> {
+export class ZNodeChildrenResolver implements Resolve<Either<Error, ZNodeMetaWith<ZNode[]>>> {
 
-  constructor(
-    private zNodeService: ZNodeService,
-    private feedbackService: FeedbackService
-  ) {
+  constructor(private zNodeService: ZNodeService) {
   }
 
   resolve(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<ZNodeMetaWith<ZNode[]>> | Promise<ZNodeMetaWith<ZNode[]>> | ZNodeMetaWith<ZNode[]> {
+  ) {
     const nodePath = route.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/";
 
     return this.zNodeService
       .getChildren(nodePath)
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose<ZNodeMetaWith<ZNode[]>>(err));
+      .map(Either.right)
+      .catch(err => Observable.of(Either.left<Error, ZNodeMetaWith<ZNode[]>>(new Error(err))));
   }
 }

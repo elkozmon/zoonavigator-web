@@ -16,36 +16,29 @@
  */
 
 import {Injectable} from "@angular/core";
-import {ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot} from "@angular/router";
+import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs/Rx";
 import {ZNodeAcl} from "./znode-acl";
 import {ZNodeService} from "../../znode.service";
 import {ZNodeMetaWith} from "../meta";
 import {EDITOR_QUERY_NODE_PATH} from "../../../editor-routing.constants";
-import {FeedbackService} from "../../../../core";
+import {Either} from "tsmonad";
 
 @Injectable()
-export class ZNodeAclResolver implements Resolve<ZNodeMetaWith<ZNodeAcl>> {
+export class ZNodeAclResolver implements Resolve<Either<Error, ZNodeMetaWith<ZNodeAcl>>> {
 
-  constructor(
-    private router: Router,
-    private zNodeService: ZNodeService,
-    private feedbackService: FeedbackService
-  ) {
+  constructor(private zNodeService: ZNodeService) {
   }
 
   resolve(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<ZNodeMetaWith<ZNodeAcl>> | Promise<ZNodeMetaWith<ZNodeAcl>> | ZNodeMetaWith<ZNodeAcl> {
+  ) {
     const nodePath = route.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/";
 
     return this.zNodeService
       .getAcl(nodePath)
-      .catch(err =>
-        this.feedbackService
-          .showErrorAndThrowOnClose<ZNodeMetaWith<ZNodeAcl>>(err)
-          .finally(() => this.router.navigate(["/editor"]))
-      );
+      .map(Either.right)
+      .catch(err => Observable.of(Either.left<Error, ZNodeMetaWith<ZNodeAcl>>(new Error(err))));
   }
 }
