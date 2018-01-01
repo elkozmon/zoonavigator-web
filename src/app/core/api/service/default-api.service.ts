@@ -16,6 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
+import {Router} from "@angular/router";
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs/Rx";
 import {ConfigService} from "../../../config";
@@ -23,6 +24,8 @@ import {ApiRequest} from "../request";
 import {ApiResponse} from "../api-response";
 import {ApiService} from "./api.service";
 import {ZSessionHandler} from "../../zsession/handler";
+import {FeedbackService} from "../../feedback";
+import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
 
 @Injectable()
 export class DefaultApiService implements ApiService {
@@ -37,7 +40,9 @@ export class DefaultApiService implements ApiService {
 
   constructor(
     private http: HttpClient,
+    private router: Router,
     private zSessionHandler: ZSessionHandler,
+    private feedbackService: FeedbackService,
     private configService: ConfigService
   ) {
   }
@@ -86,9 +91,27 @@ export class DefaultApiService implements ApiService {
       }
 
       if (error.status === 401) {
-        return this.zSessionHandler
-          .onSessionInvalid(message)
-          .switchMapTo(Observable.throw(message));
+        const returnUrl = this.router.routerState.snapshot.url;
+
+        this.feedbackService
+          .showError(message, null)
+          .switchMap(ref => ref.afterClosed())
+          .subscribe(() => {
+            this.router
+              .navigate(["/connect"], {
+                queryParams: {
+                  [CONNECT_QUERY_RETURN_URL]: returnUrl
+                }
+              })
+              .then((success) => {
+                if (success) {
+                  this
+                    .zSessionHandler
+                    .setSessionInfo(null)
+                    .subscribe();
+                }
+              });
+          });
       } else if (!message && error.status === 0) {
         message = "Unable to receive a response.";
       }

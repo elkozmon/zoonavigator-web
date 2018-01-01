@@ -15,55 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Router} from "@angular/router";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs/Rx";
 import {ZSessionHandler} from "./zsession.handler";
 import {ZSessionInfo} from "../zsession-info";
 import {StorageService} from "../../storage";
-import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
-import {FeedbackService} from "../../feedback";
 
 @Injectable()
 export class DefaultZSessionHandler implements ZSessionHandler {
 
   private sessionInfoKey = "sessionInfo";
-  private sessionInvalid = false;
 
-  constructor(
-    private router: Router,
-    private storageService: StorageService,
-    private feedbackService: FeedbackService
-  ) {
-  }
-
-  onSessionInvalid(reason: string): Observable<void> {
-    if (this.sessionInvalid) {
-      return Observable.empty();
-    }
-
-    this.sessionInvalid = true;
-
-    return this.feedbackService
-      .showError(reason, null)
-      .switchMap(ref => ref.afterClosed())
-      .map(() => {
-        this
-          .router
-          .navigate(["/connect"], {
-            queryParams: {
-              [CONNECT_QUERY_RETURN_URL]: this.router.routerState.snapshot.url
-            }
-          })
-          .then((success) => {
-            if (success) {
-              this
-                .setSessionInfo(null)
-                .subscribe();
-            }
-          });
-      })
-      .finally(() => this.sessionInvalid = false);
+  constructor(private storageService: StorageService) {
   }
 
   getSessionInfo(): Observable<ZSessionInfo | null> {

@@ -22,8 +22,6 @@ import {Observable} from "rxjs/Rx";
 @Injectable()
 export abstract class ZSessionHandler {
 
-  abstract onSessionInvalid(reason: string): Observable<void>
-
   abstract getSessionInfo(): Observable<ZSessionInfo | null>
 
   abstract setSessionInfo(value: ZSessionInfo | null): Observable<void>
