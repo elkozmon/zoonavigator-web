@@ -81,7 +81,7 @@ export class NavActionsComponent {
         "Create",
         "Cancel",
         this.viewContainerRef,
-        this.zPath.toString().concat("/")
+        this.zPath.isRoot() ? "/" : this.zPath.toString().concat("/")
       )
       .switchMap(ref => ref.afterClosed())
       .switchMap((path: string) => {
