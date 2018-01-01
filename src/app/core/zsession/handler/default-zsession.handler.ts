@@ -46,7 +46,7 @@ export class DefaultZSessionHandler implements ZSessionHandler {
 
     return this.feedbackService
       .showError(reason, null)
-      .afterClosed()
+      .switchMap(ref => ref.afterClosed())
       .map(() => {
         this
           .router

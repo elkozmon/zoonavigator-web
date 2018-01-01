@@ -128,14 +128,12 @@ export class EditorComponent implements OnInit, AfterViewInit {
       .getSessionInfo()
       .switchMap((sessionInfo) => {
           if (sessionInfo) {
-            this.feedbackService
-              .showAlert(
-                "Session info",
-                "Connection string: " + sessionInfo.connectionString,
-                "Dismiss",
-                this.viewContainerRef
-              )
-              .afterClosed();
+            return this.feedbackService.showAlert(
+              "Session info",
+              "Connection string: " + sessionInfo.connectionString,
+              "Dismiss",
+              this.viewContainerRef
+            );
           }
 
           return Observable.empty();

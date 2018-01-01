@@ -111,7 +111,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
         "Cancel",
         this.viewContainerRef
       )
-      .afterClosed()
+      .switchMap(ref => ref.afterClosed())
       .subscribe(
         discard => {
           if (discard) {
@@ -138,7 +138,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
       .switchMap(() => this.reloadAclForm(this.getCurrentPath()))
       .switchMap(() => this.feedbackService
         .showSuccess("Changes saved", this.viewContainerRef)
-        .afterOpened()
+        .switchMap(ref => ref.afterOpened())
       )
       .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
       .subscribe();

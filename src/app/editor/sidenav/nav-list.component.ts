@@ -93,7 +93,7 @@ export class NavListComponent implements OnChanges {
         "Cancel",
         this.viewContainerRef
       )
-      .afterClosed()
+      .switchMap(ref => ref.afterClosed())
       .switchMap((name: string) => {
         if (name) {
           const dir = this.zPathService.parse(zNode.path).goUp().toString();
@@ -119,7 +119,7 @@ export class NavListComponent implements OnChanges {
         this.viewContainerRef,
         zNode.path
       )
-      .afterClosed()
+      .switchMap(ref => ref.afterClosed())
       .switchMap((dest: string) => {
         if (dest) {
           return this.zNodeService
@@ -143,7 +143,7 @@ export class NavListComponent implements OnChanges {
         this.viewContainerRef,
         zNode.path
       )
-      .afterClosed()
+      .switchMap(ref => ref.afterClosed())
       .switchMap((dest: string) => {
         if (dest) {
           return this.zNodeService

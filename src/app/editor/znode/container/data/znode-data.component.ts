@@ -105,7 +105,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
             "Changes saved",
             this.viewContainerRef
           )
-          .afterOpened()
+          .switchMap(ref => ref.afterOpened())
       )
       .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
       .subscribe();

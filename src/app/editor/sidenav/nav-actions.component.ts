@@ -83,7 +83,7 @@ export class NavActionsComponent {
         this.viewContainerRef,
         this.zPath.toString().concat("/")
       )
-      .afterClosed()
+      .switchMap(ref => ref.afterClosed())
       .switchMap((path: string) => {
         if (path) {
           return this.zNodeService
@@ -111,7 +111,7 @@ export class NavActionsComponent {
         "Cancel",
         this.viewContainerRef
       )
-      .afterClosed()
+      .switchMap(ref => ref.afterClosed())
       .switchMap((accept: boolean) => {
         if (accept) {
           return this.zNodeService

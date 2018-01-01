@@ -29,7 +29,7 @@ export abstract class FeedbackService {
   ): Observable<T> {
     return this
       .showError(error, viewRef)
-      .afterClosed()
+      .switchMap(ref => ref.afterClosed())
       .switchMap(() => Observable.throw(error));
   }
 
@@ -44,7 +44,7 @@ export abstract class FeedbackService {
     cancelBtn: string,
     viewRef?: ViewContainerRef,
     value?: string
-  ): MatDialogRef<TdPromptDialogComponent>
+  ): Observable<MatDialogRef<TdPromptDialogComponent>>
 
   abstract showConfirm(
     title: string,
@@ -52,22 +52,22 @@ export abstract class FeedbackService {
     acceptBtn: string,
     cancelBtn: string,
     viewRef?: ViewContainerRef
-  ): MatDialogRef<TdConfirmDialogComponent>
+  ): Observable<MatDialogRef<TdConfirmDialogComponent>>
 
   abstract showAlert(
     title: string,
     message: string,
     closeBtn: string,
     viewRef?: ViewContainerRef
-  ): MatDialogRef<TdAlertDialogComponent>
+  ): Observable<MatDialogRef<TdAlertDialogComponent>>
 
   abstract showError(
     message: string,
     viewRef?: ViewContainerRef
-  ): MatDialogRef<TdAlertDialogComponent>
+  ): Observable<MatDialogRef<TdAlertDialogComponent>>
 
   abstract showSuccess(
     message: string,
     viewRef?: ViewContainerRef
-  ): MatSnackBarRef<SimpleSnackBar>
+  ): Observable<MatSnackBarRef<SimpleSnackBar>>
 }
