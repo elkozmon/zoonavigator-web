@@ -79,15 +79,17 @@ export class DefaultApiService implements ApiService {
   }
 
   private handleError<T>(error: any): Observable<T> {
-    let message: string = error.toString();
+    let message: string;
 
-    if (error instanceof HttpErrorResponse) {
-      try {
-        message = DefaultApiService
-          .extractResponse(error.error)
-          .message;
-      } catch {
-        message = error.message;
+    if (typeof error === "string" || error instanceof String) {
+      message = <string> error;
+    } else if (error instanceof Error) {
+      message = error.message;
+    } else if (error instanceof HttpErrorResponse) {
+      if (error.error.hasOwnProperty("success")) {
+        message = DefaultApiService.extractResponse(error.error).message;
+      } else {
+        message = error.error || "Unable to receive a response";
       }
 
       if (error.status === 401) {
@@ -112,9 +114,10 @@ export class DefaultApiService implements ApiService {
                 }
               });
           });
-      } else if (!message && error.status === 0) {
-        message = "Unable to receive a response.";
       }
+    } else {
+      message = "Unknown error occurred. See the console for details";
+      console.error(error);
     }
 
     return Observable.throw(message);
