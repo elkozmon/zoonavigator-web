@@ -20,12 +20,18 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
 import {Observable} from "rxjs/Rx";
 import {Either} from "tsmonad";
-import {ZNode, ZNodeMetaWith, ZNodeService} from "./znode";
-import {ZPath, ZPathService} from "./zpath";
 import {Ordering} from "./ordering";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
-import {FeedbackService, ZSessionHandler, ZSessionService} from "../core";
+import {
+  ZPath,
+  ZPathService,
+  DialogService,
+  ZSessionService,
+  ZSessionHandler
+} from "../core";
 import {RegexpFilterComponent} from "../shared";
+import {ZNodeWithChildren} from "../core/znode/znode-with-children";
+import {ZNodePath} from "../core/znode/znode-path";
 
 @Component({
   templateUrl: "editor.component.html",
@@ -35,44 +41,42 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   @ViewChild("childrenFilter") childrenFilter: RegexpFilterComponent;
 
-  currentZPath: Observable<ZPath>;
+  zPath: Observable<ZPath>;
 
   childrenOrdering: Ordering = Ordering.Ascending;
-  childrenZNodes: ZNode[] = [];
-  filteredZNodes: ZNode[] = [];
-  selectedZNodes: ZNode[] = [];
-
   childrenFilterRegexp: RegExp = null;
+  childrenZNodes: ZPath[] = [];
+  filteredZNodes: ZPath[] = [];
+  selectedZNodes: ZPath[] = [];
 
-  private static filterZNodes(nodes: ZNode[], regexp: RegExp): ZNode[] {
-    return nodes.filter(node => node.name.match(regexp));
+  private static filterZNodes(nodes: ZPath[], regexp: RegExp): ZPath[] {
+    return nodes.filter(node => node.name.valueOrThrow().match(regexp));
   }
 
   constructor(
     public mediaService: TdMediaService,
     private route: ActivatedRoute,
     private router: Router,
-    private zNodeService: ZNodeService,
+    private zPathService: ZPathService,
     private zSessionHandler: ZSessionHandler,
     private zSessionService: ZSessionService,
-    private zPathService: ZPathService,
-    private feedbackService: FeedbackService,
+    private dialogService: DialogService,
     private viewContainerRef: ViewContainerRef,
     private changeDetectorRef: ChangeDetectorRef,
   ) {
   }
 
   ngOnInit(): void {
-    this.currentZPath = this.route
+    this.zPath = this.route
       .queryParams
       .pluck(EDITOR_QUERY_NODE_PATH)
       .map((maybePath: string) => this.zPathService.parse(maybePath || "/"));
 
-    (<Observable<Either<Error, ZNodeMetaWith<ZNode[]>>>> this.route.data.pluck("children"))
+    (<Observable<Either<Error, ZNodeWithChildren>>> this.route.data.pluck("zNodeWithChildren"))
       .forEach(either =>
         either.caseOf<void>({
-          left: err => this.feedbackService.showError(err.message, this.viewContainerRef),
-          right: meta => this.updateChildren(meta.data)
+          left: error => this.dialogService.showError(error.message, this.viewContainerRef),
+          right: node => this.updateChildren(node.children)
         })
       );
   }
@@ -83,7 +87,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
   //     .parse(this.getCurrentPath())
   //     .goUp();
   //
-  //   if (parentPath.isRoot()) {
+  //   if (parentPath.isRoot) {
   //     this.router.navigate(["/editor"]);
   //
   //     return;
@@ -92,7 +96,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
   //   this.router.navigate(["./"], {
   //     relativeTo: this.route,
   //     queryParams: {
-  //       [EDITOR_QUERY_NODE_PATH]: parentPath.toString()
+  //       [EDITOR_QUERY_NODE_PATH]: parentPath.path
   //     },
   //     queryParamsHandling: "merge"
   //   });
@@ -106,6 +110,25 @@ export class EditorComponent implements OnInit, AfterViewInit {
   onFilterRegexpChange(regexp: RegExp): void {
     this.childrenFilterRegexp = regexp;
     this.updateFilteredChildren();
+  }
+
+  showSessionInfo(): void {
+    this.zSessionHandler
+      .getSessionInfo()
+      .switchMap((sessionInfo) => {
+          if (sessionInfo) {
+            return this.dialogService.showAlert(
+              "Session info",
+              "Connection string: " + sessionInfo.connectionString,
+              "Dismiss",
+              this.viewContainerRef
+            );
+          }
+
+          return Observable.empty();
+        }
+      )
+      .subscribe();
   }
 
   disconnect(): void {
@@ -123,31 +146,25 @@ export class EditorComponent implements OnInit, AfterViewInit {
       .subscribe();
   }
 
-  showSessionInfo(): void {
-    this.zSessionHandler
-      .getSessionInfo()
-      .switchMap((sessionInfo) => {
-          if (sessionInfo) {
-            return this.feedbackService.showAlert(
-              "Session info",
-              "Connection string: " + sessionInfo.connectionString,
-              "Dismiss",
-              this.viewContainerRef
-            );
-          }
-
-          return Observable.empty();
-        }
-      )
-      .subscribe();
+  selectZNode(zPath: ZPath): void {
+    this.selectedZNodes.push(zPath);
   }
 
-  selectZNode(zNode: ZNode): void {
-    this.selectedZNodes.push(zNode);
+  deselectZNode(zPath: ZPath): void {
+    this.selectedZNodes = this.selectedZNodes.filter(selectedNode => selectedNode !== zPath);
   }
 
-  deselectZNode(zNode: ZNode): void {
-    this.selectedZNodes = this.selectedZNodes.filter(selectedZNode => selectedZNode !== zNode);
+  toggleSelectAll(): void {
+    const selectedFilteredNodes = this.selectedZNodes.filter(node => this.filteredZNodes.indexOf(node) >= 0);
+    const allFilteredNodesSelected = selectedFilteredNodes.length === this.filteredZNodes.length;
+
+    if (!allFilteredNodesSelected) {
+      this.selectedZNodes = this.filteredZNodes;
+
+      return;
+    }
+
+    this.selectedZNodes = [];
   }
 
   reloadEditor(): void {
@@ -161,34 +178,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
         },
         queryParamsHandling: "merge"
       })
-      .catch(err => this.feedbackService.showError(err, this.viewContainerRef))
+      .catch(err => this.dialogService.showError(err, this.viewContainerRef))
   }
 
-  reloadChildren(): void {
-    this.currentZPath
-      .first()
-      .switchMap(zPath =>
-        this.zNodeService
-          .getChildren(zPath.toString())
-          .map(metaWithChildren => this.updateChildren(metaWithChildren.data))
-      )
-      .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-      .subscribe();
-  }
-
-  toggleSelectAll(): void {
-    const selectedFilteredNodes = this.selectedZNodes.filter(node => this.filteredZNodes.indexOf(node) >= 0);
-    const allFilteredNodesSelected = selectedFilteredNodes.length === this.filteredZNodes.length;
-
-    if (!allFilteredNodesSelected) {
-      this.selectedZNodes = this.filteredZNodes;
-    } else {
-      this.selectedZNodes = [];
-    }
-  }
-
-  private updateChildren(children: ZNode[]): void {
-    this.childrenZNodes = children;
+  private updateChildren(children: ZNodePath[]): void {
+    this.childrenZNodes = children.map(path => this.zPathService.parse(path));
 
     this.updateFilteredChildren();
     this.updateSelectedChildren();
@@ -200,9 +194,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
         this.childrenZNodes,
         this.childrenFilterRegexp
       );
-    } else {
-      this.filteredZNodes = this.childrenZNodes;
+
+      return;
     }
+
+    this.filteredZNodes = this.childrenZNodes;
   }
 
   private updateSelectedChildren(): void {

@@ -16,10 +16,8 @@
  */
 
 import {Component, Input, EventEmitter, Output, OnChanges, SimpleChanges, ViewContainerRef} from "@angular/core";
-import {ZNode, ZNodeService} from "../znode";
-import {ZPath, ZPathService} from "../zpath";
 import {Ordering} from "../ordering";
-import {FeedbackService} from "../../core";
+import {ZNode, ZNodeService, ZPath, ZPathService, DialogService} from "../../core";
 import {Observable} from "rxjs/Rx";
 
 @Component({
@@ -30,32 +28,32 @@ import {Observable} from "rxjs/Rx";
 export class NavListComponent implements OnChanges {
 
   @Output() refresh: EventEmitter<any> = new EventEmitter();
-  @Output() select: EventEmitter<ZNode> = new EventEmitter();
-  @Output() deselect: EventEmitter<ZNode> = new EventEmitter();
+  @Output() select: EventEmitter<ZPath> = new EventEmitter();
+  @Output() deselect: EventEmitter<ZPath> = new EventEmitter();
 
   @Input() zPath: ZPath;
-  @Input() zNodes: ZNode[];
-  @Input() zNodesSelected: ZNode[];
+  @Input() zNodes: ZPath[];
+  @Input() zNodesSelected: ZPath[];
   @Input() zNodesOrdering: Ordering;
 
-  private static compareZNodesAscending(a: ZNode, b: ZNode): number {
-    if (a.name > b.name) {
+  private static compareZNodesAscending(a: ZPath, b: ZPath): number {
+    if (a.name.valueOrThrow() > b.name.valueOrThrow()) {
       return 1;
     }
 
-    if (a.name < b.name) {
+    if (a.name.valueOrThrow() < b.name.valueOrThrow()) {
       return -1;
     }
 
     return 0;
   }
 
-  private static compareZNodesDescending(a: ZNode, b: ZNode): number {
-    if (a.name > b.name) {
+  private static compareZNodesDescending(a: ZPath, b: ZPath): number {
+    if (a.name.valueOrThrow() > b.name.valueOrThrow()) {
       return -1;
     }
 
-    if (a.name < b.name) {
+    if (a.name.valueOrThrow() < b.name.valueOrThrow()) {
       return 1;
     }
 
@@ -65,7 +63,7 @@ export class NavListComponent implements OnChanges {
   constructor(
     private zNodeService: ZNodeService,
     private zPathService: ZPathService,
-    private feedbackService: FeedbackService,
+    private dialogService: DialogService,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -76,31 +74,31 @@ export class NavListComponent implements OnChanges {
     }
   }
 
-  onNodeChecked(zNode: ZNode): void {
-    this.select.emit(zNode);
+  onNodeChecked(zPath: ZPath): void {
+    this.select.emit(zPath);
   }
 
-  onNodeUnchecked(zNode: ZNode): void {
-    this.deselect.emit(zNode);
+  onNodeUnchecked(zPath: ZPath): void {
+    this.deselect.emit(zPath);
   }
 
-  onNodeDeleteClick(zNode: ZNode): void {
-    this.feedbackService
+  onNodeDeleteClick(zPath: ZPath): void {
+    this.dialogService
       .showConfirm(
         "Confirm recursive delete",
-        `Do you want to delete node '${zNode.name}' and its children?`,
+        `Do you want to delete node '${zPath.name}' and its children?`,
         "Delete",
         "Cancel",
         this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())
-      .switchMap((name: string) => {
-        if (name) {
-          const dir = this.zPathService.parse(zNode.path).goUp().toString();
+      .switchMap((confirm: boolean) => {
+        if (confirm) {
+          const dir = this.zPathService.parse(zPath.path).goUp().path;
 
           return this.zNodeService
-            .deleteChildren(dir, [zNode.name])
-            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+            .deleteChildren(dir, [zPath.name.valueOrThrow()])
+            .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .map(() => this.refresh.emit());
         }
 
@@ -110,7 +108,7 @@ export class NavListComponent implements OnChanges {
   }
 
   onNodeDuplicateClick(zNode: ZNode): void {
-    this.feedbackService
+    this.dialogService
       .showPrompt(
         "Duplicate node",
         "Type in new node path",
@@ -120,11 +118,11 @@ export class NavListComponent implements OnChanges {
         zNode.path
       )
       .switchMap(ref => ref.afterClosed())
-      .switchMap((dest: string) => {
-        if (dest) {
+      .switchMap((destination: string) => {
+        if (destination) {
           return this.zNodeService
-            .duplicateNode(zNode.path, dest)
-            .catch((err) => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+            .duplicateNode(zNode.path, destination)
+            .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .map(() => this.refresh.emit());
         }
 
@@ -134,7 +132,7 @@ export class NavListComponent implements OnChanges {
   }
 
   onNodeMoveClick(zNode: ZNode): void {
-    this.feedbackService
+    this.dialogService
       .showPrompt(
         "Move node",
         "Type in new node path",
@@ -144,11 +142,11 @@ export class NavListComponent implements OnChanges {
         zNode.path
       )
       .switchMap(ref => ref.afterClosed())
-      .switchMap((dest: string) => {
-        if (dest) {
+      .switchMap((destination: string) => {
+        if (destination) {
           return this.zNodeService
-            .moveNode(zNode.path, dest)
-            .catch((err) => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+            .moveNode(zNode.path, destination)
+            .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .map(() => this.refresh.emit());
         }
 

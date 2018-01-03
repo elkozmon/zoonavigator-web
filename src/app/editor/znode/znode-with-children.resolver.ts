@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017  Ľuboš Kozmon
+ * Copyright (C) 2018  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,12 +16,27 @@
  */
 
 import {Injectable} from "@angular/core";
+import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs/Rx";
-import {ApiResponse} from "../response/api-response";
-import {ApiRequest} from "../request/api-request";
+import {Either} from "tsmonad";
+import {ZNodeService, ZNodeWithChildren} from "../../core";
+import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 
 @Injectable()
-export abstract class ApiService {
+export class ZNodeWithChildrenResolver implements Resolve<Either<Error, ZNodeWithChildren>> {
 
-  abstract dispatch<T>(apiRequest: ApiRequest<T>): Observable<ApiResponse<T>>
+  constructor(private zNodeService: ZNodeService) {
+  }
+
+  resolve(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ) {
+    const nodePath = route.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/";
+
+    return this.zNodeService
+      .getNode(nodePath)
+      .map(Either.right)
+      .catch(err => Observable.of(Either.left<Error, ZNodeWithChildren>(new Error(err))));
+  }
 }

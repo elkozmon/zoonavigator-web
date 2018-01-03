@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017  Ľuboš Kozmon
+ * Copyright (C) 2018  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./toolbar.component"
+import {DefaultZPathService} from "./default-zpath.service";
+import {Maybe} from "tsmonad";
+
+describe("Default zPath service tests", () => {
+  const service = new DefaultZPathService();
+
+  it("root path has no name", () => {
+    expect(Maybe.isNothing(service.parse("/").name)).toBeTruthy();
+  });
+
+  it("root path is root", () => {
+    expect(service.parse("/").isRoot).toBeTruthy();
+  });
+
+  it("one level deep path has a name", () => {
+    expect(service.parse("/test").name.valueOr(null)).toBe("test");
+  });
+});

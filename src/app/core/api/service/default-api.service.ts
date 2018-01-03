@@ -20,12 +20,12 @@ import {Router} from "@angular/router";
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs/Rx";
 import {ConfigService} from "../../../config";
-import {ApiRequest} from "../request";
-import {ApiResponse} from "../api-response";
-import {ApiService} from "./api.service";
-import {ZSessionHandler} from "../../zsession/handler";
-import {FeedbackService} from "../../feedback";
 import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
+import {ApiResponse} from "../response/api-response";
+import {ZSessionHandler} from "../../zsession/handler";
+import {DialogService} from "../../dialog";
+import {ApiRequest} from "../request";
+import {ApiService} from "./api.service";
 
 @Injectable()
 export class DefaultApiService implements ApiService {
@@ -39,10 +39,10 @@ export class DefaultApiService implements ApiService {
   }
 
   constructor(
-    private http: HttpClient,
     private router: Router,
+    private httpClient: HttpClient,
     private zSessionHandler: ZSessionHandler,
-    private feedbackService: FeedbackService,
+    private dialogService: DialogService,
     private configService: ConfigService
   ) {
   }
@@ -68,7 +68,7 @@ export class DefaultApiService implements ApiService {
       options.headers = options.headers.set("Authorization", apiRequest.authToken);
     }
 
-    return <Observable<ApiResponse<T>>> this.http
+    return <Observable<ApiResponse<T>>> this.httpClient
       .request(apiRequest.method, url, options)
       .timeoutWith(
         config.apiRequestTimeoutMillis,
@@ -95,7 +95,7 @@ export class DefaultApiService implements ApiService {
       if (error.status === 401) {
         const returnUrl = this.router.routerState.snapshot.url;
 
-        this.feedbackService
+        this.dialogService
           .showError(message, null)
           .switchMap(ref => ref.afterClosed())
           .subscribe(() => {

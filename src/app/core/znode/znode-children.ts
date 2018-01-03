@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017  Ľuboš Kozmon
+ * Copyright (C) 2018  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./toolbar.component"
+import {ZNodePath} from "./znode-path";
+
+export type ZNodeChildren = ZNodePath[];

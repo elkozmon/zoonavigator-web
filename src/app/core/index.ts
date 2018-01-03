@@ -17,7 +17,9 @@
 
 export * from "./acl"
 export * from "./api"
-export * from "./storage"
+export * from "./znode"
+export * from "./zpath"
 export * from "./zsession"
+export * from "./dialog"
+export * from "./storage"
 export * from "./core.module"
-export * from "./feedback"

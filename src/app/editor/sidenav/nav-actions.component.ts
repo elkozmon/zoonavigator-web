@@ -15,13 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, EventEmitter, Output, Input, ViewContainerRef} from "@angular/core";
-import {trigger, state, style, animate, transition} from "@angular/animations";
-import {ZPath} from "../zpath";
-import {ZNode, ZNodeService} from "../znode";
-import {FeedbackService} from "../../core";
+import {Component, EventEmitter, Input, Output, ViewContainerRef} from "@angular/core";
+import {state, style, trigger} from "@angular/animations";
+import {ZNodeService, ZPath} from "../../core";
 import {Observable} from "rxjs/Rx";
 import {Ordering} from "../ordering";
+import {DialogService} from "../../core/dialog/dialog.service";
 
 @Component({
   selector: "zoo-editor-nav-actions",
@@ -40,7 +39,7 @@ export class NavActionsComponent {
   @Output() refresh: EventEmitter<any> = new EventEmitter();
 
   @Input() zPath: ZPath;
-  @Input() zNodes: ZNode[];
+  @Input() zNodes: ZPath[];
 
   @Input() ordering: Ordering;
   @Output() orderingChange = new EventEmitter<Ordering>();
@@ -49,7 +48,7 @@ export class NavActionsComponent {
 
   constructor(
     private zNodeService: ZNodeService,
-    private feedbackService: FeedbackService,
+    private dialogService: DialogService,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -74,21 +73,21 @@ export class NavActionsComponent {
   }
 
   onCreateClick(): void {
-    this.feedbackService
+    this.dialogService
       .showPrompt(
         "Create node",
         "Type in new node path",
         "Create",
         "Cancel",
         this.viewContainerRef,
-        this.zPath.isRoot() ? "/" : this.zPath.toString().concat("/")
+        this.zPath.isRoot ? "/" : this.zPath.path.concat("/")
       )
       .switchMap(ref => ref.afterClosed())
       .switchMap((path: string) => {
         if (path) {
           return this.zNodeService
             .createNode(path)
-            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+            .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .map(() => this.refresh.emit());
         }
 
@@ -98,12 +97,12 @@ export class NavActionsComponent {
   }
 
   onDeleteClick(): void {
-    const path = this.zPath.toString();
+    const path = this.zPath.path;
     const names = this.zNodes.map(node => node.name);
 
     const message = `Do you want to delete ${names.length} ${names.length === 1 ? "node and its" : "nodes and their"} children?`;
 
-    this.feedbackService
+    this.dialogService
       .showConfirm(
         "Confirm recursive delete",
         message,
@@ -112,11 +111,11 @@ export class NavActionsComponent {
         this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())
-      .switchMap((accept: boolean) => {
-        if (accept) {
+      .switchMap((confirm: boolean) => {
+        if (confirm) {
           return this.zNodeService
-            .deleteChildren(path, names)
-            .catch(err => this.feedbackService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+            .deleteChildren(path, names.map(name => name.valueOrThrow()))
+            .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .map(() => this.refresh.emit());
         }
 

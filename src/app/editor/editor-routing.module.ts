@@ -19,18 +19,9 @@ import {NgModule} from "@angular/core";
 import {RouterModule, RunGuardsAndResolvers} from "@angular/router";
 import {CanDeactivateComponentGuard} from "../shared";
 import {EditorComponent} from "./editor.component";
-import {
-  ZNodeAclComponent,
-  ZNodeAclResolver,
-  ZNodeChildrenResolver,
-  ZNodeContainerComponent,
-  ZNodeContainerGuard,
-  ZNodeDataComponent,
-  ZNodeDataResolver,
-  ZNodeMetaComponent,
-  ZNodeMetaResolver
-} from "./znode";
 import {EditorGuard} from "./editor.guard";
+import {ZNodeContainerComponent, ZNodeDataComponent, ZNodeAclComponent, ZNodeMetaComponent} from "./container";
+import {ZNodeWithChildrenResolver} from "./znode/znode-with-children.resolver";
 
 const editorRoutes = [
   {
@@ -40,40 +31,26 @@ const editorRoutes = [
     canActivateChild: [EditorGuard],
     runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange",
     resolve: {
-      children: ZNodeChildrenResolver
+      zNodeWithChildren: ZNodeWithChildrenResolver
     },
     children: [
       {
         path: "node",
         component: ZNodeContainerComponent,
-        canActivate: [ZNodeContainerGuard],
-        canActivateChild: [ZNodeContainerGuard],
         children: [
           {
             path: "data",
             component: ZNodeDataComponent,
-            canDeactivate: [CanDeactivateComponentGuard],
-            runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange",
-            resolve: {
-              data: ZNodeDataResolver
-            }
+            canDeactivate: [CanDeactivateComponentGuard]
           },
           {
             path: "acl",
             component: ZNodeAclComponent,
-            canDeactivate: [CanDeactivateComponentGuard],
-            runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange",
-            resolve: {
-              acl: ZNodeAclResolver
-            }
+            canDeactivate: [CanDeactivateComponentGuard]
           },
           {
             path: "meta",
-            component: ZNodeMetaComponent,
-            runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange",
-            resolve: {
-              meta: ZNodeMetaResolver
-            }
+            component: ZNodeMetaComponent
           },
           {
             path: "**",
@@ -94,11 +71,7 @@ const editorRoutes = [
   ],
   providers: [
     EditorGuard,
-    ZNodeContainerGuard,
-    ZNodeChildrenResolver,
-    ZNodeDataResolver,
-    ZNodeAclResolver,
-    ZNodeMetaResolver
+    ZNodeWithChildrenResolver
   ]
 })
 export class EditorRoutingModule {

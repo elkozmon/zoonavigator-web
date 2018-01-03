@@ -42,18 +42,15 @@ import {
 import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {AceEditorModule} from "ng2-ace-editor";
 import {
-  ApiZNodeService,
   ZNodeAclComponent,
   ZNodeContainerComponent,
   ZNodeDataComponent,
-  ZNodeMetaComponent,
-  ZNodeService
-} from "./znode";
-import {EditorPathComponent} from "./toolbar";
+  ZNodeMetaComponent
+} from "./container";
+import {ToolbarComponent} from "./toolbar";
 import {NavActionsComponent, NavListComponent} from "./sidenav";
 import {EditorRoutingModule} from "./editor-routing.module";
 import {EditorComponent} from "./editor.component";
-import {DefaultZPathService, ZPathService} from "./zpath";
 import {SharedModule} from "../shared";
 
 @NgModule({
@@ -81,13 +78,10 @@ import {SharedModule} from "../shared";
     MatTabsModule,
     MatMenuModule
   ],
-  providers: [
-    {provide: ZNodeService, useClass: ApiZNodeService},
-    {provide: ZPathService, useClass: DefaultZPathService}
-  ],
+  providers: [],
   declarations: [
     EditorComponent,
-    EditorPathComponent,
+    ToolbarComponent,
     NavListComponent,
     NavActionsComponent,
     ZNodeContainerComponent,

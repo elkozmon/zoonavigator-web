@@ -15,6 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./api-response"
+export * from "./response/api-response"
 export * from "./request"
 export * from "./service"

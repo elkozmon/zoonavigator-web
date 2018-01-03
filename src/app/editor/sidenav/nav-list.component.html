@@ -18,7 +18,7 @@
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, UnnecessaryLabelJS -->
 <a
   mat-list-item
-  *ngIf="!zPath.isRoot() && zPath.goUp()?.isRoot()"
+  *ngIf="!zPath.isRoot && zPath.goUp()?.isRoot"
   routerLink="/editor">
   <mat-icon>
     arrow_back
@@ -27,10 +27,10 @@
 </a>
 <a
   mat-list-item
-  *ngIf="!zPath.isRoot() && !zPath.goUp()?.isRoot()"
+  *ngIf="!zPath.isRoot && !zPath.goUp()?.isRoot"
   routerLink="/editor/node"
   queryParamsHandling="merge"
-  [queryParams]="{path: zPath.goUp()?.toString()}">
+  [queryParams]="{path: zPath.goUp()?.path}">
   <mat-icon>
     arrow_back
   </mat-icon>
@@ -50,7 +50,7 @@
     queryParamsHandling="merge"
     [queryParams]="{path: node.path}"
     class="zoo-node-name">
-    {{node.name}}
+    {{node.name.valueOrThrow()}}
   </a>
   <div class="zoo-node-actions">
     <button mat-icon-button #nodeMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="nodeMenu">

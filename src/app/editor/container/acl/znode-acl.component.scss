@@ -1,4 +1,4 @@
-/*
+/*!
  * Copyright (C) 2017  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,4 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./toolbar.component"
+@import "../../../../sass/utils";
+
+th {
+  font-weight: 400;
+  font-size: .9em;
+  text-transform: uppercase;
+  vertical-align: bottom;
+  padding: .2em;
+}
+
+td {
+  vertical-align: top;
+
+  mat-checkbox {
+    line-height: 32px;
+    margin: 0 0 0 8px;
+  }
+}
+
+th {
+  color: #777;
+  font-weight: bold;
+}
+
+div.zoo-form-controls {
+  margin-top: 1em;
+}

@@ -38,10 +38,10 @@
 
       <mat-toolbar td-sidenav-content>
         <zoo-editor-nav-actions
-          [zPath]="currentZPath | async"
+          [zPath]="zPath | async"
           [zNodes]="selectedZNodes"
           [(ordering)]="childrenOrdering"
-          (refresh)="reloadChildren()"
+          (refresh)="reloadEditor()"
           (selectAll)="toggleSelectAll()">
         </zoo-editor-nav-actions>
       </mat-toolbar>
@@ -58,11 +58,11 @@
           </zoo-regexp-filter>
         </div>
         <zoo-editor-nav-list
-          [zPath]="currentZPath | async"
+          [zPath]="zPath | async"
           [zNodes]="filteredZNodes"
           [zNodesSelected]="selectedZNodes"
           [zNodesOrdering]="childrenOrdering"
-          (refresh)="reloadChildren()"
+          (refresh)="reloadEditor()"
           (select)="selectZNode($event)"
           (deselect)="deselectZNode($event)">
         </zoo-editor-nav-list>
@@ -79,10 +79,10 @@
 
       <mat-toolbar>
         <div layout="row" layout-align="start center" flex>
-          <zoo-editor-path
-            [zPath]="currentZPath | async"
+          <zoo-toolbar
+            [zPath]="zPath | async"
             (refresh)="reloadEditor()">
-          </zoo-editor-path>
+          </zoo-toolbar>
         </div>
       </mat-toolbar>
 

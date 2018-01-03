@@ -18,17 +18,21 @@
 import {NgModule} from "@angular/core";
 import {ApiRequestFactory, ApiService, DefaultApiService, DefaultApiRequestFactory} from "./api";
 import {ApiZSessionService, DefaultZSessionHandler, ZSessionHandler, ZSessionService} from "./zsession";
-import {DefaultFeedbackService, FeedbackService} from "./feedback";
-import {DefaultLocalStorageService, StorageService} from "./storage";
+import {DialogService, DefaultDialogService} from "./dialog";
+import {StorageService, DefaultLocalStorageService} from "./storage";
+import {ZPathService, DefaultZPathService} from "./zpath";
+import {ZNodeService, ApiZNodeService} from "./znode";
 
 @NgModule({
   providers: [
     {provide: ApiService, useClass: DefaultApiService},
     {provide: ApiRequestFactory, useClass: DefaultApiRequestFactory},
     {provide: StorageService, useClass: DefaultLocalStorageService},
+    {provide: ZNodeService, useClass: ApiZNodeService},
+    {provide: ZPathService, useClass: DefaultZPathService},
     {provide: ZSessionService, useClass: ApiZSessionService},
     {provide: ZSessionHandler, useClass: DefaultZSessionHandler},
-    {provide: FeedbackService, useClass: DefaultFeedbackService}
+    {provide: DialogService, useClass: DefaultDialogService}
   ]
 })
 export class CoreModule {
