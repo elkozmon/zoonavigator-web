@@ -67,6 +67,12 @@ export class ToolbarComponent {
     this.refresh.emit();
   }
 
+  onHomeClick(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+    });
+  }
+
   onDeleteClick(): void {
     const zPath = this.zPath;
     const parentPath = zPath.goUp().path;
@@ -90,7 +96,7 @@ export class ToolbarComponent {
         return Observable.empty<void>();
       })
       .forEach(() => {
-        this.router.navigate(["./"], {
+        this.router.navigate([], {
           relativeTo: this.route,
           queryParams: {
             [EDITOR_QUERY_NODE_PATH]: parentPath
@@ -154,24 +160,18 @@ export class ToolbarComponent {
 
   onPathKeyPress(event: KeyboardEvent): void {
     if (event.which === 13) {
-      // enter pressed
+      // Enter pressed
       this.navigatePath(this.pathInput.value);
     }
   }
 
   navigatePath(path: string): void {
+    // Parse (validate) path
     const zPath = this.zPathService.parse(path);
 
-    if (zPath.isRoot) {
-      this.router
-        .navigate(["/editor"])
-        .catch(err => this.handleNavigateError(err));
-
-      return;
-    }
-
     this.router
-      .navigate(["/editor/node"], {
+      .navigate([], {
+        relativeTo: this.route,
         queryParams: {
           [EDITOR_QUERY_NODE_PATH]: zPath.path
         },

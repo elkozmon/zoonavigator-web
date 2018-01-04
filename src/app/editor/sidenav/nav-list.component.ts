@@ -16,9 +16,11 @@
  */
 
 import {Component, Input, EventEmitter, Output, OnChanges, SimpleChanges, ViewContainerRef} from "@angular/core";
-import {Ordering} from "../ordering";
-import {ZNode, ZNodeService, ZPath, ZPathService, DialogService} from "../../core";
+import {ActivatedRoute, Router} from "@angular/router";
 import {Observable} from "rxjs/Rx";
+import {Ordering} from "../ordering";
+import {ZNode, ZNodeService, ZPath, DialogService} from "../../core";
+import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 
 @Component({
   selector: "zoo-editor-nav-list",
@@ -61,8 +63,9 @@ export class NavListComponent implements OnChanges {
   }
 
   constructor(
+    private route: ActivatedRoute,
+    private router: Router,
     private zNodeService: ZNodeService,
-    private zPathService: ZPathService,
     private dialogService: DialogService,
     private viewContainerRef: ViewContainerRef
   ) {
@@ -72,6 +75,16 @@ export class NavListComponent implements OnChanges {
     if (changes.hasOwnProperty("zNodes") || changes.hasOwnProperty("zNodesOrdering")) {
       this.sortZNodes();
     }
+  }
+
+  onNavigateClick(zPath: ZPath): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        [EDITOR_QUERY_NODE_PATH]: zPath.path
+      },
+      queryParamsHandling: "merge"
+    });
   }
 
   onNodeChecked(zPath: ZPath): void {
@@ -86,7 +99,7 @@ export class NavListComponent implements OnChanges {
     this.dialogService
       .showConfirm(
         "Confirm recursive delete",
-        `Do you want to delete node '${zPath.name}' and its children?`,
+        `Do you want to delete node '${zPath.name.valueOrThrow()}' and its children?`,
         "Delete",
         "Cancel",
         this.viewContainerRef
@@ -94,10 +107,10 @@ export class NavListComponent implements OnChanges {
       .switchMap(ref => ref.afterClosed())
       .switchMap((confirm: boolean) => {
         if (confirm) {
-          const dir = this.zPathService.parse(zPath.path).goUp().path;
+          const parentDir = zPath.goUp().path;
 
           return this.zNodeService
-            .deleteChildren(dir, [zPath.name.valueOrThrow()])
+            .deleteChildren(parentDir, [zPath.name.valueOrThrow()])
             .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .map(() => this.refresh.emit());
         }

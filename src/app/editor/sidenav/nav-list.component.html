@@ -18,19 +18,8 @@
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, UnnecessaryLabelJS -->
 <a
   mat-list-item
-  *ngIf="!zPath.isRoot && zPath.goUp()?.isRoot"
-  routerLink="/editor">
-  <mat-icon>
-    arrow_back
-  </mat-icon>
-  ../
-</a>
-<a
-  mat-list-item
-  *ngIf="!zPath.isRoot && !zPath.goUp()?.isRoot"
-  routerLink="/editor/node"
-  queryParamsHandling="merge"
-  [queryParams]="{path: zPath.goUp()?.path}">
+  *ngIf="!zPath.isRoot"
+  (click)="onNavigateClick(zPath.goUp())">
   <mat-icon>
     arrow_back
   </mat-icon>
@@ -46,10 +35,8 @@
     (change)="$event.checked ? onNodeChecked(node) : onNodeUnchecked(node)">
   </mat-checkbox>
   <a
-    routerLink="/editor/node"
-    queryParamsHandling="merge"
-    [queryParams]="{path: node.path}"
-    class="zoo-node-name">
+    class="zoo-node-name"
+    (click)="onNavigateClick(node)">
     {{node.name.valueOrThrow()}}
   </a>
   <div class="zoo-node-actions">

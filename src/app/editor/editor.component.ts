@@ -81,27 +81,6 @@ export class EditorComponent implements OnInit, AfterViewInit {
       );
   }
 
-  // TODO use this on delete
-  // private navigateToParent(): void {
-  //   const parentPath: ZPath = this.zPathService
-  //     .parse(this.getCurrentPath())
-  //     .goUp();
-  //
-  //   if (parentPath.isRoot) {
-  //     this.router.navigate(["/editor"]);
-  //
-  //     return;
-  //   }
-  //
-  //   this.router.navigate(["./"], {
-  //     relativeTo: this.route,
-  //     queryParams: {
-  //       [EDITOR_QUERY_NODE_PATH]: parentPath.path
-  //     },
-  //     queryParamsHandling: "merge"
-  //   });
-  // }
-
   ngAfterViewInit(): void {
     this.mediaService.broadcast();
     this.changeDetectorRef.detectChanges();
@@ -168,11 +147,9 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   reloadEditor(): void {
-    const urlTree = this.router.parseUrl(this.router.url);
-    const urlSegments = urlTree.root.children["primary"].segments.map(it => it.path);
-
     this.router
-      .navigate(urlSegments, {
+      .navigate([], {
+        relativeTo: this.route,
         queryParams: {
           i: ((parseInt(this.route.snapshot.queryParamMap.get("i"), 0) || 0) + 1) % 2
         },

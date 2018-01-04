@@ -56,7 +56,12 @@ const editorRoutes = [
             path: "**",
             redirectTo: "data"
           }
-        ]
+        ],
+      },
+      {
+        path: "",
+        redirectTo: "node",
+        pathMatch: "full"
       }
     ]
   }
