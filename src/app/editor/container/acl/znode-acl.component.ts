@@ -20,10 +20,18 @@ import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ActivatedRoute} from "@angular/router";
 import {Observable} from "rxjs/Rx";
 import {Either} from "tsmonad";
-import {Acl, DialogService, Permission, Scheme, ZNodeAcl, ZNodeService, ZNodeWithChildren} from "../../../core";
+import {
+  Acl,
+  DialogService,
+  Permission,
+  Scheme,
+  ZNodeAcl,
+  ZNodeService,
+  ZNodeWithChildren,
+  ZNodeMeta
+} from "../../../core";
 import {CanDeactivateComponent} from "../../../shared";
 import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
-import {ZNodeMeta} from "../../../core/znode/znode-meta";
 
 @Component({
   templateUrl: "znode-acl.component.html",

@@ -21,18 +21,24 @@
     mat-icon-button
     matTooltip="More actions"
     [matMenuTriggerFor]="nodeMenu"
-    [disabled]="zPath.isRoot">
+    [disabled]="zNode.isNothing">
     <mat-icon class="mat-24">more_vert</mat-icon>
   </button>
 
   <mat-menu #nodeMenu="matMenu">
-    <button mat-menu-item (click)="onDeleteClick(node)">
+    <button
+      mat-menu-item
+      (click)="onDeleteClick()">
       <mat-icon>delete_forever</mat-icon><span>Delete</span>
     </button>
-    <button mat-menu-item (click)="onDuplicateClick(node)">
+    <button
+      mat-menu-item
+      (click)="onDuplicateClick()">
       <mat-icon>content_copy</mat-icon><span>Duplicate</span>
     </button>
-    <button mat-menu-item (click)="onMoveClick(node)">
+    <button
+      mat-menu-item
+      (click)="onMoveClick()">
       <mat-icon>content_cut</mat-icon><span>Move</span>
     </button>
   </mat-menu>

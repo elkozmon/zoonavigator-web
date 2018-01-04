@@ -19,7 +19,7 @@ import {AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ViewCont
 import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
 import {Observable} from "rxjs/Rx";
-import {Either} from "tsmonad";
+import {Either, Maybe} from "tsmonad";
 import {Ordering} from "./ordering";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
 import {
@@ -27,11 +27,11 @@ import {
   ZPathService,
   DialogService,
   ZSessionService,
-  ZSessionHandler
+  ZSessionHandler,
+  ZNodePath,
+  ZNodeWithChildren
 } from "../core";
 import {RegexpFilterComponent} from "../shared";
-import {ZNodeWithChildren} from "../core/znode/znode-with-children";
-import {ZNodePath} from "../core/znode/znode-path";
 
 @Component({
   templateUrl: "editor.component.html",
@@ -42,6 +42,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
   @ViewChild("childrenFilter") childrenFilter: RegexpFilterComponent;
 
   zPath: Observable<ZPath>;
+  zNode: Observable<Maybe<ZNodeWithChildren>>;
 
   childrenOrdering: Ordering = Ordering.Ascending;
   childrenFilterRegexp: RegExp = null;
@@ -72,13 +73,25 @@ export class EditorComponent implements OnInit, AfterViewInit {
       .pluck(EDITOR_QUERY_NODE_PATH)
       .map((maybePath: string) => this.zPathService.parse(maybePath || "/"));
 
-    (<Observable<Either<Error, ZNodeWithChildren>>> this.route.data.pluck("zNodeWithChildren"))
-      .forEach(either =>
-        either.caseOf<void>({
-          left: error => this.dialogService.showError(error.message, this.viewContainerRef),
-          right: node => this.updateChildren(node.children)
+    this.zNode = (<Observable<Either<Error, ZNodeWithChildren>>> this.route.data.pluck("zNodeWithChildren"))
+      .map(either =>
+        either.caseOf<Maybe<ZNodeWithChildren>>({
+          left: error => {
+            this.dialogService.showError(error.message, this.viewContainerRef);
+
+            return Maybe.nothing();
+          },
+          right: node => Maybe.just(node)
         })
       );
+
+    this.zNode.forEach(maybeNode =>
+      maybeNode.caseOf({
+        just: node => this.updateChildren(node.children),
+        nothing: () => {
+        }
+      })
+    );
   }
 
   ngAfterViewInit(): void {
@@ -179,7 +192,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   private updateSelectedChildren(): void {
-    // remove non-existing selected znodes
+    // Remove non-existing selected nodes
     this.selectedZNodes = this.selectedZNodes.filter(node => this.childrenZNodes.indexOf(node) >= 0);
   }
 }

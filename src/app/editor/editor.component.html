@@ -81,6 +81,7 @@
         <div layout="row" layout-align="start center" flex>
           <zoo-toolbar
             [zPath]="zPath | async"
+            [zNode]="zNode | async"
             (refresh)="reloadEditor()">
           </zoo-toolbar>
         </div>

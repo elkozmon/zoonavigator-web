@@ -19,9 +19,10 @@ import {Component, EventEmitter, Input, Output, ViewChild, ViewContainerRef} fro
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {MatInput} from "@angular/material";
 import {ActivatedRoute, Router} from "@angular/router";
-import {DialogService, ZNode, ZNodeService, ZPath, ZPathService} from "../../core";
-import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {Observable} from "rxjs/Rx";
+import {Maybe} from "tsmonad";
+import {DialogService, ZNodeService, ZNodeWithChildren, ZPath, ZPathService} from "../../core";
+import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 
 @Component({
   selector: "zoo-toolbar",
@@ -45,6 +46,7 @@ export class ToolbarComponent {
   @Output() move: EventEmitter<any> = new EventEmitter();
 
   @Input() zPath: ZPath;
+  @Input() zNode: Maybe<ZNodeWithChildren>;
 
   navigationError: string;
 
@@ -74,6 +76,7 @@ export class ToolbarComponent {
   }
 
   onDeleteClick(): void {
+    const zNode = this.zNode.valueOrThrow();
     const zPath = this.zPath;
     const parentPath = zPath.goUp().path;
 
@@ -89,7 +92,7 @@ export class ToolbarComponent {
       .switchMap((confirm: boolean) => {
         if (confirm) {
           return this.zNodeService
-            .deleteChildren(parentPath, [zPath.name.valueOrThrow()])
+            .deleteNode(zNode.path, zNode.meta.dataVersion)
             .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef));
         }
 
@@ -107,7 +110,7 @@ export class ToolbarComponent {
   }
 
   onDuplicateClick(): void {
-    const source = this.zPath.path;
+    const source = this.zNode.valueOrThrow().path;
 
     this.dialogService
       .showPrompt(
@@ -133,7 +136,7 @@ export class ToolbarComponent {
   }
 
   onMoveClick(): void {
-    const source = this.zPath.path;
+    const source = this.zNode.valueOrThrow().path;
 
     this.dialogService
       .showPrompt(
