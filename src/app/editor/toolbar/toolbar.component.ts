@@ -23,6 +23,8 @@ import {Observable} from "rxjs/Rx";
 import {Maybe} from "tsmonad";
 import {DialogService, ZNodeService, ZNodeWithChildren, ZPath, ZPathService} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
+import {DuplicateZNodeData, MoveZNodeData} from "../../core/dialog/dialogs";
+import {CreateZNodeData} from "../../core/dialog";
 
 @Component({
   selector: "zoo-toolbar",
@@ -113,52 +115,71 @@ export class ToolbarComponent {
     const source = this.zNode.valueOrThrow().path;
 
     this.dialogService
-      .showPrompt(
-        "Duplicate node",
-        "Type in new node path",
-        "Duplicate",
-        "Cancel",
-        this.viewContainerRef,
-        source
+      .showDuplicateZNode(
+        {
+          path: source,
+          redirect: false
+        },
+        this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())
-      .switchMap((destination: string) => {
-        if (destination) {
+      .switchMap((data: DuplicateZNodeData) => {
+        if (data) {
           return this.zNodeService
-            .duplicateNode(source, destination)
+            .duplicateNode(source, data.path)
             .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.refresh.emit());
+            .switchMapTo(Observable.of(data));
         }
 
-        return Observable.empty<void>();
+        return Observable.empty();
       })
-      .subscribe();
+      .forEach((data: CreateZNodeData) => {
+        if (data.redirect) {
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+              [EDITOR_QUERY_NODE_PATH]: data.path
+            },
+            queryParamsHandling: "merge"
+          });
+
+          return;
+        }
+
+        this.refresh.emit();
+      });
   }
 
   onMoveClick(): void {
     const source = this.zNode.valueOrThrow().path;
 
     this.dialogService
-      .showPrompt(
-        "Move node",
-        "Type in new node path",
-        "Move",
-        "Cancel",
-        this.viewContainerRef,
-        source
+      .showMoveZNode(
+        {
+          path: source
+        },
+        this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())
-      .switchMap((destination: string) => {
-        if (destination) {
+      .switchMap((data: MoveZNodeData) => {
+        if (data) {
           return this.zNodeService
-            .moveNode(source, destination)
+            .moveNode(source, data.path)
             .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.refresh.emit());
+            .switchMapTo(Observable.of(data));
         }
 
-        return Observable.empty<void>();
+        return Observable.empty();
       })
-      .subscribe();
+      .forEach((data: CreateZNodeData) => {
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {
+            [EDITOR_QUERY_NODE_PATH]: data.path
+          },
+          queryParamsHandling: "merge"
+        });
+      });
   }
 
   onPathKeyPress(event: KeyboardEvent): void {

@@ -21,6 +21,8 @@ import {Observable} from "rxjs/Rx";
 import {Ordering} from "../ordering";
 import {ZNode, ZNodeService, ZPath, DialogService} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
+import {DuplicateZNodeData, MoveZNodeData} from "../../core/dialog/dialogs";
+import {CreateZNodeData} from "../../core/dialog";
 
 @Component({
   selector: "zoo-editor-nav-list",
@@ -122,50 +124,76 @@ export class NavListComponent implements OnChanges {
 
   onNodeDuplicateClick(zNode: ZNode): void {
     this.dialogService
-      .showPrompt(
-        "Duplicate node",
-        "Type in new node path",
-        "Duplicate",
-        "Cancel",
-        this.viewContainerRef,
-        zNode.path
+      .showDuplicateZNode(
+        {
+          path: zNode.path,
+          redirect: false
+        },
+        this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())
-      .switchMap((destination: string) => {
-        if (destination) {
+      .switchMap((data: DuplicateZNodeData) => {
+        if (data) {
           return this.zNodeService
-            .duplicateNode(zNode.path, destination)
+            .duplicateNode(zNode.path, data.path)
             .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.refresh.emit());
+            .switchMapTo(Observable.of(data));
         }
 
-        return Observable.empty<void>();
+        return Observable.empty();
       })
-      .subscribe();
+      .forEach((data: CreateZNodeData) => {
+        if (data.redirect) {
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+              [EDITOR_QUERY_NODE_PATH]: data.path
+            },
+            queryParamsHandling: "merge"
+          });
+
+          return;
+        }
+
+        this.refresh.emit();
+      });
   }
 
   onNodeMoveClick(zNode: ZNode): void {
     this.dialogService
-      .showPrompt(
-        "Move node",
-        "Type in new node path",
-        "Move",
-        "Cancel",
-        this.viewContainerRef,
-        zNode.path
+      .showMoveZNode(
+        {
+          path: zNode.path,
+          redirect: false
+        },
+        this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())
-      .switchMap((destination: string) => {
-        if (destination) {
+      .switchMap((data: MoveZNodeData) => {
+        if (data) {
           return this.zNodeService
-            .moveNode(zNode.path, destination)
+            .moveNode(zNode.path, data.path)
             .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.refresh.emit());
+            .switchMapTo(Observable.of(data));
         }
 
-        return Observable.empty<void>();
+        return Observable.empty();
       })
-      .subscribe();
+      .forEach((data: CreateZNodeData) => {
+        if (data.redirect) {
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+              [EDITOR_QUERY_NODE_PATH]: data.path
+            },
+            queryParamsHandling: "merge"
+          });
+
+          return;
+        }
+
+        this.refresh.emit();
+      });
   }
 
   //noinspection JSMethodCanBeStatic,JSUnusedLocalSymbols

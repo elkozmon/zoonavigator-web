@@ -42,6 +42,21 @@ div.zoo-actionbar {
   }
 }
 
+.mat-dialog-container > * {
+  display: flex !important;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mat-dialog-content {
+  max-height: inherit !important;
+  flex: 1;
+}
+
+.zoo-full-width {
+  width: 100%;
+}
+
 .zoo-bold {
   font-weight: bold;
 }

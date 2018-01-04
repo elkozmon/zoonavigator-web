@@ -16,14 +16,28 @@
  */
 
 import {NgModule} from "@angular/core";
+import {FormsModule} from "@angular/forms";
+import {CommonModule} from "@angular/common";
+import {MatCheckboxModule, MatInputModule, MatDialogModule, MatButtonModule} from "@angular/material";
 import {ApiRequestFactory, ApiService, DefaultApiService, DefaultApiRequestFactory} from "./api";
 import {ApiZSessionService, DefaultZSessionHandler, ZSessionHandler, ZSessionService} from "./zsession";
-import {DialogService, DefaultDialogService} from "./dialog";
+import {DialogService, DefaultDialogService, CreateZNodeDialogComponent} from "./dialog";
 import {StorageService, DefaultLocalStorageService} from "./storage";
 import {ZPathService, DefaultZPathService} from "./zpath";
 import {ZNodeService, ApiZNodeService} from "./znode";
+import {MoveZNodeDialogComponent} from "./dialog/dialogs";
+import {DuplicateZNodeDialogComponent} from "./dialog/dialogs/duplicate-znode.dialog";
+import {DiscardChangesDialogComponent} from "./dialog/dialogs/discard-changes.dialog";
 
 @NgModule({
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatInputModule,
+    MatCheckboxModule
+  ],
   providers: [
     {provide: ApiService, useClass: DefaultApiService},
     {provide: ApiRequestFactory, useClass: DefaultApiRequestFactory},
@@ -33,6 +47,18 @@ import {ZNodeService, ApiZNodeService} from "./znode";
     {provide: ZSessionService, useClass: ApiZSessionService},
     {provide: ZSessionHandler, useClass: DefaultZSessionHandler},
     {provide: DialogService, useClass: DefaultDialogService}
+  ],
+  entryComponents: [
+    MoveZNodeDialogComponent,
+    CreateZNodeDialogComponent,
+    DuplicateZNodeDialogComponent,
+    DiscardChangesDialogComponent
+  ],
+  declarations: [
+    MoveZNodeDialogComponent,
+    CreateZNodeDialogComponent,
+    DuplicateZNodeDialogComponent,
+    DiscardChangesDialogComponent
   ]
 })
 export class CoreModule {

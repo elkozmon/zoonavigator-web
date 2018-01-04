@@ -38,34 +38,34 @@
         <div *ngIf="errorMsg" class="zoo-error-bar">
           {{errorMsg}}
         </div>
-        <mat-input-container>
+        <mat-form-field>
           <input matInput
                  type="text"
                  placeholder="Connection string"
                  formControlName="connectionString"
                  name="connectionString"/>
           <!--<span mat-prefix><mat-icon>public</mat-icon></span>-->
-        </mat-input-container>
+        </mat-form-field>
         <div formArrayName="credentialsArray">
           <div layout="row"
                *ngFor="let credentials of credentialsFormArray.controls; let i = index"
                [formGroup]="credentials">
-            <mat-input-container>
+            <mat-form-field>
               <input matInput
                      type="text"
                      placeholder="Auth username"
                      formControlName="username"
                      (change)="onCredentialsChange(i)"/>
               <!--<span mat-prefix><mat-icon>person</mat-icon></span>-->
-            </mat-input-container>
-            <mat-input-container>
+            </mat-form-field>
+            <mat-form-field>
               <input matInput
                      type="password"
                      placeholder="Auth password"
                      formControlName="password"
                      (change)="onCredentialsChange(i)"/>
               <!--<span mat-prefix><mat-icon>lock</mat-icon></span>-->
-            </mat-input-container>
+            </mat-form-field>
           </div>
         </div>
         <button mat-raised-button color="primary" [disabled]="!connectForm.valid" (click)="onSubmit()">

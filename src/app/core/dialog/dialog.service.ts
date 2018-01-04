@@ -19,6 +19,15 @@ import {Injectable, ViewContainerRef} from "@angular/core";
 import {TdAlertDialogComponent, TdConfirmDialogComponent, TdPromptDialogComponent} from "@covalent/core";
 import {MatDialogRef, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
 import {Observable} from "rxjs/Rx";
+import {
+  CreateZNodeDialogComponent,
+  CreateZNodeData,
+  DiscardChangesDialogComponent,
+  MoveZNodeData,
+  MoveZNodeDialogComponent,
+  DuplicateZNodeDialogComponent,
+  DuplicateZNodeData
+} from "./dialogs";
 
 @Injectable()
 export abstract class DialogService {
@@ -30,21 +39,27 @@ export abstract class DialogService {
     return this
       .showError(error, viewRef)
       .switchMap(ref => ref.afterClosed())
-      .switchMap(() => Observable.throw(error));
+      .switchMapTo(Observable.throw(error));
   }
 
   abstract showDiscardChanges(
     viewRef?: ViewContainerRef
-  ): Observable<boolean>
+  ): Observable<MatDialogRef<DiscardChangesDialogComponent>>
 
-  abstract showPrompt(
-    title: string,
-    message: string,
-    acceptBtn: string,
-    cancelBtn: string,
-    viewRef?: ViewContainerRef,
-    value?: string
-  ): Observable<MatDialogRef<TdPromptDialogComponent>>
+  abstract showCreateZNode(
+    defaults: CreateZNodeData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<CreateZNodeDialogComponent>>
+
+  abstract showDuplicateZNode(
+    defaults: DuplicateZNodeData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<DuplicateZNodeDialogComponent>>
+
+  abstract showMoveZNode(
+    defaults: MoveZNodeData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<MoveZNodeDialogComponent>>
 
   abstract showConfirm(
     title: string,

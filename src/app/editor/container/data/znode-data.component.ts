@@ -78,7 +78,9 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
     if (this.editorDirty) {
-      return this.dialogService.showDiscardChanges(this.viewContainerRef);
+      return this.dialogService
+        .showDiscardChanges(this.viewContainerRef)
+        .switchMap(ref => ref.afterClosed());
     }
 
     return Observable.of(true);

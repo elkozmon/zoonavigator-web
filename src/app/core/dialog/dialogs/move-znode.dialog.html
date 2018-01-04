@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2017  Ľuboš Kozmon
+  ~ Copyright (C) 2018  Ľuboš Kozmon
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,21 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<!--suppress HtmlUnknownTag, HtmlUnknownAttribute, HtmlFormInputWithoutLabel -->
-<mat-form-field>
-  <input
-    matInput
-    #regexpFilter
-    placeholder=""
-    [value]="value"
-    (change)="onChange(regexpFilter.value)"
-    (keyup)="onChange(regexpFilter.value)"/>
-  <span matPrefix>
-      <mat-icon class="mat-18">search</mat-icon>
-  </span>
-</mat-form-field>
-
-<div *ngIf="error" class="zoo-filter-info bgc-red-400 tc-white-4">
-  <mat-icon class="mat-18">error_outline</mat-icon>
-  {{error}}
-</div>
+<h3 mat-dialog-title>Move node</h3>
+<mat-dialog-content>
+  <div>
+    <span>Type in new node path</span>
+  </div>
+  <mat-form-field class="zoo-full-width">
+    <input matInput [(ngModel)]="data.path"/>
+  </mat-form-field>
+  <div *ngIf="data.redirect !== undefined">
+    <mat-checkbox [(ngModel)]="data.redirect">
+      Show the new node afterwards
+    </mat-checkbox>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions layout-align="end">
+  <button mat-button [mat-dialog-close]="null">Cancel</button>
+  <button mat-button [mat-dialog-close]="data" color="accent">Move</button>
+</mat-dialog-actions>

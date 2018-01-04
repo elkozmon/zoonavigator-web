@@ -16,11 +16,13 @@
  */
 
 import {Component, EventEmitter, Input, Output, ViewContainerRef} from "@angular/core";
+import {ActivatedRoute, Router} from "@angular/router";
 import {state, style, trigger} from "@angular/animations";
-import {ZNodeService, ZPath} from "../../core";
 import {Observable} from "rxjs/Rx";
+import {ZNodeService, ZPath} from "../../core";
+import {DialogService, CreateZNodeData} from "../../core/dialog";
+import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {Ordering} from "../ordering";
-import {DialogService} from "../../core/dialog/dialog.service";
 
 @Component({
   selector: "zoo-editor-nav-actions",
@@ -47,6 +49,8 @@ export class NavActionsComponent {
   toggleSortButtonFlippedState = "flipped";
 
   constructor(
+    private route: ActivatedRoute,
+    private router: Router,
     private zNodeService: ZNodeService,
     private dialogService: DialogService,
     private viewContainerRef: ViewContainerRef
@@ -74,26 +78,39 @@ export class NavActionsComponent {
 
   onCreateClick(): void {
     this.dialogService
-      .showPrompt(
-        "Create node",
-        "Type in new node path",
-        "Create",
-        "Cancel",
-        this.viewContainerRef,
-        this.zPath.isRoot ? "/" : this.zPath.path.concat("/")
+      .showCreateZNode(
+        {
+          path: this.zPath.isRoot ? "/" : this.zPath.path.concat("/"),
+          redirect: false
+        },
+        this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())
-      .switchMap((path: string) => {
-        if (path) {
+      .switchMap((data: CreateZNodeData) => {
+        if (data) {
           return this.zNodeService
-            .createNode(path)
+            .createNode(data.path)
             .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.refresh.emit());
+            .switchMapTo(Observable.of(data));
         }
 
-        return Observable.empty<void>();
+        return Observable.empty();
       })
-      .subscribe();
+      .forEach((data: CreateZNodeData) => {
+        if (data.redirect) {
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+              [EDITOR_QUERY_NODE_PATH]: data.path
+            },
+            queryParamsHandling: "merge"
+          });
+
+          return;
+        }
+
+        this.refresh.emit();
+      });
   }
 
   onDeleteClick(): void {

@@ -17,19 +17,18 @@
 
 import {Injectable, ViewContainerRef} from "@angular/core";
 import {
-  IAlertConfig,
-  IConfirmConfig,
-  TdAlertDialogComponent,
-  TdConfirmDialogComponent,
-  TdDialogService,
-  TdPromptDialogComponent
+  IAlertConfig, IConfirmConfig, TdAlertDialogComponent, TdConfirmDialogComponent,
+  TdDialogService
 } from "@covalent/core";
-import {MatDialogRef, MatSnackBar, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
+import {MatDialog, MatDialogRef, MatSnackBar, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
 import {Observable} from "rxjs/Rx";
 import {Subject} from "rxjs/Subject";
 import {GroupedObservable} from "rxjs/operators/groupBy";
 import {DialogService} from "./dialog.service";
-
+import {
+  CreateZNodeData, CreateZNodeDialogComponent, DiscardChangesDialogComponent, DuplicateZNodeData,
+  DuplicateZNodeDialogComponent, MoveZNodeData, MoveZNodeDialogComponent
+} from "./dialogs";
 
 interface Pair<A, B> {
   left: A,
@@ -85,6 +84,7 @@ export class DefaultDialogService extends DialogService {
 
   constructor(
     private dialogService: TdDialogService,
+    private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
     super();
@@ -92,7 +92,7 @@ export class DefaultDialogService extends DialogService {
 
   showDiscardChanges(
     viewRef?: ViewContainerRef
-  ): Observable<boolean> {
+  ): Observable<MatDialogRef<DiscardChangesDialogComponent>> {
     const confirm = this.showConfirm(
       "Discard changes?",
       "Unsaved changes detected. Do you want to discard them?",
@@ -104,25 +104,64 @@ export class DefaultDialogService extends DialogService {
     return confirm.switchMap(ref => ref.afterClosed());
   }
 
-  showPrompt(
-    title: string,
-    message: string,
-    acceptBtn: string,
-    cancelBtn: string,
-    viewRef?: ViewContainerRef,
-    value?: string
-  ): Observable<MatDialogRef<TdPromptDialogComponent>> {
-    const prompt = this.dialogService.openPrompt({
-      message: message,
-      disableClose: true,
+  showCreateZNode(
+    defaults: CreateZNodeData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<CreateZNodeDialogComponent>> {
+    const dialog = this.dialog.open(CreateZNodeDialogComponent, {
+      data: defaults,
       viewContainerRef: viewRef,
-      title: title,
-      cancelButton: cancelBtn,
-      acceptButton: acceptBtn,
-      value: value
+      role: "dialog",
+      hasBackdrop: true,
+      width: "500px",
+      maxWidth: "80vw",
+      height: defaults.redirect === undefined ? "230px" : "260px",
+      maxHeight: "80vw",
+      direction: "ltr",
+      autoFocus: true
     });
 
-    return Observable.of(prompt);
+    return Observable.of(dialog);
+  }
+
+  showDuplicateZNode(
+    defaults: DuplicateZNodeData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<DuplicateZNodeDialogComponent>> {
+    const dialog = this.dialog.open(DuplicateZNodeDialogComponent, {
+      data: defaults,
+      viewContainerRef: viewRef,
+      role: "dialog",
+      hasBackdrop: true,
+      width: "500px",
+      maxWidth: "80vw",
+      height: defaults.redirect === undefined ? "230px" : "260px",
+      maxHeight: "80vw",
+      direction: "ltr",
+      autoFocus: true
+    });
+
+    return Observable.of(dialog);
+  }
+
+  showMoveZNode(
+    defaults: MoveZNodeData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<MoveZNodeDialogComponent>> {
+    const dialog = this.dialog.open(MoveZNodeDialogComponent, {
+      data: defaults,
+      viewContainerRef: viewRef,
+      role: "dialog",
+      hasBackdrop: true,
+      width: "500px",
+      maxWidth: "80vw",
+      height: defaults.redirect === undefined ? "230px" : "260px",
+      maxHeight: "80vw",
+      direction: "ltr",
+      autoFocus: true
+    });
+
+    return Observable.of(dialog);
   }
 
   showConfirm(

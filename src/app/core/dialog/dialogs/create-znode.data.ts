@@ -1,5 +1,5 @@
-/*!
- * Copyright (C) 2017  Ľuboš Kozmon
+/*
+ * Copyright (C) 2018  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-div.zoo-header {
-  padding: 30px 0;
-}
-
-mat-card {
-  padding: 10px;
-  max-width: 30%;
-
-  mat-form-field, div {
-    width: 100%;
-  }
-
-  button {
-    margin-top: 15px;
-  }
+export interface CreateZNodeData {
+  path: string;
+  redirect?: boolean;
 }

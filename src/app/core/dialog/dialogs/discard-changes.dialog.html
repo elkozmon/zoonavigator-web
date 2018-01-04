@@ -1,0 +1,10 @@
+<h3 mat-dialog-title>Discard changes?</h3>
+<mat-dialog-content>
+  <div>
+    <span>Unsaved changes detected. Do you want to discard them?</span>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions layout-align="end">
+  <button mat-button [mat-dialog-close]="false">Cancel</button>
+  <button mat-button [mat-dialog-close]="true" color="accent">Discard</button>
+</mat-dialog-actions>

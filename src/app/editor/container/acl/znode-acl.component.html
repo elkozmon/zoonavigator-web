@@ -49,21 +49,21 @@
             <tbody>
             <tr *ngFor="let acl of aclFormArray.controls; let i = index" [formGroup]="acl">
               <td>
-                <mat-input-container>
+                <mat-form-field>
                   <input matInput
                          type="text"
                          formControlName="scheme"/>
-                </mat-input-container>
+                </mat-form-field>
                 <div *ngIf="!acl.get('scheme').valid" class="zoo-warn">
                   <small>Scheme is required.</small>
                 </div>
               </td>
               <td>
-                <mat-input-container>
+                <mat-form-field>
                   <input matInput
                          type="text"
                          formControlName="id"/>
-                </mat-input-container>
+                </mat-form-field>
               </td>
               <td>
                 <mat-checkbox

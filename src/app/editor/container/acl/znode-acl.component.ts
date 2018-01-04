@@ -73,7 +73,9 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
     if (this.formDirty) {
-      return this.dialogService.showDiscardChanges(this.viewContainerRef);
+      return this.dialogService
+        .showDiscardChanges(this.viewContainerRef)
+        .switchMap(ref => ref.afterClosed());
     }
 
     return Observable.of(true);
