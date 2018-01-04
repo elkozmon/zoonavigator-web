@@ -18,6 +18,7 @@
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, UnnecessaryLabelJS -->
 <a
   mat-list-item
+  class="zoo-nav-item"
   *ngIf="!zPath.isRoot"
   (click)="onNavigateClick(zPath.goUp())">
   <mat-icon>
@@ -28,7 +29,7 @@
 <div
   mat-list-item
   *ngFor="let node of zNodes; trackBy: trackByPath"
-  class="zoo-node-item">
+  class="zoo-nav-item zoo-node-item">
   <mat-checkbox
     [checked]="zNodesSelected.indexOf(node) >= 0"
     (click)="$event.stopPropagation()"
