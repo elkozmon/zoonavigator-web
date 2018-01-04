@@ -41,12 +41,14 @@ const editorRoutes = [
           {
             path: "data",
             component: ZNodeDataComponent,
-            canDeactivate: [CanDeactivateComponentGuard]
+            canDeactivate: [CanDeactivateComponentGuard],
+            runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange"
           },
           {
             path: "acl",
             component: ZNodeAclComponent,
-            canDeactivate: [CanDeactivateComponentGuard]
+            canDeactivate: [CanDeactivateComponentGuard],
+            runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange"
           },
           {
             path: "meta",
