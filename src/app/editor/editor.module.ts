@@ -42,11 +42,11 @@ import {
 import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {AceEditorModule} from "ng2-ace-editor";
 import {
+  ContentComponent,
   ZNodeAclComponent,
-  ZNodeContainerComponent,
   ZNodeDataComponent,
   ZNodeMetaComponent
-} from "./container";
+} from "./content";
 import {ToolbarComponent} from "./toolbar";
 import {NavActionsComponent, NavListComponent} from "./sidenav";
 import {EditorRoutingModule} from "./editor-routing.module";
@@ -84,7 +84,7 @@ import {SharedModule} from "../shared";
     ToolbarComponent,
     NavListComponent,
     NavActionsComponent,
-    ZNodeContainerComponent,
+    ContentComponent,
     ZNodeAclComponent,
     ZNodeDataComponent,
     ZNodeMetaComponent

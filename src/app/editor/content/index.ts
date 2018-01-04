@@ -15,12 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component} from "@angular/core";
-
-@Component({
-  templateUrl: "znode-container.component.html",
-  styleUrls: ["znode-container.component.scss"]
-})
-export class ZNodeContainerComponent {
-
-}
+export * from "./content.component"
+export * from "./data"
+export * from "./acl"
+export * from "./meta"

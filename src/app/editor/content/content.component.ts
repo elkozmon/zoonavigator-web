@@ -1,4 +1,4 @@
-/*!
+/*
  * Copyright (C) 2017  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,16 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-a.active {
-  opacity: 1;
-  border-bottom: 2px solid #f4511e;
-  background-color: #eed7cf;
-}
+import {Component, Input} from "@angular/core";
 
-.mat-tab-nav-bar {
-  border-bottom: 0;
-}
+@Component({
+  selector: "zoo-editor-content",
+  templateUrl: "content.component.html",
+  styleUrls: ["content.component.scss"]
+})
+export class ContentComponent {
 
-.zoo-container-content {
-  width: 100%;
+  @Input() flex: any;
+
 }

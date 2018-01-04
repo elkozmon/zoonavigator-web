@@ -16,28 +16,29 @@
   -->
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute -->
-<div layout="column" layout-align="start start" layout-fill flex>
+<mat-card [attr.flex]="flex">
   <nav mat-tab-nav-bar>
     <a mat-tab-link
        queryParamsHandling="merge"
        routerLinkActive="active"
-       routerLink="./data">
+       routerLink="/editor/data">
       Data
-    </a><a mat-tab-link
-       queryParamsHandling="merge"
-       routerLinkActive="active"
-       routerLink="./acl">
+    </a><!--
+    --><a mat-tab-link
+          queryParamsHandling="merge"
+          routerLinkActive="active"
+          routerLink="/editor/acl">
       ACL
-    </a><a mat-tab-link
-       queryParamsHandling="merge"
-       routerLinkActive="active"
-       routerLink="./meta">
+    </a><!--
+    --><a mat-tab-link
+          queryParamsHandling="merge"
+          routerLinkActive="active"
+          routerLink="/editor/meta">
       Meta
     </a>
   </nav>
 
-  <div class="zoo-container-content" flex>
-    <router-outlet>
-    </router-outlet>
-  </div>
-</div>
+  <mat-card-content>
+    <ng-content></ng-content>
+  </mat-card-content>
+</mat-card>

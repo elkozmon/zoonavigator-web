@@ -59,7 +59,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
   }
 
   ngOnInit(): void {
-    (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.parent.data.pluck("zNodeWithChildren"))
+    (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pluck("zNodeWithChildren"))
       .forEach(either =>
         either.caseOf<void>({
           left: error => {

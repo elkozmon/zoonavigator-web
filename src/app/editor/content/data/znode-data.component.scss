@@ -17,7 +17,11 @@
 
 @import "../../../../sass/utils";
 
-.zoo-actionbar {
+.zoo-editor-container {
+  flex: 1;
+}
+
+.zoo-editor-actionbar {
   padding: .8em;
   border-top: 1px solid #d3d3d3;
   border-left: 1px solid #e4e4e4;

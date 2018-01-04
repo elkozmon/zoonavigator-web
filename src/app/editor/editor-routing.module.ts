@@ -20,7 +20,7 @@ import {RouterModule, RunGuardsAndResolvers} from "@angular/router";
 import {CanDeactivateComponentGuard} from "../shared";
 import {EditorComponent} from "./editor.component";
 import {EditorGuard} from "./editor.guard";
-import {ZNodeContainerComponent, ZNodeDataComponent, ZNodeAclComponent, ZNodeMetaComponent} from "./container";
+import {ZNodeDataComponent, ZNodeAclComponent, ZNodeMetaComponent} from "./content";
 import {ZNodeWithChildrenResolver} from "./znode/znode-with-children.resolver";
 
 const editorRoutes = [
@@ -35,35 +35,24 @@ const editorRoutes = [
     },
     children: [
       {
-        path: "node",
-        component: ZNodeContainerComponent,
-        children: [
-          {
-            path: "data",
-            component: ZNodeDataComponent,
-            canDeactivate: [CanDeactivateComponentGuard],
-            runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange"
-          },
-          {
-            path: "acl",
-            component: ZNodeAclComponent,
-            canDeactivate: [CanDeactivateComponentGuard],
-            runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange"
-          },
-          {
-            path: "meta",
-            component: ZNodeMetaComponent
-          },
-          {
-            path: "**",
-            redirectTo: "data"
-          }
-        ],
+        path: "data",
+        component: ZNodeDataComponent,
+        canDeactivate: [CanDeactivateComponentGuard],
+        runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange"
       },
       {
-        path: "",
-        redirectTo: "node",
-        pathMatch: "full"
+        path: "acl",
+        component: ZNodeAclComponent,
+        canDeactivate: [CanDeactivateComponentGuard],
+        runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange"
+      },
+      {
+        path: "meta",
+        component: ZNodeMetaComponent
+      },
+      {
+        path: "**",
+        redirectTo: "data"
       }
     ]
   }

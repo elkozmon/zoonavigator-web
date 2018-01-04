@@ -1,4 +1,4 @@
-/*
+/*!
  * Copyright (C) 2017  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./znode-container.component"
-export * from "./data"
-export * from "./acl"
-export * from "./meta"
+a.active {
+  border-bottom: 2px solid #f4511e;
+}
+
+//.mat-tab-nav-bar {
+//  border-bottom: 0;
+//}
+
+mat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+mat-card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}

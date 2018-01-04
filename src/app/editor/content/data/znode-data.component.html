@@ -16,8 +16,8 @@
   -->
 
 <!--suppress HtmlUnknownAttribute, HtmlFormInputWithoutLabel, HtmlUnknownTag -->
-<div layout="column" layout-fill *ngIf="zNode">
-  <mat-card layout="column" flex>
+<zoo-editor-content *ngIf="zNode" layout-fill layout="column" [flex]="1">
+  <div class="zoo-editor-container">
     <ace-editor
       ace-editor
       flex
@@ -30,9 +30,9 @@
       [autoUpdateContent]="true"
       style="height: 100%; overflow: auto;">
     </ace-editor>
-  </mat-card>
+  </div>
 
-  <div class="zoo-actionbar">
+  <div class="zoo-editor-actionbar">
     <button
       mat-raised-button
       type="button"
@@ -51,4 +51,4 @@
       </mat-select>
     </mat-form-field>
   </div>
-</div>
+</zoo-editor-content>
