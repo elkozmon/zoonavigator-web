@@ -32,6 +32,7 @@ import {
 } from "../../../core";
 import {CanDeactivateComponent} from "../../../shared";
 import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
+import {ZPathService} from "../../../core/zpath";
 
 @Component({
   templateUrl: "znode-acl.component.html",
@@ -45,6 +46,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
     private zNodeService: ZNodeService,
+    private zPathService: ZPathService,
     private dialogService: DialogService,
     private viewContainerRef: ViewContainerRef
   ) {
@@ -152,7 +154,9 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
   }
 
   private get currentPath(): string | null {
-    return this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH);
+    return this.zPathService
+      .parse(this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/")
+      .path;
   }
 
   private updateForm(zNodeAcl: ZNodeAcl, zNodeMeta: ZNodeMeta): void {

@@ -21,18 +21,24 @@ import {Observable} from "rxjs/Rx";
 import {Either} from "tsmonad";
 import {ZNodeService, ZNodeWithChildren} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
+import {ZPathService} from "../../core/zpath";
 
 @Injectable()
 export class ZNodeWithChildrenResolver implements Resolve<Either<Error, ZNodeWithChildren>> {
 
-  constructor(private zNodeService: ZNodeService) {
+  constructor(
+    private zNodeService: ZNodeService,
+    private zPathService: ZPathService
+  ) {
   }
 
   resolve(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ) {
-    const nodePath = route.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/";
+    const nodePath = this.zPathService
+      .parse(route.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/")
+      .path;
 
     return this.zNodeService
       .getNode(nodePath)

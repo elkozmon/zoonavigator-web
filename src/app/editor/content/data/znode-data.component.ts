@@ -29,6 +29,7 @@ import "brace/theme/chrome";
 import {DialogService, ZNode, ZNodeService, ZNodeWithChildren} from "../../../core";
 import {CanDeactivateComponent} from "../../../shared";
 import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
+import {ZPathService} from "../../../core/zpath";
 
 @Component({
   templateUrl: "znode-data.component.html",
@@ -51,6 +52,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   constructor(
     private route: ActivatedRoute,
     private zNodeService: ZNodeService,
+    private zPathService: ZPathService,
     private dialogService: DialogService,
     private viewContainerRef: ViewContainerRef
   ) {
@@ -119,6 +121,16 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
       .subscribe();
   }
 
+  onKeyDown(event: KeyboardEvent): void {
+    if (!(event.which === 115 && event.ctrlKey) && event.which !== 19) {
+      return;
+    }
+
+    // Submit on CTRL + S
+    event.preventDefault();
+    this.onSubmit();
+  }
+
   toggleWrap(): void {
     this.editorOpts.wrap = !this.editorOpts.wrap;
     this.updateOpts();
@@ -139,6 +151,8 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   }
 
   private get currentPath(): string | null {
-    return this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH);
+    return this.zPathService
+      .parse(this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/")
+      .path;
   }
 }

@@ -37,7 +37,7 @@ export class AppComponent implements OnInit {
       .queryParamMap
       .subscribe(
         map => {
-          if (map.has(EDITOR_QUERY_NODE_PATH)) {
+          if (map.has(EDITOR_QUERY_NODE_PATH) && map.get(EDITOR_QUERY_NODE_PATH).length > 1) {
             this.titleService.setTitle("ZooNavigator - " + map.get(EDITOR_QUERY_NODE_PATH));
           } else {
             this.titleService.setTitle("ZooNavigator");

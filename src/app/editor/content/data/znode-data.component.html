@@ -55,6 +55,7 @@
       ace-editor
       flex
       #dataEditor
+      (keypress)="onKeyDown($event)"
       theme="chrome"
       [(text)]="editorData"
       [mode]="editorMode"
