@@ -10,29 +10,6 @@ div.zoo-error-bar {
   @include border-radius(2px);
 }
 
-div.zoo-editor-actionbar {
-  padding: .8em;
-  border-top: 1px solid #d3d3d3;
-  background-color: #f5f5f5;
-  //@include box-shadow(-2px, 0, 2px, #000);
-
-  .zoo-divider {
-    width: 1px;
-    height: 100%;
-    border-left: 1px solid #aaa;
-    margin: 0 1em;
-  }
-
-  mat-select {
-    vertical-align: middle;
-  }
-
-  label {
-    margin: 0 .2em 0 1em;
-    text-transform: uppercase;
-  }
-}
-
 .mat-icon {
   .mat-18 {
     @include mat-icon-size(18px);

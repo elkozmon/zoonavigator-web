@@ -17,6 +17,39 @@
 
 <!--suppress HtmlUnknownAttribute, HtmlFormInputWithoutLabel, HtmlUnknownTag -->
 <zoo-editor-content *ngIf="zNode" layout-fill layout="column" [flex]="1">
+  <div class="zoo-editor-actionbar">
+    <button
+      mat-icon-button
+      matTooltip="CTRL+S"
+      matTooltipPosition="below"
+      (click)="onSubmit()"
+      [disabled]="!editorDirty"
+      color="accent">
+      <mat-icon class="mat-24">save</mat-icon>
+      <div class="zoo-shortcut-hint">save</div>
+    </button>
+
+    <button mat-icon-button disableRipple (click)="toggleWrap()">
+      <mat-icon class="mat-24">wrap_text</mat-icon>
+      <div class="zoo-shortcut-hint">wrap: {{editorOpts.wrap ? 'on' : 'off'}}</div>
+    </button>
+
+    <button mat-icon-button disableRipple [matMenuTriggerFor]="editorModesMenu">
+      <mat-icon class="mat-24">code</mat-icon>
+      <div class="zoo-shortcut-hint">mode: {{editorMode}}</div>
+    </button>
+
+    <mat-menu #editorModesMenu="matMenu">
+      <button
+        mat-menu-item
+        *ngFor="let mode of editorModes"
+        [value]="mode"
+        (click)="switchMode(mode)">
+        {{mode}}
+      </button>
+    </mat-menu>
+  </div>
+
   <div class="zoo-editor-container">
     <ace-editor
       ace-editor
@@ -30,25 +63,5 @@
       [autoUpdateContent]="true"
       style="height: 100%; overflow: auto;">
     </ace-editor>
-  </div>
-
-  <div class="zoo-editor-actionbar">
-    <button
-      mat-raised-button
-      type="button"
-      color="accent"
-      (click)="onSubmit()"
-      [disabled]="!editorDirty">
-      Save
-    </button>
-
-    <label for="editorMode" class="tc-grey-600">Mode:</label>
-    <mat-form-field>
-      <mat-select [(ngModel)]="editorMode" name="editorMode" id="editorMode">
-        <mat-option *ngFor="let mode of editorModes" [value]="mode">
-          {{mode}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
   </div>
 </zoo-editor-content>

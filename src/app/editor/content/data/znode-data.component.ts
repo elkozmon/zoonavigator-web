@@ -42,7 +42,8 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   editorModes: string[] = ["text", "json", "yaml", "xml"];
   editorMode = "text";
   editorOpts: any = {
-    fontSize: "10pt"
+    fontSize: "10pt",
+    wrap : true
   };
 
   zNode: ZNode;
@@ -116,6 +117,20 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
       )
       .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
       .subscribe();
+  }
+
+  toggleWrap(): void {
+    this.editorOpts.wrap = !this.editorOpts.wrap;
+    this.updateOpts();
+  }
+
+  switchMode(mode: string): void {
+    this.editorMode = mode;
+    // TODO unfocus the button
+  }
+
+  private updateOpts(): void {
+    this.editor.setOptions(this.editorOpts);
   }
 
   private updateData(node: ZNode): void {
