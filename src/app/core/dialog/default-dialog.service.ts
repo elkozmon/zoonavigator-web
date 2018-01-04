@@ -93,15 +93,19 @@ export class DefaultDialogService extends DialogService {
   showDiscardChanges(
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<DiscardChangesDialogComponent>> {
-    const confirm = this.showConfirm(
-      "Discard changes?",
-      "Unsaved changes detected. Do you want to discard them?",
-      "Discard",
-      "Cancel",
-      viewRef
-    );
+    const dialog = this.dialog.open(DiscardChangesDialogComponent, {
+      viewContainerRef: viewRef,
+      role: "dialog",
+      hasBackdrop: true,
+      width: "500px",
+      maxWidth: "80vw",
+      height: "200px",
+      maxHeight: "80vw",
+      direction: "ltr",
+      autoFocus: true
+    });
 
-    return confirm.switchMap(ref => ref.afterClosed());
+    return Observable.of(dialog);
   }
 
   showCreateZNode(
