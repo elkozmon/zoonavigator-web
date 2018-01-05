@@ -15,8 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./actionbar.component"
-export * from "./content.component"
-export * from "./data"
-export * from "./acl"
-export * from "./meta"
+import {Component} from "@angular/core";
+
+@Component({
+  selector: "zoo-editor-actionbar",
+  templateUrl: "actionbar.component.html",
+  styleUrls: ["actionbar.component.scss"]
+})
+export class ActionbarComponent {
+
+}

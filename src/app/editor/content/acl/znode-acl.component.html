@@ -17,30 +17,26 @@
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, HtmlFormInputWithoutLabel -->
 <zoo-editor-content *ngIf="aclForm" layout="row">
-  <div class="zoo-editor-actionbar">
+  <zoo-editor-actionbar>
     <button
-      mat-icon-button
-      disableRipple
-      (click)="onSubmit()"
-      [disabled]="!formSubmittable"
-      color="accent">
+      class="tc-deep-orange-500"
+      (click)="onSubmit(false)"
+      [disabled]="!aclForm.isValid || !aclForm.isDirty">
       <mat-icon class="mat-24">done</mat-icon>
-      <div class="zoo-icon-button-label">apply</div>
+      <span>apply</span>
     </button>
 
     <button
-      mat-icon-button
-      disableRipple
-      (click)="onSubmit()"
-      [disabled]="!formSubmittable"
-      color="accent">
+      class="tc-deep-orange-500"
+      (click)="onSubmit(true)"
+      [disabled]="!aclForm.isValid || !aclForm.isDirty">
       <mat-icon class="mat-24">done_all</mat-icon>
-      <div class="zoo-icon-button-label">recursively</div>
+      <span>recursively</span>
     </button>
-  </div>
+  </zoo-editor-actionbar>
 
   <div class="zoo-editor-container">
-    <form *ngIf="aclForm" [formGroup]="aclForm">
+    <form [formGroup]="aclForm.form">
       <input
         type="hidden"
         formControlName="aclVersion"/>
@@ -64,7 +60,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr *ngFor="let acl of aclFormArray.controls; let i = index" [formGroup]="acl">
+          <tr *ngFor="let acl of aclForm.aclFormArray.controls; let i = index" [formGroup]="acl">
             <td>
               <mat-form-field class="zoo-input-scheme">
                 <input
@@ -137,8 +133,8 @@
                 matTooltip="Remove"
                 matTooltipPosition="below"
                 color="warn"
-                (click)="removeAclFormGroup(i)"
-                [disabled]="aclFormArray.length < 2">
+                (click)="aclForm.removeAclFormItem(i)"
+                [disabled]="aclForm.aclFormArray.length < 2">
                 <mat-icon class="mat-24">delete</mat-icon>
               </button>
             </td>
@@ -152,15 +148,15 @@
           mat-button
           type="button"
           color="primary"
-          (click)="addAclFormGroup()">
+          (click)="aclForm.addAclFormItem()">
           Add new
         </button>
         <button
           mat-button
           type="button"
           color="warn"
-          [disabled]="aclFormArray.length < 2"
-          (click)="clearAclFormArray()">
+          [disabled]="aclForm.aclFormArray.length < 2"
+          (click)="clearForm()">
           Remove all
         </button>
       </div>

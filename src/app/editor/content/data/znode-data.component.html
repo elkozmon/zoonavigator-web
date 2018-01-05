@@ -17,35 +17,29 @@
 
 <!--suppress HtmlUnknownAttribute, HtmlFormInputWithoutLabel, HtmlUnknownTag -->
 <zoo-editor-content *ngIf="zNode" layout-fill layout="column" [flex]="1">
-  <div class="zoo-editor-actionbar">
+  <zoo-editor-actionbar>
     <button
-      mat-icon-button
-      disableRipple
+      class="tc-deep-orange-500"
       matTooltip="CTRL+S"
       matTooltipPosition="below"
       (click)="onSubmit()"
-      [disabled]="!editorDirty"
-      color="accent">
+      [disabled]="!editorDirty">
       <mat-icon class="mat-24">save</mat-icon>
-      <div class="zoo-icon-button-label">save</div>
+      <span>save</span>
     </button>
 
     <button
-      mat-icon-button
-      disableRipple
-      color="primary"
+      class="tc-blue-grey-600"
       (click)="toggleWrap()">
       <mat-icon class="mat-24">wrap_text</mat-icon>
-      <div class="zoo-icon-button-label">wrap: {{editorOpts.wrap ? 'on' : 'off'}}</div>
+      <span>wrap: {{editorOpts.wrap ? 'on' : 'off'}}</span>
     </button>
 
     <button
-      mat-icon-button
-      disableRipple
-      color="primary"
+      class="tc-blue-grey-600"
       [matMenuTriggerFor]="editorModesMenu">
       <mat-icon class="mat-24">code</mat-icon>
-      <div class="zoo-icon-button-label">mode: {{editorMode}}</div>
+      <span>mode: {{editorMode}}</span>
     </button>
 
     <mat-menu #editorModesMenu="matMenu">
@@ -57,7 +51,7 @@
         {{mode}}
       </button>
     </mat-menu>
-  </div>
+  </zoo-editor-actionbar>
 
   <div class="zoo-editor-container">
     <ace-editor

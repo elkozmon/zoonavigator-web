@@ -42,6 +42,7 @@ import {
 import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {AceEditorModule} from "ng2-ace-editor";
 import {
+  ActionbarComponent,
   ContentComponent,
   ZNodeAclComponent,
   ZNodeDataComponent,
@@ -52,6 +53,7 @@ import {NavActionsComponent, NavListComponent} from "./sidenav";
 import {EditorRoutingModule} from "./editor-routing.module";
 import {EditorComponent} from "./editor.component";
 import {SharedModule} from "../shared";
+import {AclFormFactory} from "./content/acl/acl-form.factory";
 
 @NgModule({
   imports: [
@@ -78,13 +80,16 @@ import {SharedModule} from "../shared";
     MatTabsModule,
     MatMenuModule
   ],
-  providers: [],
+  providers: [
+    AclFormFactory
+  ],
   declarations: [
     EditorComponent,
     ToolbarComponent,
     NavListComponent,
     NavActionsComponent,
     ContentComponent,
+    ActionbarComponent,
     ZNodeAclComponent,
     ZNodeDataComponent,
     ZNodeMetaComponent

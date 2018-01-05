@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017  Ľuboš Kozmon
+ * Copyright (C) 2018  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,8 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./actionbar.component"
-export * from "./content.component"
-export * from "./data"
-export * from "./acl"
-export * from "./meta"
+import {FormBuilder} from "@angular/forms";
+import {ZNodeAcl, ZNodeMeta} from "../../../core";
+import {Injectable} from "@angular/core";
+import {AclForm} from "./acl-form";
+
+@Injectable()
+export class AclFormFactory {
+
+  constructor(private formBuilder: FormBuilder) {
+  }
+
+  newForm(acl: ZNodeAcl, meta: ZNodeMeta): AclForm {
+    return new AclForm(acl, meta, this.formBuilder);
+  }
+}

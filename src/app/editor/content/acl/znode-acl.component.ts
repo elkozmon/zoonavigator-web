@@ -16,23 +16,15 @@
  */
 
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
-import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ActivatedRoute} from "@angular/router";
 import {Observable} from "rxjs/Rx";
 import {Either} from "tsmonad";
-import {
-  Acl,
-  DialogService,
-  Permission,
-  Scheme,
-  ZNodeAcl,
-  ZNodeService,
-  ZNodeWithChildren,
-  ZNodeMeta
-} from "../../../core";
+import {DialogService, ZNodeAcl, ZNodeService, ZNodeWithChildren} from "../../../core";
 import {CanDeactivateComponent} from "../../../shared";
-import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
 import {ZPathService} from "../../../core/zpath";
+import {AclFormFactory} from "./acl-form.factory";
+import {AclForm} from "./acl-form";
+import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
 
 @Component({
   templateUrl: "znode-acl.component.html",
@@ -40,28 +32,16 @@ import {ZPathService} from "../../../core/zpath";
 })
 export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
 
-  aclForm: FormGroup;
+  aclForm: AclForm;
 
   constructor(
     private route: ActivatedRoute,
-    private formBuilder: FormBuilder,
     private zNodeService: ZNodeService,
     private zPathService: ZPathService,
     private dialogService: DialogService,
+    private aclFormFactory: AclFormFactory,
     private viewContainerRef: ViewContainerRef
   ) {
-  }
-
-  get formDirty(): boolean {
-    if (!this.aclForm) {
-      return false;
-    }
-
-    return this.aclForm.dirty;
-  }
-
-  get formSubmittable(): boolean {
-    return this.aclForm.valid && this.aclForm.dirty && this.aclFormArray.controls.length > 0;
   }
 
   ngOnInit(): void {
@@ -72,13 +52,15 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
             this.dialogService.showError(error.message, this.viewContainerRef);
             this.aclForm = null;
           },
-          right: node => this.updateForm(node.acl, node.meta)
+          right: node => {
+            this.aclForm = this.aclFormFactory.newForm(node.acl, node.meta);
+          }
         })
       );
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.formDirty) {
+    if (this.aclForm && this.aclForm.isDirty) {
       return this.dialogService
         .showDiscardChanges(this.viewContainerRef)
         .switchMap(ref => ref.afterClosed());
@@ -87,32 +69,17 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     return Observable.of(true);
   }
 
-  onSubmit(): void {
-    const acl = this.getAclFormValue();
-
-    this.saveZNodeAcl(acl);
+  onSubmit(recursive: boolean): void {
+    this.saveZNodeAcl(
+      this.aclForm.values,
+      this.aclForm.aclVersion,
+      recursive
+    );
   }
 
-  addAclFormGroup(acl?: Acl): void {
-    this.aclFormArray.push(this.newFormGroup(acl));
-    this.aclForm.markAsDirty();
-  }
-
-  removeAclFormGroup(index: number): void {
-    this.aclFormArray.removeAt(index);
-    this.aclForm.markAsDirty();
-  }
-
-  clearAclFormArray(): void {
-    const removeAll: () => void = () => {
-      while (this.aclFormArray.controls.length > 0) {
-        this.aclFormArray.removeAt(0);
-      }
-    };
-
-    if (!this.formDirty) {
-      removeAll();
-      this.aclForm.markAsDirty();
+  clearForm(): void {
+    if (!this.aclForm.isDirty) {
+      this.aclForm.clearAclFormArray();
 
       return;
     }
@@ -126,30 +93,24 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
         this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())
-      .subscribe(
+      .forEach(
         discard => {
           if (discard) {
-            removeAll();
-            this.addAclFormGroup();
-            this.aclForm.markAsDirty();
+            this.aclForm.clearAclFormArray();
           }
         }
       );
   }
 
-  get aclFormArray(): FormArray {
-    return <FormArray>this.aclForm.get("aclArray");
-  }
-
-  private saveZNodeAcl(newZNodeAcl: ZNodeAcl): void {
+  private saveZNodeAcl(acl: ZNodeAcl, aclVersion: number, recursive: boolean): void {
     this.zNodeService
       .setAcl(
         this.currentPath,
-        this.getAclVersionFormValue(),
-        newZNodeAcl,
-        this.getApplyRecursiveFormValue()
+        aclVersion,
+        acl,
+        recursive
       )
-      .map(newMeta => this.updateForm(newZNodeAcl, newMeta))
+      .map(newMeta => this.aclForm = this.aclFormFactory.newForm(acl, newMeta))
       .switchMap(() => this.dialogService
         .showSuccess("Changes saved", this.viewContainerRef)
         .switchMap(ref => ref.afterOpened())
@@ -162,114 +123,5 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     return this.zPathService
       .parse(this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/")
       .path;
-  }
-
-  private updateForm(zNodeAcl: ZNodeAcl, zNodeMeta: ZNodeMeta): void {
-    this.aclForm = this.newForm(zNodeAcl, zNodeMeta);
-  }
-
-  private newForm(zNodeAcl: ZNodeAcl, zNodeMeta: ZNodeMeta): FormGroup {
-    const aclGroups: FormGroup[] = [];
-
-    zNodeAcl.forEach(acl => aclGroups.push(this.newFormGroup(acl)));
-
-    return this.formBuilder.group({
-      aclVersion: [zNodeMeta.aclVersion.toString(), [Validators.required]],
-      aclArray: this.formBuilder.array(aclGroups),
-      applyRecursive: [false]
-    });
-  }
-
-  private newFormGroup(acl?: Acl): FormGroup {
-    return this.formBuilder.group({
-      scheme: [acl ? acl.scheme : "", [Validators.required]],
-      id: [acl ? acl.id : ""],
-      permissions: this.newPermissionFormGroup(acl ? acl.permissions : null)
-    });
-  }
-
-  private newPermissionFormGroup(checked?: Permission[]): FormGroup {
-    const isChecked: (Permission) => boolean = (permission) => {
-      if (!checked) {
-        return false;
-      }
-
-      return checked.indexOf(permission) !== -1;
-    };
-
-    return this.formBuilder.group({
-      canCreate: [isChecked("create")],
-      canRead: [isChecked("read")],
-      canDelete: [isChecked("delete")],
-      canWrite: [isChecked("write")],
-      canAdmin: [isChecked("admin")]
-    });
-  }
-
-  private getAclLastIndex(): number {
-    return this.aclFormArray.controls.length - 1;
-  }
-
-  private getAclFormGroup(index: number): FormGroup {
-    return <FormGroup>this.aclFormArray.at(index);
-  }
-
-  private getAclSchemeFormValue(index: number): Scheme {
-    return this.getAclFormGroup(index).get("scheme").value;
-  }
-
-  private getAclIdFormValue(index: number): string {
-    return this.getAclFormGroup(index).get("id").value;
-  }
-
-  private getAclPermissionsFormValue(index: number): Permission[] {
-    const perms: Permission[] = [];
-
-    const permsGroup = this.getAclFormGroup(index).get("permissions");
-
-    if (permsGroup.get("canCreate").value) {
-      perms.push("create");
-    }
-
-    if (permsGroup.get("canRead").value) {
-      perms.push("read");
-    }
-
-    if (permsGroup.get("canDelete").value) {
-      perms.push("delete");
-    }
-
-    if (permsGroup.get("canWrite").value) {
-      perms.push("write");
-    }
-
-    if (permsGroup.get("canAdmin").value) {
-      perms.push("admin");
-    }
-
-    return perms;
-  }
-
-  private getAclVersionFormValue(): number {
-    return this.aclForm.get("aclVersion").value;
-  }
-
-  private getApplyRecursiveFormValue(): boolean {
-    return this.aclForm.get("applyRecursive").value;
-  }
-
-  private getAclFormValue(): Acl[] {
-    const aclArray: Acl[] = [];
-    const lastIndex = this.getAclLastIndex();
-
-    for (let i = 0; i <= lastIndex; i++) {
-      aclArray.push({
-        scheme: this.getAclSchemeFormValue(i),
-        id: this.getAclIdFormValue(i),
-        permissions: this.getAclPermissionsFormValue(i)
-      });
-    }
-
-    return aclArray;
   }
 }
