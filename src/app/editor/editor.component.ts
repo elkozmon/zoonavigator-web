@@ -164,7 +164,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
       .navigate([], {
         relativeTo: this.route,
         queryParams: {
-          i: ((parseInt(this.route.snapshot.queryParamMap.get("i"), 0) || 0) + 1) % 2
+          at: (Math.round((new Date()).getTime() / 1000))
         },
         queryParamsHandling: "merge"
       })
