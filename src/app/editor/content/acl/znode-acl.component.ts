@@ -60,6 +60,10 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     return this.aclForm.dirty;
   }
 
+  get formSubmittable(): boolean {
+    return this.aclForm.valid && this.aclForm.dirty && this.aclFormArray.controls.length > 0;
+  }
+
   ngOnInit(): void {
     (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pluck("zNodeWithChildren"))
       .forEach(either =>
@@ -126,6 +130,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
         discard => {
           if (discard) {
             removeAll();
+            this.addAclFormGroup();
             this.aclForm.markAsDirty();
           }
         }

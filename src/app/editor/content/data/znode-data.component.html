@@ -20,23 +20,32 @@
   <div class="zoo-editor-actionbar">
     <button
       mat-icon-button
+      disableRipple
       matTooltip="CTRL+S"
       matTooltipPosition="below"
       (click)="onSubmit()"
       [disabled]="!editorDirty"
       color="accent">
       <mat-icon class="mat-24">save</mat-icon>
-      <div class="zoo-shortcut-hint">save</div>
+      <div class="zoo-icon-button-label">save</div>
     </button>
 
-    <button mat-icon-button disableRipple (click)="toggleWrap()">
+    <button
+      mat-icon-button
+      disableRipple
+      color="primary"
+      (click)="toggleWrap()">
       <mat-icon class="mat-24">wrap_text</mat-icon>
-      <div class="zoo-shortcut-hint">wrap: {{editorOpts.wrap ? 'on' : 'off'}}</div>
+      <div class="zoo-icon-button-label">wrap: {{editorOpts.wrap ? 'on' : 'off'}}</div>
     </button>
 
-    <button mat-icon-button disableRipple [matMenuTriggerFor]="editorModesMenu">
+    <button
+      mat-icon-button
+      disableRipple
+      color="primary"
+      [matMenuTriggerFor]="editorModesMenu">
       <mat-icon class="mat-24">code</mat-icon>
-      <div class="zoo-shortcut-hint">mode: {{editorMode}}</div>
+      <div class="zoo-icon-button-label">mode: {{editorMode}}</div>
     </button>
 
     <mat-menu #editorModesMenu="matMenu">

@@ -16,139 +16,154 @@
   -->
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute, HtmlFormInputWithoutLabel -->
-<zoo-editor-content layout="row">
-  <form *ngIf="aclForm" [formGroup]="aclForm">
-    <input
-      type="hidden"
-      formControlName="aclVersion"/>
-    <div formArrayName="aclArray">
-      <table *ngIf="aclFormArray.length > 0">
-        <colgroup>4</colgroup>
-        <thead>
-        <tr>
-          <th rowspan="2" style="text-align: left">Scheme</th>
-          <th rowspan="2" style="text-align: left">Id</th>
-          <th colspan="5">Permissions</th>
-          <th></th>
-        </tr>
-        <tr>
-          <th matTooltip="Create" matTooltipPosition="below">C</th>
-          <th matTooltip="Read" matTooltipPosition="below">R</th>
-          <th matTooltip="Delete" matTooltipPosition="below">D</th>
-          <th matTooltip="Write" matTooltipPosition="below">W</th>
-          <th matTooltip="Admin" matTooltipPosition="below">A</th>
-          <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let acl of aclFormArray.controls; let i = index" [formGroup]="acl">
-          <td>
-            <mat-form-field>
-              <input
-                matInput
-                type="text"
-                formControlName="scheme"/>
-            </mat-form-field>
-            <div *ngIf="!acl.get('scheme').valid" class="zoo-warn">
-              <small>Scheme is required.</small>
-            </div>
-          </td>
-          <td>
-            <mat-form-field>
-              <input
-                matInput
-                type="text"
-                formControlName="id"/>
-            </mat-form-field>
-          </td>
-          <td>
-            <mat-checkbox
-              [formControl]="acl.get('permissions').get('canCreate')"
-              matTooltip="Create"
-              matTooltipPosition="below"
-              class="zoo-nolabel"
-              color="primary">
-            </mat-checkbox>
-          </td>
-          <td>
-            <mat-checkbox
-              [formControl]="acl.get('permissions').get('canRead')"
-              matTooltip="Read"
-              matTooltipPosition="below"
-              class="zoo-nolabel"
-              color="primary">
-            </mat-checkbox>
-          </td>
-          <td>
-            <mat-checkbox
-              [formControl]="acl.get('permissions').get('canDelete')"
-              matTooltip="Delete"
-              matTooltipPosition="below"
-              class="zoo-nolabel"
-              color="primary">
-            </mat-checkbox>
-          </td>
-          <td>
-            <mat-checkbox
-              [formControl]="acl.get('permissions').get('canWrite')"
-              matTooltip="Write"
-              matTooltipPosition="below"
-              class="zoo-nolabel"
-              color="primary">
-            </mat-checkbox>
-          </td>
-          <td>
-            <mat-checkbox
-              [formControl]="acl.get('permissions').get('canAdmin')"
-              matTooltip="Admin"
-              matTooltipPosition="below"
-              class="zoo-nolabel"
-              color="primary">
-            </mat-checkbox>
-          </td>
-          <td>
-            <button
-              mat-button
-              class="tc-red-800"
-              type="button"
-              (click)="removeAclFormGroup(i)">
-              Remove
-            </button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+<zoo-editor-content *ngIf="aclForm" layout="row">
+  <div class="zoo-editor-actionbar">
+    <button
+      mat-icon-button
+      disableRipple
+      (click)="onSubmit()"
+      [disabled]="!formSubmittable"
+      color="accent">
+      <mat-icon class="mat-24">done</mat-icon>
+      <div class="zoo-icon-button-label">apply</div>
+    </button>
 
-    <div layout="row" class="zoo-form-controls">
-      <button
-        mat-button
-        type="button"
-        (click)="addAclFormGroup()">
-        Add new
-      </button>
-      <button
-        mat-button
-        type="button"
-        *ngIf="aclFormArray.length > 0"
-        (click)="clearAclFormArray()">
-        Remove all
-      </button>
-    </div>
+    <button
+      mat-icon-button
+      disableRipple
+      (click)="onSubmit()"
+      [disabled]="!formSubmittable"
+      color="accent">
+      <mat-icon class="mat-24">done_all</mat-icon>
+      <div class="zoo-icon-button-label">recursively</div>
+    </button>
+  </div>
 
-    <div class="zoo-actionbar">
-      <button
-        mat-raised-button
-        color="accent"
-        [disabled]="!aclForm.valid || !aclForm.dirty || aclFormArray.controls.length === 0"
-        (click)="onSubmit()">
-        Save
-      </button>
-      <mat-checkbox
-        formControlName="applyRecursive"
-        color="accent">
-        <small>Apply recursively</small>
-      </mat-checkbox>
-    </div>
-  </form>
+  <div class="zoo-editor-container">
+    <form *ngIf="aclForm" [formGroup]="aclForm">
+      <input
+        type="hidden"
+        formControlName="aclVersion"/>
+      <div formArrayName="aclArray">
+        <table>
+          <colgroup>4</colgroup>
+          <thead>
+          <tr>
+            <th rowspan="2" align="left">Scheme</th>
+            <th rowspan="2" align="left">Id</th>
+            <th colspan="5">Permissions</th>
+            <th></th>
+          </tr>
+          <tr>
+            <th matTooltip="Create" matTooltipPosition="below">C</th>
+            <th matTooltip="Read" matTooltipPosition="below">R</th>
+            <th matTooltip="Delete" matTooltipPosition="below">D</th>
+            <th matTooltip="Write" matTooltipPosition="below">W</th>
+            <th matTooltip="Admin" matTooltipPosition="below">A</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let acl of aclFormArray.controls; let i = index" [formGroup]="acl">
+            <td>
+              <mat-form-field class="zoo-input-scheme">
+                <input
+                  matInput
+                  required
+                  type="text"
+                  formControlName="scheme"/>
+                <mat-error *ngIf="!acl.get('scheme').valid" class="zoo-warn">
+                  Scheme is required
+                </mat-error>
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field class="zoo-input-id">
+                <input
+                  matInput
+                  type="text"
+                  formControlName="id"/>
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-checkbox
+                [formControl]="acl.get('permissions').get('canCreate')"
+                matTooltip="Create"
+                matTooltipPosition="below"
+                class="zoo-nolabel"
+                color="primary">
+              </mat-checkbox>
+            </td>
+            <td>
+              <mat-checkbox
+                [formControl]="acl.get('permissions').get('canRead')"
+                matTooltip="Read"
+                matTooltipPosition="below"
+                class="zoo-nolabel"
+                color="primary">
+              </mat-checkbox>
+            </td>
+            <td>
+              <mat-checkbox
+                [formControl]="acl.get('permissions').get('canDelete')"
+                matTooltip="Delete"
+                matTooltipPosition="below"
+                class="zoo-nolabel"
+                color="primary">
+              </mat-checkbox>
+            </td>
+            <td>
+              <mat-checkbox
+                [formControl]="acl.get('permissions').get('canWrite')"
+                matTooltip="Write"
+                matTooltipPosition="below"
+                class="zoo-nolabel"
+                color="primary">
+              </mat-checkbox>
+            </td>
+            <td>
+              <mat-checkbox
+                [formControl]="acl.get('permissions').get('canAdmin')"
+                matTooltip="Admin"
+                matTooltipPosition="below"
+                class="zoo-nolabel"
+                color="primary">
+              </mat-checkbox>
+            </td>
+            <td>
+              <button
+                mat-icon-button
+                disableRipple
+                matTooltip="Remove"
+                matTooltipPosition="below"
+                color="warn"
+                (click)="removeAclFormGroup(i)"
+                [disabled]="aclFormArray.length < 2">
+                <mat-icon class="mat-24">delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div layout="row" class="zoo-form-controls">
+        <button
+          mat-button
+          type="button"
+          color="primary"
+          (click)="addAclFormGroup()">
+          Add new
+        </button>
+        <button
+          mat-button
+          type="button"
+          color="warn"
+          [disabled]="aclFormArray.length < 2"
+          (click)="clearAclFormArray()">
+          Remove all
+        </button>
+      </div>
+    </form>
+  </div>
 </zoo-editor-content>

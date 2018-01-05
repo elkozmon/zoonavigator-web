@@ -15,7 +15,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@import "../../../../sass/utils";
+.zoo-editor-actionbar {
+  padding: .1em;
+  background-color: #f7f7f7;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+
+  mat-select {
+    vertical-align: middle;
+  }
+
+  label {
+    margin: 0 .2em 0 1em;
+    text-transform: uppercase;
+  }
+
+  button {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .mat-icon-button {
+    width: auto;
+    min-width: 40px;
+    margin-bottom: 12px;
+  }
+}
+
+.zoo-icon-button-label {
+  line-height: 9px;
+  font-size: 9px;
+}
+
+.zoo-editor-container {
+  padding: 16px;
+}
+
+.zoo-form-controls {
+  button {
+    margin-right: 10px;
+  }
+}
 
 th {
   font-weight: 400;
@@ -25,18 +66,17 @@ th {
   padding: .2em;
 }
 
-td {
-  vertical-align: top;
-
-  mat-checkbox {
-    line-height: 32px;
-    margin: 0 0 0 8px;
-  }
-}
-
 th {
   color: #777;
   font-weight: bold;
+}
+
+.zoo-input-id {
+  margin-right: 20px;
+}
+
+.zoo-input-remove {
+  margin-left: 20px;
 }
 
 div.zoo-form-controls {

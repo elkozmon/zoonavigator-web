@@ -17,46 +17,48 @@
 
 <!--suppress HtmlUnknownAttribute, HtmlUnknownTag -->
 <zoo-editor-content *ngIf="meta" layout="row">
-  <table>
-    <tr>
-      <th>Creation ID:</th>
-      <td>{{meta.creationId}}</td>
-    </tr>
-    <tr>
-      <th>Creation time:</th>
-      <td>{{meta.creationTime}}</td>
-    </tr>
-    <tr>
-      <th>Modified ID:</th>
-      <td>{{meta.modifiedId}}</td>
-    </tr>
-    <tr>
-      <th>Modified time:</th>
-      <td>{{meta.modifiedTime}}</td>
-    </tr>
-    <tr>
-      <th>Data length:</th>
-      <td>{{meta.dataLength}}</td>
-    </tr>
-    <tr>
-      <th>Data version:</th>
-      <td>{{meta.dataVersion}}</td>
-    </tr>
-    <tr>
-      <th>Acl version:</th>
-      <td>{{meta.aclVersion}}</td>
-    </tr>
-    <tr>
-      <th>Children version:</th>
-      <td>{{meta.childrenVersion}}</td>
-    </tr>
-    <tr>
-      <th>Children number:</th>
-      <td>{{meta.childrenNumber}}</td>
-    </tr>
-    <tr>
-      <th>Ephemeral owner:</th>
-      <td>{{meta.ephemeralOwner}}</td>
-    </tr>
-  </table>
+  <div class="zoo-editor-container">
+    <table>
+      <tr>
+        <th>Creation ID:</th>
+        <td>{{meta.creationId}}</td>
+      </tr>
+      <tr>
+        <th>Creation time:</th>
+        <td>{{meta.creationTime}}</td>
+      </tr>
+      <tr>
+        <th>Modified ID:</th>
+        <td>{{meta.modifiedId}}</td>
+      </tr>
+      <tr>
+        <th>Modified time:</th>
+        <td>{{meta.modifiedTime}}</td>
+      </tr>
+      <tr>
+        <th>Data length:</th>
+        <td>{{meta.dataLength}}</td>
+      </tr>
+      <tr>
+        <th>Data version:</th>
+        <td>{{meta.dataVersion}}</td>
+      </tr>
+      <tr>
+        <th>ACL version:</th>
+        <td>{{meta.aclVersion}}</td>
+      </tr>
+      <tr>
+        <th>Children version:</th>
+        <td>{{meta.childrenVersion}}</td>
+      </tr>
+      <tr>
+        <th>Children number:</th>
+        <td>{{meta.childrenNumber}}</td>
+      </tr>
+      <tr>
+        <th>Ephemeral owner:</th>
+        <td>{{meta.ephemeralOwner}}</td>
+      </tr>
+    </table>
+  </div>
 </zoo-editor-content>

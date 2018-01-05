@@ -39,16 +39,17 @@
 }
 
 .zoo-editor-actionbar button {
-  margin-left: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .mat-icon-button {
   width: auto;
   min-width: 40px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.zoo-shortcut-hint {
+.zoo-icon-button-label {
   line-height: 0;
   font-size: 9px;
 }
