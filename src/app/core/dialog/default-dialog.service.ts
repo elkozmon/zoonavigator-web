@@ -97,6 +97,7 @@ export class DefaultDialogService extends DialogService {
       viewContainerRef: viewRef,
       role: "dialog",
       hasBackdrop: true,
+      disableClose: true,
       width: "500px",
       maxWidth: "80vw",
       height: "200px",
@@ -117,6 +118,7 @@ export class DefaultDialogService extends DialogService {
       viewContainerRef: viewRef,
       role: "dialog",
       hasBackdrop: true,
+      disableClose: true,
       width: "500px",
       maxWidth: "80vw",
       height: defaults.redirect === undefined ? "230px" : "260px",
@@ -137,6 +139,7 @@ export class DefaultDialogService extends DialogService {
       viewContainerRef: viewRef,
       role: "dialog",
       hasBackdrop: true,
+      disableClose: true,
       width: "500px",
       maxWidth: "80vw",
       height: defaults.redirect === undefined ? "230px" : "260px",
@@ -157,6 +160,7 @@ export class DefaultDialogService extends DialogService {
       viewContainerRef: viewRef,
       role: "dialog",
       hasBackdrop: true,
+      disableClose: true,
       width: "500px",
       maxWidth: "80vw",
       height: defaults.redirect === undefined ? "230px" : "260px",
@@ -208,7 +212,6 @@ export class DefaultDialogService extends DialogService {
   ): Observable<MatDialogRef<TdAlertDialogComponent>> {
     const config: IAlertConfig = {
       message: message,
-      disableClose: true,
       viewContainerRef: viewRef,
       title: title,
       closeButton: closeBtn
