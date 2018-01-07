@@ -138,7 +138,6 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
   switchMode(mode: string): void {
     this.editorMode = mode;
-    // TODO unfocus the button
   }
 
   private updateOpts(): void {

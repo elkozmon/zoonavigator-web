@@ -125,7 +125,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   disconnect(): void {
     Observable
-      .fromPromise(this.router.navigate(["/connect"]))
+      .fromPromise(this.router.navigate(["connect"]))
       .switchMap((success) => {
         if (success) {
           return this.zSessionHandler

@@ -17,9 +17,14 @@
 
 import {NgModule} from "@angular/core";
 import {Routes, RouterModule} from "@angular/router";
+import {AppGuard} from "./app.guard";
 
 const appRoutes: Routes = [
-  {path: "**", redirectTo: "/connect"}
+  {
+    path: "**",
+    canActivate: [AppGuard],
+    children: []
+  }
 ];
 
 @NgModule({
@@ -28,6 +33,9 @@ const appRoutes: Routes = [
   ],
   exports: [
     RouterModule
+  ],
+  providers: [
+    AppGuard
   ]
 })
 export class AppRoutingModule {

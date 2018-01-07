@@ -100,7 +100,7 @@ export class DefaultApiService implements ApiService {
           .switchMap(ref => ref.afterClosed())
           .subscribe(() => {
             this.router
-              .navigate(["/connect"], {
+              .navigate(["/"], {
                 queryParams: {
                   [CONNECT_QUERY_RETURN_URL]: returnUrl
                 }

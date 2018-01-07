@@ -88,7 +88,7 @@ export class ConnectComponent implements OnInit {
         authInfo: this.getAuthInfoFormValue()
       })
       .switchMap((sessionInfo) => this.zSessionHandler.setSessionInfo(sessionInfo))
-      .first()
+      // .first()
       .finally(() => this.stopLoader())
       .subscribe(
         () => this.router.navigateByUrl(this.redirectUrl),
