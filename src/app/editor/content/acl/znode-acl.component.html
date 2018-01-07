@@ -33,6 +33,14 @@
       <mat-icon class="mat-24">done_all</mat-icon>
       <span>recursively</span>
     </button>
+
+    <button
+      class="tc-red-600"
+      (click)="clearForm()"
+      [disabled]="aclForm.aclFormArray.length < 2">
+      <mat-icon class="mat-24">clear</mat-icon>
+      <span>clear</span>
+    </button>
   </zoo-editor-actionbar>
 
   <div class="zoo-editor-container">
@@ -149,15 +157,7 @@
           type="button"
           color="primary"
           (click)="aclForm.addAclFormItem()">
-          Add new
-        </button>
-        <button
-          mat-button
-          type="button"
-          color="warn"
-          [disabled]="aclForm.aclFormArray.length < 2"
-          (click)="clearForm()">
-          Remove all
+          Add ACL input
         </button>
       </div>
     </form>

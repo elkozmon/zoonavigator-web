@@ -27,11 +27,20 @@
 
 .zoo-editor-actionbar ::ng-deep {
   button {
-    background: none;
+    background: #fbfbfb;
     border: 0;
+    border-right: 1px solid #e4e4e4;
     padding: 0;
-    min-width: 60px;
+    min-width: 70px;
     min-height: 50px;
+
+    &.tc-deep-orange-500 {
+      background-color: #fff4f1;
+    }
+
+    &:active {
+      background: #eeeeee;
+    }
 
     &:focus {
       outline: 0;
@@ -41,17 +50,20 @@
       border: 0;
     }
 
+    &[disabled] {
+      background: #eeeeee;
+
+      mat-icon, span {
+        color: #9a9a9a;
+      }
+    }
+
     span {
       display: block;
       line-height: 7px;
+      font-weight: bold;
       font-size: 9px;
       font-family: "Roboto", "Helvetica Neue", sans-serif;
-    }
-  }
-
-  button[disabled] {
-    mat-icon, span {
-      color: #9a9a9a;
     }
   }
 }
