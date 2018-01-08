@@ -18,11 +18,13 @@
 import {NgModule} from "@angular/core";
 import {RouterModule, Routes} from "@angular/router";
 import {ConnectComponent} from "./connect.component";
+import {ConnectGuard} from "./connect.guard";
 
 const connectRoutes: Routes = [
   {
     path: "connect",
-    component: ConnectComponent
+    component: ConnectComponent,
+    canActivate: [ConnectGuard]
   }
 ];
 
@@ -32,6 +34,9 @@ const connectRoutes: Routes = [
   ],
   exports: [
     RouterModule
+  ],
+  providers: [
+    ConnectGuard
   ]
 })
 export class ConnectRoutingModule {
