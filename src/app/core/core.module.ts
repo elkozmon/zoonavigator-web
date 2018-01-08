@@ -18,16 +18,20 @@
 import {NgModule} from "@angular/core";
 import {FormsModule} from "@angular/forms";
 import {CommonModule} from "@angular/common";
-import {MatCheckboxModule, MatInputModule, MatDialogModule, MatButtonModule} from "@angular/material";
-import {ApiRequestFactory, ApiService, DefaultApiService, DefaultApiRequestFactory} from "./api";
+import {MatButtonModule, MatCheckboxModule, MatDialogModule, MatInputModule} from "@angular/material";
+import {ApiRequestFactory, ApiService, DefaultApiRequestFactory, DefaultApiService} from "./api";
 import {ApiZSessionService, DefaultZSessionHandler, ZSessionHandler, ZSessionService} from "./zsession";
-import {DialogService, DefaultDialogService, CreateZNodeDialogComponent} from "./dialog";
-import {StorageService, DefaultLocalStorageService} from "./storage";
-import {ZPathService, DefaultZPathService} from "./zpath";
-import {ZNodeService, ApiZNodeService} from "./znode";
-import {MoveZNodeDialogComponent} from "./dialog/dialogs";
-import {DuplicateZNodeDialogComponent} from "./dialog/dialogs/duplicate-znode.dialog";
-import {DiscardChangesDialogComponent} from "./dialog/dialogs/discard-changes.dialog";
+import {
+  DialogService,
+  DefaultDialogService,
+  MoveZNodeDialogComponent,
+  CreateZNodeDialogComponent,
+  DuplicateZNodeDialogComponent,
+  DiscardChangesDialogComponent
+} from "./dialog";
+import {StorageService, LocalStorageService} from "./storage";
+import {DefaultZPathService, ZPathService} from "./zpath";
+import {ApiZNodeService, ZNodeService} from "./znode";
 
 @NgModule({
   imports: [
@@ -41,7 +45,7 @@ import {DiscardChangesDialogComponent} from "./dialog/dialogs/discard-changes.di
   providers: [
     {provide: ApiService, useClass: DefaultApiService},
     {provide: ApiRequestFactory, useClass: DefaultApiRequestFactory},
-    {provide: StorageService, useClass: DefaultLocalStorageService},
+    {provide: StorageService, useClass: LocalStorageService},
     {provide: ZNodeService, useClass: ApiZNodeService},
     {provide: ZPathService, useClass: DefaultZPathService},
     {provide: ZSessionService, useClass: ApiZSessionService},

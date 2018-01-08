@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017  Ľuboš Kozmon
+ * Copyright (C) 2018  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,33 +16,28 @@
  */
 
 import {Injectable} from "@angular/core";
-import {AsyncLocalStorage} from "angular-async-local-storage";
 import {StorageService} from "./storage.service";
 import {Observable} from "rxjs/Rx";
 
 @Injectable()
-export class DefaultLocalStorageService implements StorageService {
+export class LocalStorageService implements StorageService {
 
-  constructor(private asyncLocalStorage: AsyncLocalStorage) {
+  constructor() {
   }
 
   set(key: string, value: any): Observable<void> {
-    return this.asyncLocalStorage
-      .setItem(key, value)
-      .mapTo(null)
-      .first();
+    return Observable
+      .defer(() => Observable.of(localStorage.setItem(key, value)))
+      .mapTo(null);
   }
 
   get(key: string): Observable<any> {
-    return this.asyncLocalStorage
-      .getItem(key)
-      .first();
+    return Observable.defer(() => Observable.of(localStorage.getItem(key)));
   }
 
   remove(key: string): Observable<void> {
-    return this.asyncLocalStorage
-      .removeItem(key)
-      .mapTo(null)
-      .first();
+    return Observable
+      .defer(() => Observable.of(localStorage.removeItem(key)))
+      .mapTo(null);
   }
 }
