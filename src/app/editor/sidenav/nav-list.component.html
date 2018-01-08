@@ -37,6 +37,9 @@
   </mat-checkbox>
   <a
     class="zoo-node-name"
+    #zooNodeName
+    [matTooltip]="(zooNodeName.offsetWidth < zooNodeName.scrollWidth) ? node.name.valueOrThrow() : null"
+    matTooltipPosition="below"
     (click)="onNavigateClick(node)">
     {{node.name.valueOrThrow()}}
   </a>
