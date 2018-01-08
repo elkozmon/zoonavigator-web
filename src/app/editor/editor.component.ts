@@ -124,18 +124,15 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   disconnect(): void {
-    Observable
-      .fromPromise(this.router.navigate(["connect"]))
-      .switchMap((success) => {
-        if (success) {
-          return this.zSessionHandler
-            .getSessionInfo()
-            .switchMap((sessionInfo) => this.zSessionService.close(sessionInfo));
-        }
-
-        return Observable.empty<void>();
-      })
-      .subscribe();
+    this.zSessionHandler
+      .getSessionInfo()
+      .switchMap(sessionInfo => this.zSessionService.close(sessionInfo))
+      .switchMap(() => this.zSessionHandler.setSessionInfo(null))
+      .catch(error => this.dialogService.showError(error, this.viewContainerRef))
+      .forEach(() => this.router
+        .navigate(["/connect"])
+        .catch(error => this.dialogService.showError(error, this.viewContainerRef))
+      );
   }
 
   selectZNode(zPath: ZPath): void {
