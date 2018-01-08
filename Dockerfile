@@ -1,4 +1,4 @@
-FROM mkenney/npm:7.0-alpine as npm
+FROM top20/node:8-alpine as npm
 MAINTAINER Lubos Kozmon <lubosh91@gmail.com>
 
 # Make dist files
