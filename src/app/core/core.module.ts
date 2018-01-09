@@ -27,7 +27,8 @@ import {
   MoveZNodeDialogComponent,
   CreateZNodeDialogComponent,
   DuplicateZNodeDialogComponent,
-  DiscardChangesDialogComponent
+  DiscardChangesDialogComponent,
+  SessionInfoDialogComponent
 } from "./dialog";
 import {StorageService, LocalStorageService} from "./storage";
 import {DefaultZPathService, ZPathService} from "./zpath";
@@ -56,13 +57,15 @@ import {ApiZNodeService, ZNodeService} from "./znode";
     MoveZNodeDialogComponent,
     CreateZNodeDialogComponent,
     DuplicateZNodeDialogComponent,
-    DiscardChangesDialogComponent
+    DiscardChangesDialogComponent,
+    SessionInfoDialogComponent
   ],
   declarations: [
     MoveZNodeDialogComponent,
     CreateZNodeDialogComponent,
     DuplicateZNodeDialogComponent,
-    DiscardChangesDialogComponent
+    DiscardChangesDialogComponent,
+    SessionInfoDialogComponent
   ]
 })
 export class CoreModule {

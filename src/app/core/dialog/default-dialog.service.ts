@@ -27,8 +27,9 @@ import {GroupedObservable} from "rxjs/operators/groupBy";
 import {DialogService} from "./dialog.service";
 import {
   CreateZNodeData, CreateZNodeDialogComponent, DiscardChangesDialogComponent, DuplicateZNodeData,
-  DuplicateZNodeDialogComponent, MoveZNodeData, MoveZNodeDialogComponent
+  DuplicateZNodeDialogComponent, MoveZNodeData, MoveZNodeDialogComponent, SessionInfoDialogComponent
 } from "./dialogs";
+import {ZSessionInfo} from "../zsession/zsession-info";
 
 interface Pair<A, B> {
   left: A,
@@ -164,6 +165,26 @@ export class DefaultDialogService extends DialogService {
       width: "500px",
       maxWidth: "80vw",
       height: defaults.redirect === undefined ? "230px" : "260px",
+      maxHeight: "80vw",
+      direction: "ltr",
+      autoFocus: true
+    });
+
+    return Observable.of(dialog);
+  }
+
+  showSessionInfo(
+    sessionInfo: ZSessionInfo,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<SessionInfoDialogComponent>> {
+    const dialog = this.dialog.open(SessionInfoDialogComponent, {
+      data: sessionInfo,
+      viewContainerRef: viewRef,
+      role: "dialog",
+      hasBackdrop: true,
+      width: "500px",
+      maxWidth: "80vw",
+      height: "250px",
       maxHeight: "80vw",
       direction: "ltr",
       autoFocus: true

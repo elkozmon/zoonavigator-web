@@ -109,10 +109,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
       .getSessionInfo()
       .switchMap((sessionInfo) => {
           if (sessionInfo) {
-            return this.dialogService.showAlert(
-              "Session info",
-              "Connection string: " + sessionInfo.connectionString,
-              "Dismiss",
+            return this.dialogService.showSessionInfo(
+              sessionInfo,
               this.viewContainerRef
             );
           }

@@ -28,6 +28,8 @@ import {
   DuplicateZNodeDialogComponent,
   DuplicateZNodeData
 } from "./dialogs";
+import {SessionInfoDialogComponent} from "./dialogs/session-info.dialog";
+import {ZSessionInfo} from "../zsession/zsession-info";
 
 @Injectable()
 export abstract class DialogService {
@@ -60,6 +62,11 @@ export abstract class DialogService {
     defaults: MoveZNodeData,
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<MoveZNodeDialogComponent>>
+
+  abstract showSessionInfo(
+    sessionInfo: ZSessionInfo,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<SessionInfoDialogComponent>>
 
   abstract showConfirm(
     title: string,

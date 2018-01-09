@@ -15,11 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./create-znode.data"
-export * from "./create-znode.dialog"
-export * from "./discard-changes.dialog"
-export * from "./duplicate-znode.data"
-export * from "./duplicate-znode.dialog"
-export * from "./move-znode.data"
-export * from "./move-znode.dialog"
-export * from "./session-info.dialog"
+import {Component, Inject} from "@angular/core";
+import {MAT_DIALOG_DATA} from "@angular/material"
+import {ZSessionInfo} from "../../zsession/zsession-info";
+
+@Component({
+  selector: "zoo-session-info.dialog",
+  templateUrl: "session-info.dialog.html",
+  styleUrls: ["dialog.scss"]
+})
+export class SessionInfoDialogComponent {
+  constructor(@Inject(MAT_DIALOG_DATA) public sessionInfo: ZSessionInfo) {
+  }
+}
