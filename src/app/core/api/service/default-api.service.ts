@@ -98,21 +98,13 @@ export class DefaultApiService implements ApiService {
         this.dialogService
           .showError(message, null)
           .switchMap(ref => ref.afterClosed())
-          .subscribe(() => {
-            this.router
-              .navigate(["/"], {
-                queryParams: {
-                  [CONNECT_QUERY_RETURN_URL]: returnUrl
-                }
-              })
-              .then((success) => {
-                if (success) {
-                  this
-                    .zSessionHandler
-                    .setSessionInfo(null)
-                    .subscribe();
-                }
-              });
+          .switchMapTo(this.zSessionHandler.setSessionInfo(null))
+          .forEach(() => {
+            this.router.navigate(["/"], {
+              queryParams: {
+                [CONNECT_QUERY_RETURN_URL]: returnUrl
+              }
+            });
           });
       }
     } else {
