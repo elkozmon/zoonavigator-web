@@ -70,11 +70,32 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
   }
 
   onSubmit(recursive: boolean): void {
-    this.saveZNodeAcl(
-      this.aclForm.values,
-      this.aclForm.aclVersion,
-      recursive
-    );
+    let confirmation: Observable<boolean> = Observable.of(true);
+
+    if (recursive) {
+      confirmation = this.dialogService
+        .showConfirm(
+          "Confirm recursive change",
+          "Do you want to apply these settings to this node and all its children?",
+          "Apply",
+          "Cancel",
+          this.viewContainerRef
+        )
+        .switchMap(ref => ref.afterClosed());
+    }
+
+    const values = this.aclForm.values;
+    const version = this.aclForm.aclVersion;
+
+    confirmation.forEach(confirm => {
+      if (confirm) {
+        this.saveZNodeAcl(
+          values,
+          version,
+          recursive
+        );
+      }
+    });
   }
 
   clearForm(): void {
