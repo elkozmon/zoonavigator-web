@@ -173,7 +173,7 @@ export class ApiZNodeService implements ZNodeService {
     recursively: boolean
   ): Observable<ZNodeMeta> {
     return this.withAuthToken(token => {
-      const params = new HttpParams({
+      let params = new HttpParams({
         fromObject: {
           path: path,
           version: version.toString()
@@ -181,7 +181,7 @@ export class ApiZNodeService implements ZNodeService {
       });
 
       if (recursively) {
-        params.set("recursive", "true");
+        params = params.set("recursive", "true");
       }
 
       const request = this.apiRequestFactory.putRequest(
