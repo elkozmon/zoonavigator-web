@@ -76,7 +76,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
       confirmation = this.dialogService
         .showConfirm(
           "Confirm recursive change",
-          "Do you want to apply these settings to this node and all its children?",
+          "Do you want to apply these settings to this node and its children?",
           "Apply",
           "Cancel",
           this.viewContainerRef
@@ -107,9 +107,9 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
 
     this.dialogService
       .showConfirm(
-        "Confirm removing all ACLs",
+        "Confirm clearing the form",
         "Do you want to remove all ACL inputs? Changes will not be applied yet.",
-        "Remove",
+        "Clear",
         "Cancel",
         this.viewContainerRef
       )

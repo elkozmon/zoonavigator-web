@@ -18,14 +18,14 @@
 <h3 mat-dialog-title>Move node</h3>
 <mat-dialog-content>
   <div>
-    <span>Type in new node path</span>
+    <span>Enter new path</span>
   </div>
   <mat-form-field class="zoo-full-width">
     <input matInput [(ngModel)]="data.path"/>
   </mat-form-field>
   <div *ngIf="data.redirect !== undefined">
     <mat-checkbox [(ngModel)]="data.redirect">
-      Show the new node afterwards
+      Open the new node afterwards
     </mat-checkbox>
   </div>
 </mat-dialog-content>
