@@ -122,7 +122,9 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   }
 
   onKeyDown(event: KeyboardEvent): void {
-    if (!(event.which === 115 && event.ctrlKey) && event.which !== 19) {
+    const code = event.which || event.keyCode;
+
+    if (!(code === 115 && event.ctrlKey) && code !== 19) {
       return;
     }
 
