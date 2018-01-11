@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, Inject} from "@angular/core";
-import {MAT_DIALOG_DATA} from "@angular/material"
+import {Component, Inject, ViewChild} from "@angular/core";
+import {MAT_DIALOG_DATA, MatButton} from "@angular/material"
 import {CreateZNodeData} from "./create-znode.data";
+import {RegexpFilterComponent} from "../../../shared";
 
 @Component({
   selector: "zoo-create-znode.dialog",
@@ -25,6 +26,17 @@ import {CreateZNodeData} from "./create-znode.data";
   styleUrls: ["dialog.scss"]
 })
 export class CreateZNodeDialogComponent {
+
+  @ViewChild("submitButton") submitButton: MatButton;
+
   constructor(@Inject(MAT_DIALOG_DATA) public data: CreateZNodeData) {
+  }
+
+  onKeyPress(event: KeyboardEvent): void {
+    const code = event.which || event.keyCode;
+
+    if (code === 13) {
+      this.submitButton._elementRef.nativeElement.click();
+    }
   }
 }

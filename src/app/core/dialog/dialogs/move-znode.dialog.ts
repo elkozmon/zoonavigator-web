@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, Inject} from "@angular/core";
-import {MAT_DIALOG_DATA} from "@angular/material"
+import {Component, Inject, ViewChild} from "@angular/core";
+import {MAT_DIALOG_DATA, MatButton} from "@angular/material"
 import {MoveZNodeData} from "./move-znode.data";
 
 @Component({
@@ -25,6 +25,17 @@ import {MoveZNodeData} from "./move-znode.data";
   styleUrls: ["dialog.scss"]
 })
 export class MoveZNodeDialogComponent {
+
+  @ViewChild("submitButton") submitButton: MatButton;
+
   constructor(@Inject(MAT_DIALOG_DATA) public data: MoveZNodeData) {
+  }
+
+  onKeyPress(event: KeyboardEvent): void {
+    const code = event.which || event.keyCode;
+
+    if (code === 13) {
+      this.submitButton._elementRef.nativeElement.click();
+    }
   }
 }

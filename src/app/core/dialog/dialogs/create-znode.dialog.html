@@ -21,7 +21,10 @@
     <span>Enter new path</span>
   </div>
   <mat-form-field class="zoo-full-width">
-    <input matInput [(ngModel)]="data.path"/>
+    <input
+      matInput
+      (keypress)="onKeyPress($event)"
+      [(ngModel)]="data.path"/>
   </mat-form-field>
   <div *ngIf="data.redirect !== null">
     <mat-checkbox [(ngModel)]="data.redirect">
@@ -31,5 +34,5 @@
 </mat-dialog-content>
 <mat-dialog-actions layout-align="end">
   <button mat-button [mat-dialog-close]="null">Cancel</button>
-  <button mat-button [mat-dialog-close]="data" color="accent">Create</button>
+  <button mat-button [mat-dialog-close]="data" color="accent" #submitButton="matButton">Create</button>
 </mat-dialog-actions>
