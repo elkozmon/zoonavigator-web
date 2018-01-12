@@ -2,7 +2,7 @@ ZooNavigator Web
 ================
 
 [![Build Status](https://travis-ci.org/elkozmon/zoonavigator-web.svg)](https://travis-ci.org/elkozmon/zoonavigator-web)
-[![Docker Stars](https://img.shields.io/docker/pulls/elkozmon/zoonavigator-web.svg)]()
+[![Docker Pulls](https://img.shields.io/docker/pulls/elkozmon/zoonavigator-web.svg)]()
 
 Web client for ZooNavigator, web-based GUI for ZooKeeper.
 
