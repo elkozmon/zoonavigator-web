@@ -48,6 +48,7 @@ import {
   ZNodeDataComponent,
   ZNodeMetaComponent
 } from "./content";
+import {PreferencesService, DefaultPreferencesService} from "./preferences";
 import {ToolbarComponent} from "./toolbar";
 import {NavActionsComponent, NavListComponent} from "./sidenav";
 import {EditorRoutingModule} from "./editor-routing.module";
@@ -81,7 +82,8 @@ import {AclFormFactory} from "./content/acl/acl-form.factory";
     MatMenuModule
   ],
   providers: [
-    AclFormFactory
+    AclFormFactory,
+    {provide: PreferencesService, useClass: DefaultPreferencesService}
   ],
   declarations: [
     EditorComponent,

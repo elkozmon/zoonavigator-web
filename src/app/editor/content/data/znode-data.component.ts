@@ -30,6 +30,8 @@ import {DialogService, ZNode, ZNodeService, ZNodeWithChildren} from "../../../co
 import {CanDeactivateComponent} from "../../../shared";
 import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
 import {ZPathService} from "../../../core/zpath";
+import {Mode} from "../../mode";
+import {PreferencesService} from "../../preferences";
 
 @Component({
   templateUrl: "znode-data.component.html",
@@ -39,12 +41,21 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
   @ViewChild("dataEditor") editor: AceEditorComponent;
 
+  defaultMode: Mode = Mode.Text;
+
+  currentPath: Observable<string>;
+
   editorData: string;
-  editorModes: string[] = ["text", "json", "yaml", "xml"];
-  editorMode = "text";
+  editorModes: Mode[] = [
+    Mode.Text,
+    Mode.Json,
+    Mode.Yaml,
+    Mode.Xml
+  ];
+  editorMode: Mode = Mode.Text;
   editorOpts: any = {
     fontSize: "10pt",
-    wrap : true
+    wrap: true
   };
 
   zNode: ZNode;
@@ -54,6 +65,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
     private zNodeService: ZNodeService,
     private zPathService: ZPathService,
     private dialogService: DialogService,
+    private preferencesService: PreferencesService,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -77,6 +89,20 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
           right: node => this.updateData(node)
         })
       );
+
+    this.currentPath = this.route
+      .queryParamMap
+      .map(a =>
+        this.zPathService
+          .parse(a.get(EDITOR_QUERY_NODE_PATH) || "/")
+          .path
+      );
+
+    // Try to recall mode used the last time with this node
+    this.currentPath
+      .concatMap(m => this.preferencesService.getModeFor(m))
+      .map(m => m.valueOr(this.defaultMode))
+      .forEach(mode => this.editorMode = mode);
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
@@ -94,7 +120,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
     this.zNodeService
       .setData(
-        this.currentPath,
+        this.currentPathSnapshot,
         this.zNode.meta.dataVersion,
         newData
       )
@@ -138,7 +164,12 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
     this.updateOpts();
   }
 
-  switchMode(mode: string): void {
+  switchMode(mode: Mode): void {
+    // Remember mode used for this node
+    this.preferencesService
+      .setModeFor(this.currentPathSnapshot, mode)
+      .subscribe();
+
     this.editorMode = mode;
   }
 
@@ -151,7 +182,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
     this.editorData = node.data;
   }
 
-  private get currentPath(): string | null {
+  private get currentPathSnapshot(): string | null {
     return this.zPathService
       .parse(this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/")
       .path;
