@@ -19,7 +19,6 @@ import {NgModule} from "@angular/core";
 import {MatIconModule, MatInputModule} from "@angular/material";
 import {CovalentCommonModule} from "@covalent/core";
 import {RegexpFilterComponent} from "./regexp/regexp-filter.component";
-import {WindowRef} from "./window/window-ref";
 import {CanDeactivateComponentGuard} from "./guards";
 
 @NgModule({
@@ -32,7 +31,6 @@ import {CanDeactivateComponentGuard} from "./guards";
     RegexpFilterComponent
   ],
   providers: [
-    WindowRef,
     CanDeactivateComponentGuard
   ],
   exports: [
