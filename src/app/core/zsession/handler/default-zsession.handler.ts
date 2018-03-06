@@ -24,7 +24,7 @@ import {StorageService} from "../../storage";
 @Injectable()
 export class DefaultZSessionHandler implements ZSessionHandler {
 
-  private sessionInfoKey = "sessionInfo";
+  private sessionInfoKey = "DefaultZSessionHandler.sessionInfo";
 
   constructor(private storageService: StorageService) {
   }
