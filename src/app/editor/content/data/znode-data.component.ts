@@ -109,8 +109,14 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
   }
 
   ngAfterViewInit(): void {
-    // Disable Ace editors search box
-    this.editor._editor.commands.removeCommand("find");
+    // Check if editor exists since its guarded by ngIf
+    if (this.editor) {
+      // Disable Ace editors search box
+      this.editor
+        ._editor
+        .commands
+        .removeCommand("find");
+    }
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
