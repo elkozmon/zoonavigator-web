@@ -56,6 +56,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
   ];
   editorMode: Mode = this.defaultMode;
   editorOpts: any = {
+    fontFamily: "DejaVu Sans Mono, monospace",
     fontSize: "10pt",
     wrap: true
   };
