@@ -17,71 +17,36 @@
 
 import {Injectable, ViewContainerRef} from "@angular/core";
 import {
-  IAlertConfig, IConfirmConfig, TdAlertDialogComponent, TdConfirmDialogComponent,
+  IAlertConfig,
+  IConfirmConfig,
+  TdAlertDialogComponent,
+  TdConfirmDialogComponent,
   TdDialogService
 } from "@covalent/core";
 import {MatDialog, MatDialogRef, MatSnackBar, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
 import {Observable} from "rxjs/Rx";
-import {Subject} from "rxjs/Subject";
-import {GroupedObservable} from "rxjs/operators/groupBy";
 import {DialogService} from "./dialog.service";
 import {
-  CreateZNodeData, CreateZNodeDialogComponent, DiscardChangesDialogComponent, DuplicateZNodeData,
-  DuplicateZNodeDialogComponent, MoveZNodeData, MoveZNodeDialogComponent, SessionInfoDialogComponent
+  CreateZNodeData,
+  CreateZNodeDialogComponent,
+  DiscardChangesDialogComponent,
+  DuplicateZNodeData,
+  DuplicateZNodeDialogComponent,
+  MoveZNodeData,
+  MoveZNodeDialogComponent,
+  SessionInfoDialogComponent
 } from "./dialogs";
 import {ZSessionInfo} from "../zsession/zsession-info";
 
-interface Pair<A, B> {
-  left: A,
-  right: B
-}
 
 type GroupKey = string;
 
 @Injectable()
 export class DefaultDialogService extends DialogService {
 
-  private groupByWindowDuration = 200; // ms
+  private showConfirmInstances: Map<GroupKey, MatDialogRef<TdConfirmDialogComponent>> = new Map();
 
-  private showConfirmSubject: Subject<Pair<GroupKey, IConfirmConfig>> = new Subject();
-
-  private showConfirmObservable: Observable<Pair<GroupKey, MatDialogRef<TdConfirmDialogComponent>>> =
-    Observable
-      .from(this.showConfirmSubject)
-      .groupBy(
-        (pair: Pair<GroupKey, IConfirmConfig>) => pair.left,
-        (pair: Pair<GroupKey, IConfirmConfig>) => pair.right,
-        () => Observable.interval(this.groupByWindowDuration)
-      )
-      .mergeMap((group: GroupedObservable<GroupKey, IConfirmConfig>) =>
-        group.toArray().map((array: IConfirmConfig[]) => {
-          return {
-            left: group.key,
-            right: this.dialogService.openConfirm(array[0])
-          };
-        })
-      )
-      .share();
-
-  private showAlertSubject: Subject<Pair<GroupKey, IAlertConfig>> = new Subject();
-
-  private showAlertObservable: Observable<Pair<GroupKey, MatDialogRef<TdAlertDialogComponent>>> =
-    Observable
-      .from(this.showAlertSubject)
-      .groupBy(
-        (pair: Pair<GroupKey, IAlertConfig>) => pair.left,
-        (pair: Pair<GroupKey, IAlertConfig>) => pair.right,
-        () => Observable.interval(this.groupByWindowDuration)
-      )
-      .mergeMap((group: GroupedObservable<GroupKey, IAlertConfig>) =>
-        group.toArray().map((array: IAlertConfig[]) => {
-          return {
-            left: group.key,
-            right: this.dialogService.openAlert(array[0])
-          };
-        })
-      )
-      .share();
+  private showAlertInstances: Map<GroupKey, MatDialogRef<TdAlertDialogComponent>> = new Map();
 
   constructor(
     private dialogService: TdDialogService,
@@ -211,18 +176,22 @@ export class DefaultDialogService extends DialogService {
 
     const key: GroupKey = title + message + acceptBtn;
 
-    const promise = this.showConfirmObservable
-      .filter(pair => pair.left === key)
-      .first()
-      .map(pair => pair.right)
-      .toPromise();
+    // Look for cached dialog
+    if (this.showConfirmInstances.has(key)) {
+      return Observable.of(this.showConfirmInstances.get(key));
+    }
 
-    this.showConfirmSubject.next({
-      left: key,
-      right: config
-    });
+    const dialog = this.dialogService.openConfirm(config);
 
-    return Observable.fromPromise(promise);
+    // Cache dialog
+    this.showConfirmInstances.set(key, dialog);
+
+    // Uncache dialog once closed
+    dialog
+      .afterClosed()
+      .forEach(() => this.showConfirmInstances.delete(key));
+
+    return Observable.of(dialog);
   }
 
   showAlert(
@@ -240,18 +209,22 @@ export class DefaultDialogService extends DialogService {
 
     const key: GroupKey = title + message;
 
-    const promise = this.showAlertObservable
-      .filter(pair => pair.left === key)
-      .first()
-      .map(pair => pair.right)
-      .toPromise();
+    // Look for cached dialog
+    if (this.showAlertInstances.has(key)) {
+      return Observable.of(this.showAlertInstances.get(key));
+    }
 
-    this.showAlertSubject.next({
-      left: key,
-      right: config
-    });
+    const dialog = this.dialogService.openAlert(config);
 
-    return Observable.fromPromise(promise);
+    // Cache dialog
+    this.showAlertInstances.set(key, dialog);
+
+    // Uncache dialog once closed
+    dialog
+      .afterClosed()
+      .forEach(() => this.showAlertInstances.delete(key));
+
+    return Observable.of(dialog);
   }
 
   showError(
