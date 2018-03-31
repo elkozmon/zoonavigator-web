@@ -51,6 +51,14 @@
         {{mode}}
       </button>
     </mat-menu>
+
+    <button
+      class="tc-blue-grey-600"
+      (click)="formatData()"
+      [disabled]="!formatterAvailable">
+      <mat-icon class="mat-24">format_paint</mat-icon>
+      <span>auto-format</span>
+    </button>
   </zoo-editor-actionbar>
 
   <div class="zoo-editor-container">

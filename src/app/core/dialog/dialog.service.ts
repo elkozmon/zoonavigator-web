@@ -88,7 +88,7 @@ export abstract class DialogService {
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<TdAlertDialogComponent>>
 
-  abstract showSuccess(
+  abstract showSnackbar(
     message: string,
     viewRef?: ViewContainerRef
   ): Observable<MatSnackBarRef<SimpleSnackBar>>

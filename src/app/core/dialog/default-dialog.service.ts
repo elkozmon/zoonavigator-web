@@ -266,7 +266,7 @@ export class DefaultDialogService extends DialogService {
     );
   }
 
-  showSuccess(
+  showSnackbar(
     message: string,
     viewRef?: ViewContainerRef
   ): Observable<MatSnackBarRef<SimpleSnackBar>> {
@@ -275,7 +275,6 @@ export class DefaultDialogService extends DialogService {
       "Close",
       {
         duration: 3000,
-        extraClasses: ["zoo-success"],
         viewContainerRef: viewRef
       }
     );

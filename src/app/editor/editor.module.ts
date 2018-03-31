@@ -55,6 +55,8 @@ import {EditorRoutingModule} from "./editor-routing.module";
 import {EditorComponent} from "./editor.component";
 import {SharedModule} from "../shared";
 import {AclFormFactory} from "./content/acl/acl-form.factory";
+import {Formatter, JsonFormatter, YamlFormatter} from "./formatter/formatters";
+import {DefaultFormatterProvider, FormatterProvider} from "./formatter";
 
 @NgModule({
   imports: [
@@ -83,7 +85,10 @@ import {AclFormFactory} from "./content/acl/acl-form.factory";
   ],
   providers: [
     AclFormFactory,
-    {provide: PreferencesService, useClass: DefaultPreferencesService}
+    {provide: PreferencesService, useClass: DefaultPreferencesService},
+    {provide: Formatter, multi: true, useClass: JsonFormatter},
+    {provide: Formatter, multi: true, useClass: YamlFormatter},
+    {provide: FormatterProvider, useClass: DefaultFormatterProvider}
   ],
   declarations: [
     EditorComponent,

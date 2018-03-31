@@ -1,6 +1,6 @@
 {
   "name": "zoonavigator-web",
-  "version": "x.x.x",
+  "version": "0.0.0",
   "license": "GNU Affero GPL V3",
   "author": {
     "name": "Ľuboš Kozmon",
@@ -40,6 +40,7 @@
     "rxjs": "^5.5.6",
     "spinkit": "^1.2.5",
     "tsmonad": "^0.8.0",
+    "yamljs": "^0.3.0",
     "zone.js": "^0.8.18"
   },
   "devDependencies": {

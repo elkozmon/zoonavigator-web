@@ -132,9 +132,10 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
         recursive
       )
       .map(newMeta => this.aclForm = this.aclFormFactory.newForm(acl, newMeta))
-      .switchMap(() => this.dialogService
-        .showSuccess("Changes saved", this.viewContainerRef)
-        .switchMap(ref => ref.afterOpened())
+      .switchMap(() =>
+        this.dialogService
+          .showSnackbar("Changes saved", this.viewContainerRef)
+          .switchMap(ref => ref.afterOpened())
       )
       .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
       .subscribe();

@@ -15,12 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
+import {AfterViewInit, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {AceEditorComponent} from "ng2-ace-editor";
 import {Observable} from "rxjs/Rx";
 import {Either} from "tsmonad";
 import "brace";
+import "brace/ext/searchbox";
 import "brace/mode/text";
 import "brace/mode/json";
 import "brace/mode/yaml";
@@ -28,16 +29,17 @@ import "brace/mode/xml";
 import "brace/theme/chrome";
 import {DialogService, ZNode, ZNodeService, ZNodeWithChildren} from "../../../core";
 import {CanDeactivateComponent} from "../../../shared";
+import {PreferencesService} from "../../preferences";
 import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
 import {ZPathService} from "../../../core/zpath";
 import {Mode} from "../../mode";
-import {PreferencesService} from "../../preferences";
+import {FormatterProvider, Formatter} from "../../formatter";
 
 @Component({
   templateUrl: "znode-data.component.html",
   styleUrls: ["znode-data.component.scss"]
 })
-export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
+export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateComponent {
 
   @ViewChild("dataEditor") editor: AceEditorComponent;
 
@@ -52,7 +54,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
     Mode.Yaml,
     Mode.Xml
   ];
-  editorMode: Mode = Mode.Text;
+  editorMode: Mode = this.defaultMode;
   editorOpts: any = {
     fontSize: "10pt",
     wrap: true
@@ -66,6 +68,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
     private zPathService: ZPathService,
     private dialogService: DialogService,
     private preferencesService: PreferencesService,
+    private formatterProvider: FormatterProvider,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -105,6 +108,11 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
       .forEach(mode => this.editorMode = mode);
   }
 
+  ngAfterViewInit(): void {
+    // Disable Ace editors search box
+    this.editor._editor.commands.removeCommand("find");
+  }
+
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
     if (this.editorDirty) {
       return this.dialogService
@@ -135,12 +143,8 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
         this.updateData(newNode);
       })
       .switchMap(() =>
-        this
-          .dialogService
-          .showSuccess(
-            "Changes saved",
-            this.viewContainerRef
-          )
+        this.dialogService
+          .showSnackbar("Changes saved", this.viewContainerRef)
           .switchMap(ref => ref.afterOpened())
       )
       .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
@@ -157,6 +161,33 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
     // Submit on CTRL + S
     event.preventDefault();
     this.onSubmit();
+  }
+
+  formatData(): void {
+    this.formatterProvider
+      .getFormatter(this.editorMode)
+      .map<Either<Error, Formatter>>(Either.right)
+      .valueOrCompute(() => Either.left<Error, Formatter>(
+        new Error("Unsupported mode '" + this.editorMode.toUpperCase() + "'")
+      ))
+      .bind((f: Formatter) => f.format(this.editorData))
+      .caseOf({
+        left: error => {
+          this.dialogService
+            .showSnackbar("Error:  " + error.message, this.viewContainerRef)
+            .subscribe()
+        },
+        right: data => this.editorData = data
+      });
+  }
+
+  get formatterAvailable(): boolean {
+    return this.formatterProvider
+      .getFormatter(this.editorMode)
+      .caseOf({
+        just: () => true,
+        nothing: () => false
+      });
   }
 
   toggleWrap(): void {
