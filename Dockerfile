@@ -10,6 +10,9 @@ RUN npm install -g @angular/cli \
 
 FROM nginx:1.13.5
 
+ARG ZOONAV_VERSION
+ENV ZOONAV_VERSION=$ZOONAV_VERSION
+
 # Copy setup files
 COPY ./docker/copy /
 
