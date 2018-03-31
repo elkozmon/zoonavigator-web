@@ -29,14 +29,11 @@
   button {
     background: #fbfbfb;
     border: 0;
-    border-right: 1px solid #e4e4e4;
     padding: 0;
-    min-width: 70px;
+    min-width: 75px;
     min-height: 50px;
-
-    &.tc-deep-orange-500 {
-      background-color: #fff4f1;
-    }
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, .1);
+    margin: 0 1px 0 0;
 
     &:active {
       background: #eeeeee;
@@ -56,6 +53,10 @@
       mat-icon, span {
         color: #9a9a9a;
       }
+    }
+
+    mat-icon, span {
+      text-shadow: 1px 1px white;
     }
 
     span {
