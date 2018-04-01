@@ -23,8 +23,8 @@ import {Observable} from "rxjs/Observable";
 @Injectable()
 export abstract class PreferencesService {
 
-  abstract setModeFor(path: string, mode: Mode): Observable<void>
+  abstract setModeFor(path: string, creationId: number, mode: Mode): Observable<void>
 
-  abstract getModeFor(path: string): Observable<Maybe<Mode>>
+  abstract getModeFor(path: string, creationId: number): Observable<Maybe<Mode>>
 }
 

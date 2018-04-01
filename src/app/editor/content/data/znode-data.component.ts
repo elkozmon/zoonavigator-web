@@ -19,7 +19,7 @@ import {AfterViewInit, Component, OnInit, ViewChild, ViewContainerRef} from "@an
 import {ActivatedRoute, Router} from "@angular/router";
 import {AceEditorComponent} from "ng2-ace-editor";
 import {Observable} from "rxjs/Rx";
-import {Either} from "tsmonad";
+import {Either, Maybe} from "tsmonad";
 import "brace";
 import "brace/ext/searchbox";
 import "brace/mode/text";
@@ -27,13 +27,13 @@ import "brace/mode/json";
 import "brace/mode/yaml";
 import "brace/mode/xml";
 import "brace/theme/chrome";
-import {DialogService, ZNode, ZNodeService, ZNodeWithChildren} from "../../../core";
+import {DialogService, ZNodeService, ZNodeWithChildren} from "../../../core";
 import {CanDeactivateComponent} from "../../../shared";
 import {PreferencesService} from "../../preferences";
-import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
 import {ZPathService} from "../../../core/zpath";
 import {Mode} from "../../mode";
 import {Formatter, FormatterProvider} from "../../formatter";
+import {ZNodeMeta} from "../../../core/znode";
 
 @Component({
   templateUrl: "znode-data.component.html",
@@ -45,7 +45,9 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
 
   defaultMode: Mode = Mode.Text;
 
-  currentPath: Observable<string>;
+  currentNode: ZNodeWithChildren;
+
+  isSubmitting = false;
 
   editorData: string;
   editorModes: Mode[] = [
@@ -61,8 +63,6 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
     wrap: true
   };
 
-  zNode: ZNode;
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -76,38 +76,44 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
   }
 
   get editorDirty(): boolean {
-    if (!this.zNode) {
+    if (!this.currentNode) {
       return false;
     }
 
-    return this.editorData !== this.zNode.data;
+    return this.currentNode.data !== this.editorData;
   }
 
   ngOnInit(): void {
-    (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pluck("zNodeWithChildren"))
-      .forEach(either =>
-        either.caseOf<void>({
-          left: error => {
-            this.dialogService.showError(error.message, this.viewContainerRef);
-            this.zNode = null;
-          },
-          right: node => this.updateData(node)
-        })
-      );
+    const currentNodeObservable: Observable<Either<Error, ZNodeWithChildren>> =
+      this.route
+        .parent
+        .data
+        .pluck("zNodeWithChildren");
 
-    this.currentPath = this.route
-      .queryParamMap
-      .map(a =>
-        this.zPathService
-          .parse(a.get(EDITOR_QUERY_NODE_PATH) || "/")
-          .path
-      );
+    // Update current node
+    currentNodeObservable
+      .do(either => either.caseOf({
+        left: error => this.currentNode = null,
+        right: node => this.currentNode = node
+      }))
+      .subscribe();
+
+    // Show popup on error or update editor data
+    currentNodeObservable
+      .do(either => either.caseOf<void>({
+        left: error => this.dialogService.showError(error.message, this.viewContainerRef),
+        right: node => this.editorData = node.data
+      }))
+      .subscribe();
 
     // Try to recall mode used the last time with this node
-    this.currentPath
-      .concatMap(m => this.preferencesService.getModeFor(m))
-      .map(m => m.valueOr(this.defaultMode))
-      .forEach(mode => this.editorMode = mode);
+    currentNodeObservable
+      .switchMap(either => either.caseOf({
+        left: () => Observable.empty<Maybe<Mode>>(),
+        right: n => this.preferencesService.getModeFor(n.path, n.meta.creationId)
+      }))
+      .do(maybeMode => this.editorMode = maybeMode.valueOr(this.defaultMode))
+      .subscribe();
   }
 
   ngAfterViewInit(): void {
@@ -122,7 +128,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.editorDirty) {
+    if (this.editorDirty && !this.isSubmitting) {
       return this.dialogService
         .showDiscardChanges(this.viewContainerRef)
         .switchMap(ref => ref.afterClosed());
@@ -132,16 +138,15 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
   }
 
   onSubmit(): void {
+    this.isSubmitting = true;
+
     this.zNodeService
       .setData(
-        this.currentPathSnapshot,
-        this.zNode.meta.dataVersion,
+        this.currentNode.path,
+        this.currentNode.meta.dataVersion,
         this.editorData
       )
-      .switchMap(newMeta => {
-        // markAsPristine equivalent
-        this.zNode.data = this.editorData;
-
+      .switchMap((newMeta: ZNodeMeta) => {
         // refresh node data in resolver
         const redirect = this.router.navigate([], {
           relativeTo: this.route,
@@ -160,6 +165,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
           );
       })
       .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      .do(() => this.isSubmitting = false)
       .subscribe();
   }
 
@@ -208,26 +214,19 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
   }
 
   switchMode(mode: Mode): void {
+    this.editorMode = mode;
+
     // Remember mode used for this node
     this.preferencesService
-      .setModeFor(this.currentPathSnapshot, mode)
+      .setModeFor(
+        this.currentNode.path,
+        this.currentNode.meta.creationId,
+        mode
+      )
       .subscribe();
-
-    this.editorMode = mode;
   }
 
   private updateOpts(): void {
     this.editor.setOptions(this.editorOpts);
-  }
-
-  private updateData(node: ZNode): void {
-    this.zNode = node;
-    this.editorData = node.data;
-  }
-
-  private get currentPathSnapshot(): string | null {
-    return this.zPathService
-      .parse(this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/")
-      .path;
   }
 }

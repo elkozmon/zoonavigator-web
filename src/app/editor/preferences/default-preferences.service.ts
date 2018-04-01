@@ -25,22 +25,22 @@ import {StorageService} from "../../core/storage";
 @Injectable()
 export class DefaultPreferencesService extends PreferencesService {
 
-  private static getModeKey(path: string): string {
-    return "DefaultPreferencesService.mode:" + path;
+  private static getModeKey(path: string, creationId: number): string {
+    return "DefaultPreferencesService.mode:" + path + "@" + creationId;
   }
 
   constructor(private storageService: StorageService) {
     super();
   }
 
-  setModeFor(path: string, mode: Mode): Observable<void> {
-    const key = DefaultPreferencesService.getModeKey(path);
+  setModeFor(path: string, creationId: number, mode: Mode): Observable<void> {
+    const key = DefaultPreferencesService.getModeKey(path, creationId);
 
     return this.storageService.set(key, mode);
   }
 
-  getModeFor(path: string): Observable<Maybe<Mode>> {
-    const key = DefaultPreferencesService.getModeKey(path);
+  getModeFor(path: string, creationId: number): Observable<Maybe<Mode>> {
+    const key = DefaultPreferencesService.getModeKey(path, creationId);
 
     return this.storageService.get(key).map(Maybe.maybe);
   }
