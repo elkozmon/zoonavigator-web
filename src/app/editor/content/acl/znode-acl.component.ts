@@ -16,7 +16,7 @@
  */
 
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {Observable} from "rxjs/Rx";
 import {Either} from "tsmonad";
 import {DialogService, ZNodeAcl, ZNodeService, ZNodeWithChildren} from "../../../core";
@@ -36,6 +36,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private zNodeService: ZNodeService,
     private zPathService: ZPathService,
     private dialogService: DialogService,
@@ -131,12 +132,26 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
         acl,
         recursive
       )
-      .map(newMeta => this.aclForm = this.aclFormFactory.newForm(acl, newMeta))
-      .switchMap(() =>
-        this.dialogService
-          .showSnackbar("Changes saved", this.viewContainerRef)
-          .switchMap(ref => ref.afterOpened())
-      )
+      .switchMap(newMeta => {
+        this.aclForm.markAsPristine();
+
+        // refresh node data in resolver
+        const redirect = this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {
+            aclVersion: newMeta.aclVersion
+          },
+          queryParamsHandling: "merge"
+        });
+
+        return Observable
+          .fromPromise(redirect)
+          .switchMap(() =>
+            this.dialogService
+              .showSnackbar("Changes saved", this.viewContainerRef)
+              .switchMap(ref => ref.afterOpened())
+          );
+      })
       .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
       .subscribe();
   }

@@ -16,7 +16,7 @@
  */
 
 import {AfterViewInit, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {AceEditorComponent} from "ng2-ace-editor";
 import {Observable} from "rxjs/Rx";
 import {Either} from "tsmonad";
@@ -33,7 +33,7 @@ import {PreferencesService} from "../../preferences";
 import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
 import {ZPathService} from "../../../core/zpath";
 import {Mode} from "../../mode";
-import {FormatterProvider, Formatter} from "../../formatter";
+import {Formatter, FormatterProvider} from "../../formatter";
 
 @Component({
   templateUrl: "znode-data.component.html",
@@ -65,6 +65,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private zNodeService: ZNodeService,
     private zPathService: ZPathService,
     private dialogService: DialogService,
@@ -131,29 +132,33 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
   }
 
   onSubmit(): void {
-    const newData = this.editorData;
-
     this.zNodeService
       .setData(
         this.currentPathSnapshot,
         this.zNode.meta.dataVersion,
-        newData
+        this.editorData
       )
-      .map(newMeta => {
-        const newNode: ZNode = {
-          acl: this.zNode.acl,
-          path: this.zNode.path,
-          data: newData,
-          meta: newMeta
-        };
+      .switchMap(newMeta => {
+        // markAsPristine equivalent
+        this.zNode.data = this.editorData;
 
-        this.updateData(newNode);
+        // refresh node data in resolver
+        const redirect = this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {
+            dataVersion: newMeta.dataVersion
+          },
+          queryParamsHandling: "merge"
+        });
+
+        return Observable
+          .fromPromise(redirect)
+          .switchMap(() =>
+            this.dialogService
+              .showSnackbar("Changes saved", this.viewContainerRef)
+              .switchMap(ref => ref.afterOpened())
+          );
       })
-      .switchMap(() =>
-        this.dialogService
-          .showSnackbar("Changes saved", this.viewContainerRef)
-          .switchMap(ref => ref.afterOpened())
-      )
       .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
       .subscribe();
   }

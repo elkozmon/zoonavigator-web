@@ -88,6 +88,10 @@ export class AclForm {
     this.aclForm.markAsDirty();
   }
 
+  markAsPristine(): void {
+    this.aclForm.markAsPristine();
+  }
+
   private newForm(zNodeAcl: ZNodeAcl, zNodeMeta: ZNodeMeta): FormGroup {
     const aclGroups: FormGroup[] = [];
 
