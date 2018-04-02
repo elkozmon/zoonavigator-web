@@ -43,7 +43,9 @@ import {ReplaySubject} from "rxjs/ReplaySubject";
 export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
   @ViewChild("dataEditor") set dataEditor(comp: AceEditorComponent) {
-    this.editorSubject.next(comp);
+    if (comp) {
+      this.editorSubject.next(comp);
+    }
   }
 
   editorSubject: ReplaySubject<AceEditorComponent> = new ReplaySubject(1);
