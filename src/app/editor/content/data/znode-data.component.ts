@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AfterViewInit, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
+import {Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AceEditorComponent} from "ng2-ace-editor";
 import {Observable} from "rxjs/Rx";
@@ -34,16 +34,23 @@ import {ZPathService} from "../../../core/zpath";
 import {Mode} from "../../mode";
 import {Formatter, FormatterProvider} from "../../formatter";
 import {ZNodeMeta} from "../../../core/znode";
+import {ReplaySubject} from "rxjs/ReplaySubject";
 
 @Component({
   templateUrl: "znode-data.component.html",
   styleUrls: ["znode-data.component.scss"]
 })
-export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateComponent {
+export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
-  @ViewChild("dataEditor") editor: AceEditorComponent;
+  @ViewChild("dataEditor") set dataEditor(comp: AceEditorComponent) {
+    this.editorSubject.next(comp);
+  }
+
+  editorSubject: ReplaySubject<AceEditorComponent> = new ReplaySubject(1);
+  editor: Observable<AceEditorComponent> = Observable.from(this.editorSubject);
 
   defaultMode: Mode = Mode.Text;
+  defaultWrap = true;
 
   currentNode: ZNodeWithChildren;
 
@@ -60,7 +67,7 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
   editorOpts: any = {
     fontFamily: "DejaVu Sans Mono, monospace",
     fontSize: "10pt",
-    wrap: true
+    wrap: this.defaultWrap
   };
 
   constructor(
@@ -112,19 +119,20 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
         left: () => Observable.empty<Maybe<Mode>>(),
         right: n => this.preferencesService.getModeFor(n.path, n.meta.creationId)
       }))
-      .do(maybeMode => this.editorMode = maybeMode.valueOr(this.defaultMode))
+      .do(maybeMode => this.setMode(maybeMode.valueOr(this.defaultMode), false))
       .subscribe();
-  }
 
-  ngAfterViewInit(): void {
-    // Check if editor exists since its guarded by ngIf
-    if (this.editor) {
-      // Disable Ace editors search box
-      this.editor
-        ._editor
-        .commands
-        .removeCommand("find");
-    }
+    // Try to recall wrap setting used the last time with this node
+    currentNodeObservable
+      .switchMap(either => either.caseOf({
+        left: () => Observable.empty<Maybe<boolean>>(),
+        right: n => this.preferencesService.getWrapFor(n.path, n.meta.creationId)
+      }))
+      .do(maybeWrap => this.setWrap(maybeWrap.valueOr(this.defaultWrap), false))
+      .subscribe();
+
+    // Disable Ace editors search box
+    this.editor.forEach(e => e._editor.commands.removeCommand("find"))
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
@@ -208,25 +216,42 @@ export class ZNodeDataComponent implements OnInit, AfterViewInit, CanDeactivateC
       });
   }
 
-  toggleWrap(): void {
-    this.editorOpts.wrap = !this.editorOpts.wrap;
-    this.updateOpts();
-  }
-
-  switchMode(mode: Mode): void {
+  setMode(mode: Mode, remember: boolean): void {
     this.editorMode = mode;
 
-    // Remember mode used for this node
-    this.preferencesService
-      .setModeFor(
-        this.currentNode.path,
-        this.currentNode.meta.creationId,
-        mode
-      )
-      .subscribe();
+    if (remember) {
+      // Remember mode used for this node
+      this.preferencesService
+        .setModeFor(
+          this.currentNode.path,
+          this.currentNode.meta.creationId,
+          mode
+        )
+        .subscribe();
+    }
+  }
+
+  setWrap(enabled: boolean, remember: boolean): void {
+    this.editorOpts.wrap = enabled;
+    this.updateOpts();
+
+    if (remember) {
+      // Remember wrap used for this node
+      this.preferencesService
+        .setWrapFor(
+          this.currentNode.path,
+          this.currentNode.meta.creationId,
+          enabled
+        )
+        .subscribe();
+    }
+  }
+
+  getWrap(): boolean {
+    return this.editorOpts.wrap;
   }
 
   private updateOpts(): void {
-    this.editor.setOptions(this.editorOpts);
+    this.editor.forEach(e => e.setOptions(this.editorOpts));
   }
 }

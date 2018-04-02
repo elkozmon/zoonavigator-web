@@ -30,9 +30,9 @@
 
     <button
       class="tc-blue-grey-600"
-      (click)="toggleWrap()">
+      (click)="setWrap(!getWrap(), true)">
       <mat-icon class="mat-24">wrap_text</mat-icon>
-      <span>wrap: {{editorOpts.wrap ? 'on' : 'off'}}</span>
+      <span>wrap: {{getWrap() ? 'on' : 'off'}}</span>
     </button>
 
     <button
@@ -47,7 +47,7 @@
         mat-menu-item
         *ngFor="let mode of editorModes"
         [value]="mode"
-        (click)="switchMode(mode)">
+        (click)="setMode(mode, true)">
         {{mode}}
       </button>
     </mat-menu>

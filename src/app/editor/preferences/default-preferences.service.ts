@@ -29,6 +29,10 @@ export class DefaultPreferencesService extends PreferencesService {
     return "DefaultPreferencesService.mode:" + path + "@" + creationId;
   }
 
+  private static getWrapKey(path: string, creationId: number): string {
+    return "DefaultPreferencesService.wrap:" + path + "@" + creationId;
+  }
+
   constructor(private storageService: StorageService) {
     super();
   }
@@ -43,5 +47,17 @@ export class DefaultPreferencesService extends PreferencesService {
     const key = DefaultPreferencesService.getModeKey(path, creationId);
 
     return this.storageService.get(key).map(Maybe.maybe);
+  }
+
+  setWrapFor(path: string, creationId: number, enabled: boolean): Observable<void> {
+    const key = DefaultPreferencesService.getWrapKey(path, creationId);
+
+    return this.storageService.set(key, enabled ? "true" : "false");
+  }
+
+  getWrapFor(path: string, creationId: number): Observable<Maybe<boolean>> {
+    const key = DefaultPreferencesService.getWrapKey(path, creationId);
+
+    return this.storageService.get(key).map(Maybe.maybe).map(ms => ms.map(s => s === "true"));
   }
 }

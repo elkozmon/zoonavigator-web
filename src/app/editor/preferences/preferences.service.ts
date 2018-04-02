@@ -26,5 +26,9 @@ export abstract class PreferencesService {
   abstract setModeFor(path: string, creationId: number, mode: Mode): Observable<void>
 
   abstract getModeFor(path: string, creationId: number): Observable<Maybe<Mode>>
+
+  abstract setWrapFor(path: string, creationId: number, enabled: boolean): Observable<void>
+
+  abstract getWrapFor(path: string, creationId: number): Observable<Maybe<boolean>>
 }
 
