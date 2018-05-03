@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "Starting ZooNavigator Web $ZOONAV_VERSION"
+echo "Starting ZooNavigator Web $(cat .version)"
 
 # Generate configs
 dockerize \

@@ -1,49 +1,51 @@
-FROM top20/node:8-alpine as npm
+FROM node:9.11.1-alpine as npm
 MAINTAINER Lubos Kozmon <lubosh91@gmail.com>
 
-# Make dist files
+# Copy source code
 WORKDIR /app
 COPY . .
-RUN npm install -g @angular/cli \
+
+# Install dependencies & build
+RUN apk --no-cache add tar \
+  && npm install -g @angular/cli \
   && npm install \
-  && ng build --prod
+  && ng build --prod \
+  && echo $SOURCE_BRANCH > dist/.version
 
-FROM nginx:1.13.5
-
-ARG ZOONAV_VERSION
-ENV ZOONAV_VERSION=$ZOONAV_VERSION
-
-# Copy setup files
-COPY ./docker/copy /
-
-RUN chmod +x \
-    /app/run.sh \
-    /app/healthcheck.sh
-
-# Add health check
-RUN apt-get update \
-  && apt-get install -y curl wget \
-  && apt-get clean
-
-HEALTHCHECK --interval=5m --timeout=3s \
-    CMD /app/healthcheck.sh
-
-# Get dockerize
-ENV DOCKERIZE_VERSION v0.6.0
-RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-  && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-  && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-
-# Copy dist files
-COPY --from=npm /app/dist /app
+FROM nginx:1.13.12-alpine
 
 # Default config
-ENV SERVER_HTTP_PORT=8000 \
-    API_HOST=api \
-    API_PORT=9000 \
-    API_REQUEST_TIMEOUT_MILLIS=10000
+ENV DOCKERIZE_VERSION=v0.6.0 \
+  SERVER_HTTP_PORT=8000 \
+  API_HOST=api \
+  API_PORT=9000 \
+  API_REQUEST_TIMEOUT_MILLIS=10000
+
+# Copy dist & setup files
+COPY --from=npm /app/docker/files /
+COPY --from=npm /app/dist /app
+
+WORKDIR /app
+
+RUN apk --no-cache add curl tar \
+  # Get dockerize
+  && curl \
+    -Lo dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+  && tar xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz -C /usr/local/bin \
+  && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+  # Make scripts executable
+  && chmod +x \
+    run.sh \
+    healthcheck.sh \
+  # Clean up
+  && apk del tar
+
+# Add health check
+HEALTHCHECK --interval=5m --timeout=3s \
+    CMD ./healthcheck.sh
 
 # Expose HTTP port
 EXPOSE 8000
 
-CMD ["/app/run.sh"]
+CMD ["./run.sh"]

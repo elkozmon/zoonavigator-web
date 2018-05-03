@@ -13,6 +13,7 @@
     "start": "ng serve --proxy-config proxy.conf.json --aot",
     "build": "ng build",
     "test": "ng test",
+    "test:ci": "ng test --browser ChromeHeadlessCI --single-run=true && ng e2e",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
