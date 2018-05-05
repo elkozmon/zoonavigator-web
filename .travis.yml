@@ -6,7 +6,11 @@ script:
   - docker-compose -f docker-compose.test.yml up --build --exit-code-from sut
 
 deploy:
-  provider: script
-  script: docker/deploy.sh $TRAVIS_BRANCH
-  on:
-    tags: true
+  - provider: script
+    script: docker/deploy.sh $TRAVIS_TAG
+    on:
+      tags: true
+  - provider: script
+    script: docker/deploy.sh latest
+    on:
+      branch: master
