@@ -1,8 +1,10 @@
 FROM node:9.11.1-alpine as npm
 MAINTAINER Lubos Kozmon <lubosh91@gmail.com>
 
+ARG ZOONAV_VERSION
+
 # Copy source code
-WORKDIR /app
+WORKDIR /src
 COPY . .
 
 # Install dependencies & build
@@ -10,7 +12,7 @@ RUN apk --no-cache add tar \
   && npm install -g @angular/cli \
   && npm install \
   && ng build --prod \
-  && echo $SOURCE_BRANCH > dist/.version
+  && echo $ZOONAV_VERSION > dist/.version
 
 FROM nginx:1.13.12-alpine
 
@@ -21,9 +23,9 @@ ENV DOCKERIZE_VERSION=v0.6.0 \
   API_PORT=9000 \
   API_REQUEST_TIMEOUT_MILLIS=10000
 
-# Copy dist & setup files
-COPY --from=npm /app/docker/files /
-COPY --from=npm /app/dist /app
+# Copy app files
+COPY --from=npm /src/docker/files /
+COPY --from=npm /src/dist /app
 
 WORKDIR /app
 
