@@ -12,8 +12,11 @@
     "dev": "ng serve --proxy-config proxy.conf.json",
     "start": "ng serve --proxy-config proxy.conf.json --aot",
     "build": "ng build",
+    "preversion": "npm run test:docker",
     "version": "./version.sh $npm_package_version",
+    "postversion": "git push && git push --tags",
     "test": "ng test",
+    "test:docker": "docker-compose -f docker-compose.test.yml up --build --exit-code-from sut",
     "test:ci": "ng test --browser ChromeHeadlessCI --single-run=true && ng e2e",
     "lint": "ng lint",
     "e2e": "ng e2e"
