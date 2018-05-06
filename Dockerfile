@@ -1,8 +1,6 @@
 FROM node:9.11.1-alpine as npm
 MAINTAINER Lubos Kozmon <lubosh91@gmail.com>
 
-ARG ZOONAV_VERSION
-
 # Copy source code
 WORKDIR /src
 COPY . .
@@ -11,8 +9,7 @@ COPY . .
 RUN apk --no-cache add tar \
   && npm install -g @angular/cli \
   && npm install \
-  && ng build --prod \
-  && echo $ZOONAV_VERSION > dist/.version
+  && ng build --prod
 
 FROM nginx:1.13.12-alpine
 

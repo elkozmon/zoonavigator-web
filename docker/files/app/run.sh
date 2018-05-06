@@ -1,7 +1,5 @@
 #!/bin/sh
 
-echo "Starting ZooNavigator Web $(cat .version)"
-
 # Generate configs
 dockerize \
   -template /app/config.json.template:/app/config.json \
