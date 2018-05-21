@@ -29,7 +29,7 @@ RUN curl \
 FROM nginx:1.13.12-alpine
 
 # Default config
-ENV SERVER_HTTP_PORT=8000 \
+ENV WEB_HTTP_PORT=8000 \
   API_HOST=api \
   API_PORT=9000 \
   API_REQUEST_TIMEOUT_MILLIS=10000
@@ -48,7 +48,7 @@ RUN apk --no-cache add curl
 HEALTHCHECK --interval=5m --timeout=3s \
     CMD ./healthcheck.sh
 
-# Expose HTTP port
+# Expose default HTTP port
 EXPOSE 8000
 
 CMD ["./run.sh"]

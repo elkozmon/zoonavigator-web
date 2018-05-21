@@ -14,9 +14,9 @@ http {
     charset             utf-8;
 
     server {
-        listen {{ $.Env.SERVER_HTTP_PORT }} default_server;
+        listen {{ $.Env.WEB_HTTP_PORT }} default_server;
         {{ if $.Env.ENABLE_IPV6 }}
-        listen [::]:{{ $.Env.SERVER_HTTP_PORT }} default_server;
+        listen [::]:{{ $.Env.WEB_HTTP_PORT }} default_server;
         {{ end }}
 
         root /app;
