@@ -23,7 +23,7 @@
       matTooltip="CTRL+S"
       matTooltipPosition="below"
       (click)="onSubmit()"
-      [disabled]="!editorDirty">
+      [disabled]="!editorSubmitReady">
       <mat-icon class="mat-24">save</mat-icon>
       <span>save</span>
     </button>

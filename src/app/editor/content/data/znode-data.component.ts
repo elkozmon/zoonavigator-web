@@ -84,6 +84,10 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   ) {
   }
 
+  get editorSubmitReady(): boolean {
+    return this.editorDirty && !this.isSubmitting;
+  }
+
   get editorDirty(): boolean {
     if (!this.currentNode) {
       return false;
@@ -138,7 +142,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.editorDirty && !this.isSubmitting) {
+    if (this.editorSubmitReady) {
       return this.dialogService
         .showDiscardChanges(this.viewContainerRef)
         .switchMap(ref => ref.afterClosed());
@@ -183,6 +187,10 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
     const code = event.which || event.keyCode;
 
     if (!(code === 115 && event.ctrlKey) && code !== 19) {
+      return;
+    }
+
+    if (!this.editorSubmitReady) {
       return;
     }
 
