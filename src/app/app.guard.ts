@@ -25,7 +25,7 @@ import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect/conne
 
 /**
  * Looks for auto-connect configuration which this guard uses
- * to connect to Zookeeper and then redirects user to editor.
+ * to connect to ZooKeeper and then redirects user to editor.
  *
  * Otherwise it redirects user to connect form.
  */
