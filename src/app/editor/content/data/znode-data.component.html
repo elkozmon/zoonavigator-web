@@ -55,7 +55,7 @@
     <button
       class="tc-blue-grey-600"
       (click)="formatData()"
-      [matTooltip]="formatterAvailable ? null : 'Unavailable for this mode'"
+      [matTooltip]="formatterAvailable ? null : 'Unavailable in \'' + editorMode.toString() + '\' mode'"
       matTooltipPosition="below"
       [disabled]="!formatterAvailable">
       <mat-icon class="mat-24">format_paint</mat-icon>
