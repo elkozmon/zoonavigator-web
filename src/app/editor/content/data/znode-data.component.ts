@@ -67,7 +67,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   ];
   editorMode: Mode = this.defaultMode;
   editorOpts: any = {
-    fontFamily: "DejaVu Sans Mono, monospace",
+    fontFamily: "\"Fira Code Retina\", monospace",
     fontSize: "10pt",
     wrap: this.defaultWrap
   };

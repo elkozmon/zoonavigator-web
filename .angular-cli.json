@@ -35,7 +35,7 @@
   ],
   "addons": [
     "../node_modules/font-awesome/fonts/*.+(otf|eot|svg|ttf|woff|woff2)",
-    "../node_modules/dejavu-fonts-ttf/ttf/*.+ttf"
+    "../node_modules/firacode/distr/ttf/*.+ttf"
   ],
   "e2e": {
     "protractor": {
