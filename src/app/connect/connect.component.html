@@ -26,7 +26,7 @@
         ZooNavigator.
       </span>
       <i class="tc-blue-grey-600">
-        An awesome ZooKeeper web admin.
+        An awesome ZooKeeper web editor.
       </i>
     </p>
   </div>
@@ -38,14 +38,17 @@
         <div *ngIf="errorMsg" class="zoo-error-bar">
           {{errorMsg}}
         </div>
-        <mat-form-field>
-          <input matInput
-                 type="text"
-                 placeholder="Connection string"
-                 formControlName="connectionString"
-                 name="connectionString"/>
-          <!--<span mat-prefix><mat-icon>public</mat-icon></span>-->
-        </mat-form-field>
+        <div>
+          <mat-form-field>
+            <input matInput
+                   type="text"
+                   placeholder="Connection string"
+                   formControlName="connectionString"
+                   name="connectionString"/>
+            <!--<span mat-prefix><mat-icon>public</mat-icon></span>-->
+            <mat-hint>Required</mat-hint>
+          </mat-form-field>
+        </div>
         <div formArrayName="credentialsArray">
           <div layout="row"
                *ngFor="let credentials of credentialsFormArray.controls; let i = index"
@@ -57,6 +60,7 @@
                      formControlName="username"
                      (change)="onCredentialsChange(i)"/>
               <!--<span mat-prefix><mat-icon>person</mat-icon></span>-->
+              <mat-hint *ngIf="i == 0"><a href="http://www.elkozmon.com/zoonavigator/help/faqs/#what-should-i-fill-in-for-auth-username-and-auth-password" target="_blank">What's this?</a></mat-hint>
             </mat-form-field>
             <mat-form-field>
               <input matInput

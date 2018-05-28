@@ -24,11 +24,24 @@ mat-card {
   min-width: 410px;
   max-width: 30%;
 
+  mat-form-field {
+    margin: 0 0 10px;
+  }
+
   mat-form-field, div {
     width: 100%;
+  }
+
+  form > div {
+    padding: 0 5px;
   }
 
   button {
     margin-top: 15px;
   }
+}
+
+mat-hint a {
+  color: #53728b;
+  text-decoration: none;
 }

@@ -7,8 +7,8 @@ describe("Connect page", () => {
     page = new ConnectPage();
   });
 
-  it("should display message saying 'ZooNavigator. An awesome ZooKeeper web admin.'", () => {
+  it("should display message saying 'ZooNavigator. An awesome ZooKeeper web editor.'", () => {
     page.navigateTo();
-    expect<any>(page.getHeaderText()).toEqual("ZooNavigator. An awesome ZooKeeper web admin.");
+    expect<any>(page.getHeaderText()).toEqual("ZooNavigator. An awesome ZooKeeper web editor.");
   });
 });
