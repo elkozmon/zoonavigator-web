@@ -1,12 +1,15 @@
 ZooNavigator Web
 ================
 
-[![Build Status](https://travis-ci.org/elkozmon/zoonavigator-web.svg)](https://travis-ci.org/elkozmon/zoonavigator-web)
-[![Docker Pulls](https://img.shields.io/docker/pulls/elkozmon/zoonavigator-web.svg)](https://hub.docker.com/r/elkozmon/zoonavigator-web)
+[![Build Status](https://travis-ci.org/elkozmon/zoonavigator-web.svg)](https://travis-ci.org/elkozmon/zoonavigator-web) 
+[![Docker image size](https://images.microbadger.com/badges/image/elkozmon/zoonavigator-web.svg)](https://hub.docker.com/r/elkozmon/zoonavigator-web)
 
-Web client for ZooNavigator, web-based GUI for ZooKeeper.
 
-**For more info and instructions how to use ZooNavigator see [parent GitHub repository](https://github.com/elkozmon/zoonavigator).**
+Web client for ZooNavigator, web-based browser & editor for ZooKeeper. 
+
+
+**For more info and instructions how to use ZooNavigator read [official docs](http://www.elkozmon.com/zoonavigator).**
+
 
 License
 -------
