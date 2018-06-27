@@ -8,7 +8,7 @@ ZooNavigator Web
 Web client for ZooNavigator, web-based browser & editor for ZooKeeper. 
 
 
-**For more info and instructions how to use ZooNavigator read [official docs](http://www.elkozmon.com/zoonavigator).**
+**For more info and instructions how to use ZooNavigator read [official docs](https://www.elkozmon.com/zoonavigator).**
 
 
 License
