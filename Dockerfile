@@ -45,7 +45,7 @@ WORKDIR /app
 RUN apk --no-cache add curl
 
 # Add health check
-HEALTHCHECK --interval=5m --timeout=3s \
+HEALTHCHECK --interval=30s --timeout=3s \
     CMD ./healthcheck.sh
 
 # Expose default HTTP port
