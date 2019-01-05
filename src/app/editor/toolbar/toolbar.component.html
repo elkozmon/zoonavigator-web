@@ -19,7 +19,7 @@
 <div *ngIf="zPath" layout="row" layout-align="start center" flex>
   <button
     mat-icon-button
-    matTooltip="More actions"
+    matTooltip="Current node actions ..."
     [matMenuTriggerFor]="nodeMenu"
     [disabled]="zNode.isNothing">
     <mat-icon class="mat-24">more_vert</mat-icon>
@@ -45,7 +45,7 @@
 
   <button
     mat-icon-button
-    matTooltip="Refresh"
+    matTooltip="Refresh editor and children nodes"
     matTooltipPosition="below"
     [@rotatedState]="refreshButtonRotatedState"
     (click)="onRefreshClick()">
@@ -54,7 +54,7 @@
 
   <button
     mat-icon-button
-    matTooltip="Go to root"
+    matTooltip="Go to root node"
     (click)="onHomeClick()">
     <mat-icon class="mat-24">home</mat-icon>
   </button>
@@ -72,7 +72,6 @@
 
   <button
     mat-icon-button
-    #goToAddress
     matTooltip="Go to address"
     (click)="navigatePath(pathInput.value)">
     <mat-icon class="mat-24">arrow_forward</mat-icon>
