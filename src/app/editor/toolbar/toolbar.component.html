@@ -33,6 +33,11 @@
     </button>
     <button
       mat-menu-item
+      (click)="onExportClick()">
+      <mat-icon>cloud_download</mat-icon><span>Export</span>
+    </button>
+    <button
+      mat-menu-item
       (click)="onDuplicateClick()">
       <mat-icon>content_copy</mat-icon><span>Duplicate</span>
     </button>

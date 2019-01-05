@@ -22,6 +22,7 @@ import {ZNodeMeta} from "./znode-meta";
 import {ZNodeData} from "./znode-data";
 import {ZNodeChildren} from "./znode-children";
 import {ZNodeWithChildren} from "./znode-with-children";
+import {ZNodeExport} from "./znode-export";
 
 @Injectable()
 export abstract class ZNodeService {
@@ -70,4 +71,8 @@ export abstract class ZNodeService {
     path: string,
     names: string[]
   ): Observable<void>
+
+  abstract exportNodes(
+    paths: string[]
+  ): Observable<ZNodeExport>
 }

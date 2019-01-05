@@ -15,11 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, EventEmitter, Input, Output, ViewContainerRef} from "@angular/core";
+import {Component, EventEmitter, Input, Output, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {state, style, trigger} from "@angular/animations";
 import {Observable} from "rxjs/Rx";
-import {ZNodeService, ZPath} from "../../core";
+import {FileSaverService, ZNodeExport, ZNodeService, ZPath} from "../../core";
 import {DialogService, CreateZNodeData} from "../../core/dialog";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {Ordering} from "../ordering";
@@ -53,6 +53,7 @@ export class NavActionsComponent {
     private router: Router,
     private zNodeService: ZNodeService,
     private dialogService: DialogService,
+    private fileSaverService: FileSaverService,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -111,6 +112,15 @@ export class NavActionsComponent {
 
         this.refresh.emit();
       });
+  }
+
+  onExportClick(): void {
+    const paths = this.zNodes.map(node => node.path);
+
+    this.zNodeService
+      .exportNodes(paths)
+      .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      .forEach((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name));
   }
 
   onDeleteClick(): void {

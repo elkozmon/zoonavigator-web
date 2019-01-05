@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./znode.service"
-export * from "./api-znode.service"
-export * from "./znode"
-export * from "./znode-with-children"
-export * from "./znode-acl"
-export * from "./znode-data"
-export * from "./znode-meta"
-export * from "./znode-path"
-export * from "./znode-children"
-export * from "./znode-export"
+import {Injectable} from "@angular/core";
+import {FileSaverService} from "./file-saver.service";
+import {saveAs} from "file-saver";
+
+@Injectable()
+export class DefaultFileSaverService implements FileSaverService {
+
+  save(blob: Blob, fileName: String): void {
+    saveAs(blob, fileName);
+  }
+}

@@ -19,7 +19,7 @@ import {Component, Input, EventEmitter, Output, OnChanges, SimpleChanges, ViewCo
 import {ActivatedRoute, Router} from "@angular/router";
 import {Observable} from "rxjs/Rx";
 import {Ordering} from "../ordering";
-import {ZNode, ZNodeService, ZPath, DialogService} from "../../core";
+import {ZNode, ZNodeService, ZPath, DialogService, FileSaverService, ZNodeExport} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {DuplicateZNodeData, MoveZNodeData} from "../../core/dialog/dialogs";
 import {CreateZNodeData} from "../../core/dialog";
@@ -69,6 +69,7 @@ export class NavListComponent implements OnChanges {
     private router: Router,
     private zNodeService: ZNodeService,
     private dialogService: DialogService,
+    private fileSaverService: FileSaverService,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -122,11 +123,18 @@ export class NavListComponent implements OnChanges {
       .subscribe();
   }
 
-  onNodeDuplicateClick(zNode: ZNode): void {
+  onNodeExportClick(zPath: ZPath): void {
+    this.zNodeService
+      .exportNodes([zPath.path])
+      .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      .forEach((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name));
+  }
+
+  onNodeDuplicateClick(zPath: ZPath): void {
     this.dialogService
       .showDuplicateZNode(
         {
-          path: zNode.path,
+          path: zPath.path,
           redirect: false
         },
         this.viewContainerRef
@@ -135,7 +143,7 @@ export class NavListComponent implements OnChanges {
       .switchMap((data: DuplicateZNodeData) => {
         if (data) {
           return this.zNodeService
-            .duplicateNode(zNode.path, data.path)
+            .duplicateNode(zPath.path, data.path)
             .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .switchMapTo(Observable.of(data));
         }
@@ -159,11 +167,11 @@ export class NavListComponent implements OnChanges {
       });
   }
 
-  onNodeMoveClick(zNode: ZNode): void {
+  onNodeMoveClick(zPath: ZPath): void {
     this.dialogService
       .showMoveZNode(
         {
-          path: zNode.path,
+          path: zPath.path,
           redirect: false
         },
         this.viewContainerRef
@@ -172,7 +180,7 @@ export class NavListComponent implements OnChanges {
       .switchMap((data: MoveZNodeData) => {
         if (data) {
           return this.zNodeService
-            .moveNode(zNode.path, data.path)
+            .moveNode(zPath.path, data.path)
             .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
             .switchMapTo(Observable.of(data));
         }
@@ -197,8 +205,8 @@ export class NavListComponent implements OnChanges {
   }
 
   //noinspection JSMethodCanBeStatic,JSUnusedLocalSymbols
-  trackByPath(index: number, zNode: ZNode): string {
-    return zNode.path;
+  trackByPath(index: number, zPath: ZPath): string {
+    return zPath.path;
   }
 
   private sortZNodes(): void {

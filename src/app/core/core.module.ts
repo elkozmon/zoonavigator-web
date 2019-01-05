@@ -31,6 +31,7 @@ import {
   SessionInfoDialogComponent
 } from "./dialog";
 import {StorageService, LocalStorageService} from "./storage";
+import {FileSaverService, DefaultFileSaverService} from "./file-saver";
 import {DefaultZPathService, ZPathService} from "./zpath";
 import {ApiZNodeService, ZNodeService} from "./znode";
 
@@ -47,6 +48,7 @@ import {ApiZNodeService, ZNodeService} from "./znode";
     {provide: ApiService, useClass: DefaultApiService},
     {provide: ApiRequestFactory, useClass: DefaultApiRequestFactory},
     {provide: StorageService, useClass: LocalStorageService},
+    {provide: FileSaverService, useClass: DefaultFileSaverService},
     {provide: ZNodeService, useClass: ApiZNodeService},
     {provide: ZPathService, useClass: DefaultZPathService},
     {provide: ZSessionService, useClass: ApiZSessionService},

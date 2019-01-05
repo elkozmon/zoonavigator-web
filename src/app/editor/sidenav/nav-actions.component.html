@@ -51,7 +51,7 @@
 
 <button
   mat-icon-button
-  matTooltip="Selected nodes actions ...."
+  matTooltip="Selected nodes actions ..."
   matTooltipPosition="below"
   [matMenuTriggerFor]="selectedNodesMenu"
   [disabled]="zNodes.length === 0"
@@ -71,12 +71,12 @@
 <mat-menu #selectedNodesMenu="matMenu">
   <button
     mat-menu-item
-    (click)="onExportClick()">
-    <mat-icon>cloud_download</mat-icon><span>Export</span>
+    (click)="onDeleteClick()">
+    <mat-icon>delete_forever</mat-icon><span>Delete</span>
   </button>
   <button
     mat-menu-item
-    (click)="onDeleteClick()">
-    <mat-icon>delete_forever</mat-icon><span>Delete</span>
+    (click)="onExportClick()">
+    <mat-icon>cloud_download</mat-icon><span>Export</span>
   </button>
 </mat-menu>

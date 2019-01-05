@@ -21,7 +21,7 @@ import {MatInput} from "@angular/material";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Observable} from "rxjs/Rx";
 import {Maybe} from "tsmonad";
-import {DialogService, ZNodeService, ZNodeWithChildren, ZPath, ZPathService} from "../../core";
+import {DialogService, FileSaverService, ZNodeExport, ZNodeService, ZNodeWithChildren, ZPath, ZPathService} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {DuplicateZNodeData, MoveZNodeData} from "../../core/dialog/dialogs";
 import {CreateZNodeData} from "../../core/dialog";
@@ -60,6 +60,7 @@ export class ToolbarComponent {
     private zNodeService: ZNodeService,
     private zPathService: ZPathService,
     private dialogService: DialogService,
+    private fileSaverService: FileSaverService,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -109,6 +110,13 @@ export class ToolbarComponent {
           queryParamsHandling: "merge"
         });
       });
+  }
+
+  onExportClick(): void {
+    this.zNodeService
+      .exportNodes([this.zPath.path])
+      .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      .forEach((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name));
   }
 
   onDuplicateClick(): void {

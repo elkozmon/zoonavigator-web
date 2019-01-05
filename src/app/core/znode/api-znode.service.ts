@@ -26,6 +26,7 @@ import {ZNodeAcl} from "./znode-acl";
 import {ZNodeWithChildren} from "./znode-with-children";
 import {ZSessionHandler} from "../zsession";
 import {ApiRequestFactory, ApiService, JsonRequestContent, TextRequestContent} from "../api";
+import {ZNodeExport} from "./znode-export";
 
 @Injectable()
 export class ApiZNodeService implements ZNodeService {
@@ -270,6 +271,34 @@ export class ApiZNodeService implements ZNodeService {
       return this.apiService
         .dispatch(request)
         .mapTo(null);
+    });
+  }
+
+  exportNodes(
+    paths: string[]
+  ): Observable<ZNodeExport> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          paths: paths
+        }
+      });
+
+      const request = this.apiRequestFactory.getRequest(
+        "/znode/export",
+        params,
+        null,
+        token
+      );
+
+      return this.apiService
+        .dispatch(request)
+        .map(response => {
+          return {
+            blob: new Blob([JSON.stringify(response.payload)], {type: "text/plain"}),
+            name: "znode-export-" + new Date().toISOString() + ".json"
+          }
+        });
     });
   }
 }
