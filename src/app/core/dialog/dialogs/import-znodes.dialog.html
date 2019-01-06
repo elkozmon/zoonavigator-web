@@ -15,7 +15,12 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<h3 mat-dialog-title>Import nodes</h3>
+<h3 mat-dialog-title>
+  <div class="zoo-dialog-title" layout="row" layout-align="start center" flex>
+    <mat-icon>cloud_upload</mat-icon>
+    <div>Import nodes</div>
+  </div>
+</h3>
 <mat-dialog-content
   tdFileDrop
   [multiple]="false"

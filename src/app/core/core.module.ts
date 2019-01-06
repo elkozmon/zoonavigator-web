@@ -18,7 +18,7 @@
 import {NgModule} from "@angular/core";
 import {FormsModule} from "@angular/forms";
 import {CommonModule} from "@angular/common";
-import {MatButtonModule, MatCheckboxModule, MatDialogModule, MatInputModule} from "@angular/material";
+import {MatButtonModule, MatCheckboxModule, MatDialogModule, MatIconModule, MatInputModule} from "@angular/material";
 import {CovalentFileModule} from "@covalent/core";
 import {ApiRequestFactory, ApiService, DefaultApiRequestFactory, DefaultApiService} from "./api";
 import {ApiZSessionService, DefaultZSessionHandler, ZSessionHandler, ZSessionService} from "./zsession";
@@ -45,6 +45,7 @@ import {DefaultFileReaderService, FileReaderService} from "./file-reader";
     MatButtonModule,
     MatDialogModule,
     MatInputModule,
+    MatIconModule,
     MatCheckboxModule,
     CovalentFileModule
   ],
