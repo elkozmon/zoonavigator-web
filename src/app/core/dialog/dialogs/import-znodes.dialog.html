@@ -24,8 +24,7 @@
       tdFileDrop
       [multiple]="false"
       (fileDrop)="data.file = $event"
-      (click)="fileInput.inputElement.click()"
-      (keyup)="fileInput.inputElement.click()">
+      (click)="fileInput.inputElement.click()">
       <input
         matInput
         [value]="data.file?.name"
@@ -42,13 +41,13 @@
   <mat-form-field class="zoo-full-width">
     <input
       matInput
-      placeholder="Enter root path"
+      placeholder="Enter destination path"
       (keypress)="onKeyPress($event)"
       [(ngModel)]="data.path"/>
   </mat-form-field>
   <div *ngIf="data.redirect !== null">
     <mat-checkbox [(ngModel)]="data.redirect">
-      Open the root node afterwards
+      Open the parent node afterwards
     </mat-checkbox>
   </div>
 </mat-dialog-content>
