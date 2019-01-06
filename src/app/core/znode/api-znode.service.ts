@@ -257,7 +257,7 @@ export class ApiZNodeService implements ZNodeService {
       const params = new HttpParams({
         fromObject: {
           path: path,
-          names: names.join("/")
+          names: names
         }
       });
 
