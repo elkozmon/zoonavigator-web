@@ -16,14 +16,14 @@
   -->
 
 <h3 mat-dialog-title>Import nodes</h3>
-<mat-dialog-content>
+<mat-dialog-content
+  tdFileDrop
+  [multiple]="false"
+  (fileDrop)="data.file = $event">
   <div layout="row" layout-align="start center" flex>
     <mat-form-field
       class="zoo-full-width"
       flex
-      tdFileDrop
-      [multiple]="false"
-      (fileDrop)="data.file = $event"
       (click)="fileInput.inputElement.click()">
       <input
         matInput
