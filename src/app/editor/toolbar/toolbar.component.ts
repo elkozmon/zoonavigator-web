@@ -84,11 +84,8 @@ export class ToolbarComponent {
     const parentPath = zPath.goUp().path;
 
     this.dialogService
-      .showConfirm(
-        "Confirm recursive delete",
-        `Do you want to delete this node and its children?`,
-        "Delete",
-        "Cancel",
+      .showRecursiveDeleteZNode(
+        "Do you want to delete this node and its children?",
         this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())

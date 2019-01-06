@@ -28,7 +28,8 @@ import {
   MoveZNodeDialogComponent,
   CreateZNodeDialogComponent,
   DuplicateZNodeDialogComponent,
-  DiscardChangesDialogComponent,
+  ConfirmDialogComponent,
+  InfoDialogComponent,
   SessionInfoDialogComponent,
   ImportZNodesDialogComponent
 } from "./dialog";
@@ -66,7 +67,8 @@ import {DefaultFileReaderService, FileReaderService} from "./file-reader";
     CreateZNodeDialogComponent,
     ImportZNodesDialogComponent,
     DuplicateZNodeDialogComponent,
-    DiscardChangesDialogComponent,
+    ConfirmDialogComponent,
+    InfoDialogComponent,
     SessionInfoDialogComponent
   ],
   declarations: [
@@ -74,7 +76,8 @@ import {DefaultFileReaderService, FileReaderService} from "./file-reader";
     CreateZNodeDialogComponent,
     ImportZNodesDialogComponent,
     DuplicateZNodeDialogComponent,
-    DiscardChangesDialogComponent,
+    ConfirmDialogComponent,
+    InfoDialogComponent,
     SessionInfoDialogComponent
   ]
 })

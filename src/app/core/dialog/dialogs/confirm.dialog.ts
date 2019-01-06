@@ -15,14 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component} from "@angular/core";
+import {Component, Inject} from "@angular/core";
+import {MAT_DIALOG_DATA} from "@angular/material";
+import {ConfirmData} from "./confirm.data";
 
 @Component({
-  selector: "zoo-discard-changes.dialog",
-  templateUrl: "discard-changes.dialog.html",
+  selector: "zoo-confirm.dialog",
+  templateUrl: "confirm.dialog.html",
   styleUrls: ["dialog.scss"]
 })
-export class DiscardChangesDialogComponent {
-  constructor() {
+export class ConfirmDialogComponent {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: ConfirmData) {
   }
 }

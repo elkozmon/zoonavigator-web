@@ -16,20 +16,23 @@
  */
 
 import {Injectable, ViewContainerRef} from "@angular/core";
-import {TdAlertDialogComponent, TdConfirmDialogComponent} from "@covalent/core";
+import {TdAlertDialogComponent} from "@covalent/core";
 import {MatDialogRef, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
 import {Observable} from "rxjs/Rx";
 import {
-  SessionInfoDialogComponent,
-  CreateZNodeDialogComponent,
+  ConfirmData,
+  ConfirmDialogComponent,
   CreateZNodeData,
-  DiscardChangesDialogComponent,
+  CreateZNodeDialogComponent,
+  DuplicateZNodeData,
+  DuplicateZNodeDialogComponent,
+  ImportZNodesData,
+  ImportZNodesDialogComponent,
+  InfoData,
+  InfoDialogComponent,
   MoveZNodeData,
   MoveZNodeDialogComponent,
-  DuplicateZNodeDialogComponent,
-  DuplicateZNodeData,
-  ImportZNodesDialogComponent,
-  ImportZNodesData
+  SessionInfoDialogComponent
 } from "./dialogs";
 import {ZSessionInfo} from "../zsession/zsession-info";
 
@@ -48,7 +51,7 @@ export abstract class DialogService {
 
   abstract showDiscardChanges(
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<DiscardChangesDialogComponent>>
+  ): Observable<MatDialogRef<ConfirmDialogComponent>>
 
   abstract showCreateZNode(
     defaults: CreateZNodeData,
@@ -65,6 +68,11 @@ export abstract class DialogService {
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<DuplicateZNodeDialogComponent>>
 
+  abstract showRecursiveDeleteZNode(
+    message: string,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<ConfirmDialogComponent>>
+
   abstract showMoveZNode(
     defaults: MoveZNodeData,
     viewRef?: ViewContainerRef
@@ -75,25 +83,20 @@ export abstract class DialogService {
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<SessionInfoDialogComponent>>
 
-  abstract showConfirm(
-    title: string,
-    message: string,
-    acceptBtn: string,
-    cancelBtn: string,
-    viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<TdConfirmDialogComponent>>
-
-  abstract showAlert(
-    title: string,
-    message: string,
-    closeBtn: string,
-    viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<TdAlertDialogComponent>>
-
   abstract showError(
     message: string,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<TdAlertDialogComponent>>
+  ): Observable<MatDialogRef<InfoDialogComponent>>
+
+  abstract showConfirm(
+    options: ConfirmData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<ConfirmDialogComponent>>
+
+  abstract showInfo(
+    options: InfoData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<InfoDialogComponent>>
 
   abstract showSnackbar(
     message: string,

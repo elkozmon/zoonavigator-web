@@ -76,10 +76,13 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     if (recursive) {
       confirmation = this.dialogService
         .showConfirm(
-          "Confirm recursive change",
-          "Do you want to apply these settings to this node and its children?",
-          "Apply",
-          "Cancel",
+          {
+            icon: "help",
+            title: "Confirm recursive change",
+            message: "Do you want to apply these settings to this node and its children?",
+            acceptText: "Apply",
+            cancelText: "Cancel"
+          },
           this.viewContainerRef
         )
         .switchMap(ref => ref.afterClosed());
@@ -108,10 +111,13 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
 
     this.dialogService
       .showConfirm(
-        "Confirm clearing the form",
-        "Do you want to remove all ACL inputs? Changes will not be applied yet.",
-        "Clear",
-        "Cancel",
+        {
+          icon: "help",
+          title: "Confirm clearing the form",
+          message: "Do you want to remove all ACL inputs? Changes will not be applied yet.",
+          acceptText: "Clear",
+          cancelText: "Cancel"
+        },
         this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())

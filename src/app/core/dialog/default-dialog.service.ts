@@ -18,9 +18,7 @@
 import {Injectable, ViewContainerRef} from "@angular/core";
 import {
   IAlertConfig,
-  IConfirmConfig,
   TdAlertDialogComponent,
-  TdConfirmDialogComponent,
   TdDialogService
 } from "@covalent/core";
 import {MatDialog, MatDialogRef, MatSnackBar, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
@@ -29,14 +27,17 @@ import {DialogService} from "./dialog.service";
 import {
   CreateZNodeData,
   CreateZNodeDialogComponent,
-  DiscardChangesDialogComponent,
+  ConfirmData,
+  ConfirmDialogComponent,
   DuplicateZNodeData,
   DuplicateZNodeDialogComponent,
   ImportZNodesData,
   ImportZNodesDialogComponent,
   MoveZNodeData,
   MoveZNodeDialogComponent,
-  SessionInfoDialogComponent
+  SessionInfoDialogComponent,
+  InfoData,
+  InfoDialogComponent
 } from "./dialogs";
 import {ZSessionInfo} from "../zsession/zsession-info";
 
@@ -45,9 +46,9 @@ type GroupKey = string;
 @Injectable()
 export class DefaultDialogService extends DialogService {
 
-  private showConfirmInstances: Map<GroupKey, MatDialogRef<TdConfirmDialogComponent>> = new Map();
+  private showConfirmInstances: Map<GroupKey, MatDialogRef<ConfirmDialogComponent>> = new Map();
 
-  private showAlertInstances: Map<GroupKey, MatDialogRef<TdAlertDialogComponent>> = new Map();
+  private showInfoInstances: Map<GroupKey, MatDialogRef<InfoDialogComponent>> = new Map();
 
   constructor(
     private dialogService: TdDialogService,
@@ -59,21 +60,14 @@ export class DefaultDialogService extends DialogService {
 
   showDiscardChanges(
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<DiscardChangesDialogComponent>> {
-    const dialog = this.dialog.open(DiscardChangesDialogComponent, {
-      viewContainerRef: viewRef,
-      role: "dialog",
-      hasBackdrop: true,
-      disableClose: true,
-      width: "500px",
-      maxWidth: "80vw",
-      height: "200px",
-      maxHeight: "80vw",
-      direction: "ltr",
-      autoFocus: true
-    });
-
-    return Observable.of(dialog);
+  ): Observable<MatDialogRef<ConfirmDialogComponent>> {
+    return this.showConfirm({
+      icon: "help",
+      title: "Discard changes?",
+      message: "Unsaved changes detected. Do you want to discard them?",
+      cancelText: "Cancel",
+      acceptText: "Discard"
+    }, viewRef);
   }
 
   showCreateZNode(
@@ -139,6 +133,19 @@ export class DefaultDialogService extends DialogService {
     return Observable.of(dialog);
   }
 
+  showRecursiveDeleteZNode(
+    message: string,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<ConfirmDialogComponent>> {
+    return this.showConfirm({
+      icon: "help",
+      title: "Confirm recursive delete",
+      message: message,
+      acceptText: "Delete",
+      cancelText: "Cancel"
+    }, viewRef);
+  }
+
   showMoveZNode(
     defaults: MoveZNodeData,
     viewRef?: ViewContainerRef
@@ -180,30 +187,44 @@ export class DefaultDialogService extends DialogService {
     return Observable.of(dialog);
   }
 
-  showConfirm(
-    title: string,
+  showError(
     message: string,
-    acceptBtn: string,
-    cancelBtn: string,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<TdConfirmDialogComponent>> {
-    const config: IConfirmConfig = {
-      message: message,
-      disableClose: true,
-      viewContainerRef: viewRef,
-      title: title,
-      cancelButton: cancelBtn,
-      acceptButton: acceptBtn
-    };
+  ): Observable<MatDialogRef<InfoDialogComponent>> {
+    return this.showInfo(
+      {
+        icon: "error",
+        title: "Error",
+        message: message,
+        dismissText: "Close"
+      },
+      viewRef
+    );
+  }
 
-    const key: GroupKey = title + message + acceptBtn;
+  showConfirm(
+    options: ConfirmData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<ConfirmDialogComponent>> {
+    const key: GroupKey = options.title + options.message + options.acceptText;
 
     // Look for cached dialog
     if (this.showConfirmInstances.has(key)) {
       return Observable.of(this.showConfirmInstances.get(key));
     }
 
-    const dialog = this.dialogService.openConfirm(config);
+    const dialog = this.dialog.open(ConfirmDialogComponent, {
+      data: options,
+      viewContainerRef: viewRef,
+      role: "dialog",
+      hasBackdrop: true,
+      width: "500px",
+      maxWidth: "80vw",
+      height: "210px",
+      maxHeight: "80vw",
+      direction: "ltr",
+      autoFocus: true
+    });
 
     // Cache dialog
     this.showConfirmInstances.set(key, dialog);
@@ -216,49 +237,39 @@ export class DefaultDialogService extends DialogService {
     return Observable.of(dialog);
   }
 
-  showAlert(
-    title: string,
-    message: string,
-    closeBtn: string,
+  showInfo(
+    options: InfoData,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<TdAlertDialogComponent>> {
-    const config: IAlertConfig = {
-      message: message,
-      viewContainerRef: viewRef,
-      title: title,
-      closeButton: closeBtn
-    };
-
-    const key: GroupKey = title + message;
+  ): Observable<MatDialogRef<InfoDialogComponent>> {
+    const key: GroupKey = options.title + options.message;
 
     // Look for cached dialog
-    if (this.showAlertInstances.has(key)) {
-      return Observable.of(this.showAlertInstances.get(key));
+    if (this.showInfoInstances.has(key)) {
+      return Observable.of(this.showInfoInstances.get(key));
     }
 
-    const dialog = this.dialogService.openAlert(config);
+    const dialog = this.dialog.open(InfoDialogComponent, {
+      data: options,
+      viewContainerRef: viewRef,
+      role: "dialog",
+      hasBackdrop: true,
+      width: "500px",
+      maxWidth: "80vw",
+      height: "210px",
+      maxHeight: "80vw",
+      direction: "ltr",
+      autoFocus: true
+    });
 
     // Cache dialog
-    this.showAlertInstances.set(key, dialog);
+    this.showInfoInstances.set(key, dialog);
 
     // Uncache dialog once closed
     dialog
       .afterClosed()
-      .forEach(() => this.showAlertInstances.delete(key));
+      .forEach(() => this.showInfoInstances.delete(key));
 
     return Observable.of(dialog);
-  }
-
-  showError(
-    message: string,
-    viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<TdAlertDialogComponent>> {
-    return this.showAlert(
-      "Error",
-      message,
-      "Close",
-      viewRef
-    );
   }
 
   showSnackbar(

@@ -177,13 +177,7 @@ export class NavActionsComponent {
     const message = `Do you want to delete ${names.length} ${names.length === 1 ? "node and its" : "nodes and their"} children?`;
 
     this.dialogService
-      .showConfirm(
-        "Confirm recursive delete",
-        message,
-        "Delete",
-        "Cancel",
-        this.viewContainerRef
-      )
+      .showRecursiveDeleteZNode(message, this.viewContainerRef)
       .switchMap(ref => ref.afterClosed())
       .switchMap((confirm: boolean) => {
         if (confirm) {

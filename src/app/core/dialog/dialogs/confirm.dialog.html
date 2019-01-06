@@ -15,13 +15,18 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<h3 mat-dialog-title>Discard changes?</h3>
+<h3 mat-dialog-title>
+  <div class="zoo-dialog-title" layout="row" layout-align="start center" flex>
+    <mat-icon>{{ data.icon }}</mat-icon>
+    <div>{{ data.title }}</div>
+  </div>
+</h3>
 <mat-dialog-content>
   <div>
-    <span>Unsaved changes detected. Do you want to discard them?</span>
+    <span>{{ data.message }}</span>
   </div>
 </mat-dialog-content>
 <mat-dialog-actions layout-align="end">
-  <button mat-button [mat-dialog-close]="false">Cancel</button>
-  <button mat-button [mat-dialog-close]="true" color="accent">Discard</button>
+  <button mat-button [mat-dialog-close]="false">{{ data.cancelText }}</button>
+  <button mat-button [mat-dialog-close]="true" color="accent">{{ data.acceptText }}</button>
 </mat-dialog-actions>

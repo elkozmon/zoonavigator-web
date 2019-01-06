@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./create-znode.data"
-export * from "./create-znode.dialog"
-export * from "./import-znodes.data"
-export * from "./import-znodes.dialog"
-export * from "./confirm.data"
-export * from "./confirm.dialog"
-export * from "./info.data"
-export * from "./info.dialog"
-export * from "./duplicate-znode.data"
-export * from "./duplicate-znode.dialog"
-export * from "./move-znode.data"
-export * from "./move-znode.dialog"
-export * from "./session-info.dialog"
+export interface ConfirmData {
+  icon: string;
+  iconColor?: string;
+  title: string;
+  titleColor?: string;
+  message: string;
+  cancelText: string;
+  acceptText: string;
+}

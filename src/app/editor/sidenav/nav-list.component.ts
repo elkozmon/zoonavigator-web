@@ -100,11 +100,8 @@ export class NavListComponent implements OnChanges {
 
   onNodeDeleteClick(zPath: ZPath): void {
     this.dialogService
-      .showConfirm(
-        "Confirm recursive delete",
+      .showRecursiveDeleteZNode(
         `Do you want to delete node '${zPath.name.valueOrThrow()}' and its children?`,
-        "Delete",
-        "Cancel",
         this.viewContainerRef
       )
       .switchMap(ref => ref.afterClosed())
