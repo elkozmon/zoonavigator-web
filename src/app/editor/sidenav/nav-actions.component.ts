@@ -15,12 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, EventEmitter, Input, Output, ViewChild, ViewContainerRef} from "@angular/core";
+import {Component, EventEmitter, Input, Output, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {state, style, trigger} from "@angular/animations";
 import {Observable} from "rxjs/Rx";
-import {FileSaverService, ZNodeExport, ZNodeService, ZPath} from "../../core";
-import {DialogService, CreateZNodeData} from "../../core/dialog";
+import {
+  CreateZNodeData,
+  DialogService,
+  FileSaverService,
+  ImportZNodesData,
+  ZNodeExport,
+  ZNodeService,
+  ZPath,
+  FileReaderService
+} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {Ordering} from "../ordering";
 
@@ -54,6 +62,7 @@ export class NavActionsComponent {
     private zNodeService: ZNodeService,
     private dialogService: DialogService,
     private fileSaverService: FileSaverService,
+    private fileReaderService: FileReaderService,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -75,6 +84,44 @@ export class NavActionsComponent {
 
     this.ordering = newOrdering;
     this.orderingChange.emit(newOrdering);
+  }
+
+  onImportClick(): void {
+    this.dialogService
+      .showImportZNodes(
+        {
+          path: this.zPath.isRoot ? "/" : this.zPath.path.concat("/"),
+          redirect: false
+        },
+        this.viewContainerRef
+      )
+      .switchMap(ref => ref.afterClosed())
+      .switchMap((data: ImportZNodesData) => {
+        if (data && data.file) {
+          return this.fileReaderService
+            .readAsText(data.file)
+            .switchMap(str => this.zNodeService.importNodes(data.path, JSON.parse(str)))
+            .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+            .switchMapTo(Observable.of(data));
+        }
+
+        return Observable.empty();
+      })
+      .forEach((data: ImportZNodesData) => {
+        if (data.redirect) {
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+              [EDITOR_QUERY_NODE_PATH]: data.path
+            },
+            queryParamsHandling: "merge"
+          });
+
+          return;
+        }
+
+        this.refresh.emit();
+      });
   }
 
   onCreateClick(): void {

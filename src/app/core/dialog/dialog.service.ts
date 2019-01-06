@@ -16,19 +16,21 @@
  */
 
 import {Injectable, ViewContainerRef} from "@angular/core";
-import {TdAlertDialogComponent, TdConfirmDialogComponent, TdPromptDialogComponent} from "@covalent/core";
+import {TdAlertDialogComponent, TdConfirmDialogComponent} from "@covalent/core";
 import {MatDialogRef, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
 import {Observable} from "rxjs/Rx";
 import {
+  SessionInfoDialogComponent,
   CreateZNodeDialogComponent,
   CreateZNodeData,
   DiscardChangesDialogComponent,
   MoveZNodeData,
   MoveZNodeDialogComponent,
   DuplicateZNodeDialogComponent,
-  DuplicateZNodeData
+  DuplicateZNodeData,
+  ImportZNodesDialogComponent,
+  ImportZNodesData
 } from "./dialogs";
-import {SessionInfoDialogComponent} from "./dialogs/session-info.dialog";
 import {ZSessionInfo} from "../zsession/zsession-info";
 
 @Injectable()
@@ -52,6 +54,11 @@ export abstract class DialogService {
     defaults: CreateZNodeData,
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<CreateZNodeDialogComponent>>
+
+  abstract showImportZNodes(
+    defaults: ImportZNodesData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<ImportZNodesDialogComponent>>
 
   abstract showDuplicateZNode(
     defaults: DuplicateZNodeData,

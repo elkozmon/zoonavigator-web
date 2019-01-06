@@ -15,7 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface ZNodeExport {
-  blob: Blob,
-  name: string
+import {Injectable} from "@angular/core";
+import {Observable} from "rxjs/Rx";
+
+@Injectable()
+export abstract class FileReaderService {
+
+  abstract readAsText(file: File, encoding?: string): Observable<string>;
 }

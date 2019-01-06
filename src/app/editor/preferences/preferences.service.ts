@@ -18,7 +18,7 @@
 import {Maybe} from "tsmonad";
 import {Mode} from "../mode";
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Observable";
+import {Observable} from "rxjs/Rx";
 
 @Injectable()
 export abstract class PreferencesService {

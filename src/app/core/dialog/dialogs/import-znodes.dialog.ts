@@ -15,7 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface ZNodeExport {
-  blob: Blob,
-  name: string
+import {Component, Inject, ViewChild} from "@angular/core";
+import {MAT_DIALOG_DATA, MatButton} from "@angular/material"
+import {ImportZNodesData} from "./import-znodes.data";
+
+@Component({
+  selector: "zoo-import-znodes.dialog",
+  templateUrl: "import-znodes.dialog.html",
+  styleUrls: ["dialog.scss"]
+})
+export class ImportZNodesDialogComponent {
+
+  @ViewChild("submitButton") submitButton: MatButton;
+
+  constructor(@Inject(MAT_DIALOG_DATA) public data: ImportZNodesData) {
+  }
+
+  onKeyPress(event: KeyboardEvent): void {
+    const code = event.which || event.keyCode;
+
+    if (code === 13) {
+      this.submitButton._elementRef.nativeElement.click();
+    }
+  }
 }

@@ -33,6 +33,9 @@
     </button>
     <button
       mat-menu-item
+      [disabled]="zPath.isRoot"
+      [matTooltip]="zPath.isRoot ? 'Cannot export root node' : ''"
+      matTooltipPosition="after"
       (click)="onExportClick()">
       <mat-icon>cloud_download</mat-icon><span>Export</span>
     </button>

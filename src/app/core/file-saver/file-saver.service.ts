@@ -21,5 +21,5 @@ import {Observable} from "rxjs/Rx";
 @Injectable()
 export abstract class FileSaverService {
 
-  abstract save(blob: Blob, fileName: String): void;
+  abstract save(blob: Blob, fileName: string): void;
 }

@@ -301,4 +301,29 @@ export class ApiZNodeService implements ZNodeService {
         });
     });
   }
+
+  importNodes(
+    path: string,
+    nodes: any
+  ): Observable<void> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path
+        }
+      });
+
+      const request = this.apiRequestFactory.postRequest(
+        "/znode/import",
+        params,
+        null,
+        new JsonRequestContent(nodes),
+        token
+      );
+
+      return this.apiService
+        .dispatch(request)
+        .mapTo(null);
+    });
+  }
 }

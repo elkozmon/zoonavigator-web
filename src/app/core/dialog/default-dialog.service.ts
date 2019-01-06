@@ -32,12 +32,13 @@ import {
   DiscardChangesDialogComponent,
   DuplicateZNodeData,
   DuplicateZNodeDialogComponent,
+  ImportZNodesData,
+  ImportZNodesDialogComponent,
   MoveZNodeData,
   MoveZNodeDialogComponent,
   SessionInfoDialogComponent
 } from "./dialogs";
 import {ZSessionInfo} from "../zsession/zsession-info";
-
 
 type GroupKey = string;
 
@@ -89,6 +90,27 @@ export class DefaultDialogService extends DialogService {
       maxWidth: "80vw",
       height: defaults.redirect === undefined ? "230px" : "260px",
       maxHeight: "80vw",
+      direction: "ltr",
+      autoFocus: true
+    });
+
+    return Observable.of(dialog);
+  }
+
+  showImportZNodes(
+    defaults: ImportZNodesData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<ImportZNodesDialogComponent>> {
+    const dialog = this.dialog.open(ImportZNodesDialogComponent, {
+      data: defaults,
+      viewContainerRef: viewRef,
+      role: "dialog",
+      hasBackdrop: true,
+      disableClose: true,
+      width: "500px",
+      maxWidth: "80vw",
+      height: defaults.redirect === undefined ? "287px" : "325px",
+      maxHeight: "100vw",
       direction: "ltr",
       autoFocus: true
     });

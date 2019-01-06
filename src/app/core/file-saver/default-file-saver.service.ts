@@ -22,7 +22,7 @@ import {saveAs} from "file-saver";
 @Injectable()
 export class DefaultFileSaverService implements FileSaverService {
 
-  save(blob: Blob, fileName: String): void {
+  save(blob: Blob, fileName: string): void {
     saveAs(blob, fileName);
   }
 }

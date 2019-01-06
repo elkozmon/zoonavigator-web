@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2018  Ľuboš Kozmon
+  ~ Copyright (C) 2019  Ľuboš Kozmon
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,44 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<h3 mat-dialog-title>Move node</h3>
+<h3 mat-dialog-title>Import nodes</h3>
 <mat-dialog-content>
+  <div layout="row" layout-align="start center" flex>
+    <mat-form-field
+      class="zoo-full-width"
+      flex
+      tdFileDrop
+      [multiple]="false"
+      (fileDrop)="data.file = $event"
+      (click)="fileInput.inputElement.click()"
+      (keyup)="fileInput.inputElement.click()">
+      <input
+        matInput
+        [value]="data.file?.name"
+        placeholder="Select or drop file to import"
+        readonly/>
+      <td-file-input
+        #fileInput
+        [(ngModel)]="data.file"
+        style="display: none;">
+      </td-file-input>
+    </mat-form-field>
+    <button mat-button (click)="fileInput.inputElement.click()" style="margin-left: 5px">Browse</button>
+  </div>
   <mat-form-field class="zoo-full-width">
     <input
       matInput
-      placeholder="Enter new path"
+      placeholder="Enter root path"
       (keypress)="onKeyPress($event)"
       [(ngModel)]="data.path"/>
   </mat-form-field>
-  <div *ngIf="data.redirect !== undefined">
+  <div *ngIf="data.redirect !== null">
     <mat-checkbox [(ngModel)]="data.redirect">
-      Open the new node afterwards
+      Open the root node afterwards
     </mat-checkbox>
   </div>
 </mat-dialog-content>
 <mat-dialog-actions layout-align="end">
   <button mat-button [mat-dialog-close]="null">Cancel</button>
-  <button mat-button [mat-dialog-close]="data" color="accent" #submitButton="matButton">Move</button>
+  <button mat-button [mat-dialog-close]="data" color="accent" #submitButton="matButton">Import</button>
 </mat-dialog-actions>

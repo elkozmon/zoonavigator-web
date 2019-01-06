@@ -75,4 +75,9 @@ export abstract class ZNodeService {
   abstract exportNodes(
     paths: string[]
   ): Observable<ZNodeExport>
+
+  abstract importNodes(
+    path: string,
+    nodes: any
+  ): Observable<void>
 }

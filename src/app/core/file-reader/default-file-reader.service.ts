@@ -15,7 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface ZNodeExport {
-  blob: Blob,
-  name: string
+import {Injectable} from "@angular/core";
+import {Observable} from "rxjs/Rx";
+import {FileReaderService} from "./file-reader.service";
+
+@Injectable()
+export class DefaultFileReaderService implements FileReaderService {
+
+  readAsText(file: File, encoding?: string): Observable<string> {
+    const promise = new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => resolve(reader.result);
+      reader.onabort = ev => reject(ev);
+      reader.onerror = ev => reject(ev);
+
+      reader.readAsText(file, encoding);
+    });
+
+    return Observable.fromPromise(promise);
+  }
 }
+

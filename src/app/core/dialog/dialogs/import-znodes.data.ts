@@ -15,7 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface ZNodeExport {
-  blob: Blob,
-  name: string
+export interface ImportZNodesData {
+  path: string;
+  file?: File;
+  redirect?: boolean;
 }

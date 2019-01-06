@@ -19,6 +19,7 @@ import {NgModule} from "@angular/core";
 import {FormsModule} from "@angular/forms";
 import {CommonModule} from "@angular/common";
 import {MatButtonModule, MatCheckboxModule, MatDialogModule, MatInputModule} from "@angular/material";
+import {CovalentFileModule} from "@covalent/core";
 import {ApiRequestFactory, ApiService, DefaultApiRequestFactory, DefaultApiService} from "./api";
 import {ApiZSessionService, DefaultZSessionHandler, ZSessionHandler, ZSessionService} from "./zsession";
 import {
@@ -28,12 +29,14 @@ import {
   CreateZNodeDialogComponent,
   DuplicateZNodeDialogComponent,
   DiscardChangesDialogComponent,
-  SessionInfoDialogComponent
+  SessionInfoDialogComponent,
+  ImportZNodesDialogComponent
 } from "./dialog";
 import {StorageService, LocalStorageService} from "./storage";
 import {FileSaverService, DefaultFileSaverService} from "./file-saver";
 import {DefaultZPathService, ZPathService} from "./zpath";
 import {ApiZNodeService, ZNodeService} from "./znode";
+import {DefaultFileReaderService, FileReaderService} from "./file-reader";
 
 @NgModule({
   imports: [
@@ -42,13 +45,15 @@ import {ApiZNodeService, ZNodeService} from "./znode";
     MatButtonModule,
     MatDialogModule,
     MatInputModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    CovalentFileModule
   ],
   providers: [
     {provide: ApiService, useClass: DefaultApiService},
     {provide: ApiRequestFactory, useClass: DefaultApiRequestFactory},
     {provide: StorageService, useClass: LocalStorageService},
     {provide: FileSaverService, useClass: DefaultFileSaverService},
+    {provide: FileReaderService, useClass: DefaultFileReaderService},
     {provide: ZNodeService, useClass: ApiZNodeService},
     {provide: ZPathService, useClass: DefaultZPathService},
     {provide: ZSessionService, useClass: ApiZSessionService},
@@ -58,6 +63,7 @@ import {ApiZNodeService, ZNodeService} from "./znode";
   entryComponents: [
     MoveZNodeDialogComponent,
     CreateZNodeDialogComponent,
+    ImportZNodesDialogComponent,
     DuplicateZNodeDialogComponent,
     DiscardChangesDialogComponent,
     SessionInfoDialogComponent
@@ -65,6 +71,7 @@ import {ApiZNodeService, ZNodeService} from "./znode";
   declarations: [
     MoveZNodeDialogComponent,
     CreateZNodeDialogComponent,
+    ImportZNodesDialogComponent,
     DuplicateZNodeDialogComponent,
     DiscardChangesDialogComponent,
     SessionInfoDialogComponent
