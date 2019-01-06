@@ -38,6 +38,7 @@ import {FileSaverService, DefaultFileSaverService} from "./file-saver";
 import {DefaultZPathService, ZPathService} from "./zpath";
 import {ApiZNodeService, ZNodeService} from "./znode";
 import {DefaultFileReaderService, FileReaderService} from "./file-reader";
+import {PathSanitizingZNodeService} from "./znode/path-sanitizing-znode.service";
 
 @NgModule({
   imports: [
@@ -56,7 +57,8 @@ import {DefaultFileReaderService, FileReaderService} from "./file-reader";
     {provide: StorageService, useClass: LocalStorageService},
     {provide: FileSaverService, useClass: DefaultFileSaverService},
     {provide: FileReaderService, useClass: DefaultFileReaderService},
-    {provide: ZNodeService, useClass: ApiZNodeService},
+    ApiZNodeService,
+    {provide: ZNodeService, deps: [ApiZNodeService], useFactory: (apiService) => new PathSanitizingZNodeService(apiService)},
     {provide: ZPathService, useClass: DefaultZPathService},
     {provide: ZSessionService, useClass: ApiZSessionService},
     {provide: ZSessionHandler, useClass: DefaultZSessionHandler},
