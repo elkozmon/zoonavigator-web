@@ -55,7 +55,7 @@
       <mat-toolbar td-sidenav-content>
         <zoo-editor-nav-actions
           [zPath]="zPath | async"
-          [zNodes]="selectedZNodes"
+          [zNodes]="selectedFilteredNodes"
           [(ordering)]="childrenOrdering"
           (refresh)="reloadEditor()"
           (selectAll)="toggleSelectAll()">
@@ -76,7 +76,7 @@
         <zoo-editor-nav-list
           [zPath]="zPath | async"
           [zNodes]="filteredZNodes"
-          [zNodesSelected]="selectedZNodes"
+          [zNodesSelected]="selectedFilteredNodes"
           [zNodesOrdering]="childrenOrdering"
           (refresh)="reloadEditor()"
           (select)="selectZNode($event)"

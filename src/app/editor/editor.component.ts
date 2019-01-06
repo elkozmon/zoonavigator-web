@@ -67,6 +67,10 @@ export class EditorComponent implements OnInit, AfterViewInit {
   ) {
   }
 
+  get selectedFilteredNodes(): ZPath[] {
+    return this.selectedZNodes.filter(value => -1 !== this.filteredZNodes.indexOf(value));
+  }
+
   ngOnInit(): void {
     this.zPath = this.route
       .queryParams
