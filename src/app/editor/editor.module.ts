@@ -42,10 +42,10 @@ import {
 import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {AceEditorModule} from "ng2-ace-editor";
 import {
-  ActionbarComponent,
-  ContentComponent,
+  ActionbarComponent, CompressionProvider,
+  ContentComponent, DefaultCompressionProvider, DefaultModeProvider, ModeProvider,
   ZNodeAclComponent,
-  ZNodeDataComponent,
+  ZNodeDataComponent, ZNodeDataEditorComponent, ZNodeDataToolbarComponent,
   ZNodeMetaComponent
 } from "./content";
 import {PreferencesService, DefaultPreferencesService} from "./preferences";
@@ -88,7 +88,9 @@ import {DefaultFormatterProvider, FormatterProvider} from "./formatter";
     {provide: PreferencesService, useClass: DefaultPreferencesService},
     {provide: Formatter, multi: true, useClass: JsonFormatter},
     {provide: Formatter, multi: true, useClass: YamlFormatter},
-    {provide: FormatterProvider, useClass: DefaultFormatterProvider}
+    {provide: FormatterProvider, useClass: DefaultFormatterProvider},
+    {provide: ModeProvider, useClass: DefaultModeProvider},
+    {provide: CompressionProvider, useClass: DefaultCompressionProvider}
   ],
   declarations: [
     EditorComponent,
@@ -99,6 +101,8 @@ import {DefaultFormatterProvider, FormatterProvider} from "./formatter";
     ActionbarComponent,
     ZNodeAclComponent,
     ZNodeDataComponent,
+    ZNodeDataEditorComponent,
+    ZNodeDataToolbarComponent,
     ZNodeMetaComponent
   ]
 })

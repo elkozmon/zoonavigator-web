@@ -19,12 +19,12 @@ import {Injectable} from "@angular/core";
 import "yamljs";
 import {Either} from "tsmonad";
 import {Formatter} from "./formatter";
-import {Mode} from "../../mode";
+import {ModeId} from "../../content/data/mode";
 
 @Injectable()
 export class JsonFormatter extends Formatter {
 
-  mode: Mode = Mode.Json;
+  mode: ModeId = ModeId.Json;
 
   format(data: string): Either<Error, string> {
     try {

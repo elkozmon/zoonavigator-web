@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,11 +16,19 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Maybe} from "tsmonad";
-import {Formatter} from "./formatters";
-import {ModeId} from "../content";
+import {CompressionProvider} from "./compression.provider";
+import {Compression} from "./compression";
+import {CompressionId} from "./compression-id";
+import {GzipCompression} from "./gzip-compression";
 
 @Injectable()
-export abstract class FormatterProvider {
-  abstract getFormatter(mode: ModeId): Maybe<Formatter>
+export class DefaultCompressionProvider implements CompressionProvider {
+
+  private compressions: Map<CompressionId, Compression> = new Map([
+    [CompressionId.Gzip, new GzipCompression()],
+  ]);
+
+  getCompression(compressionId: CompressionId): Compression {
+    return this.compressions.get(compressionId);
+  }
 }

@@ -15,19 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Maybe} from "tsmonad";
-import {Mode} from "../mode";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs/Rx";
+import {Maybe} from "tsmonad";
+import {ModeId} from "../content";
 
 @Injectable()
 export abstract class PreferencesService {
 
-  abstract setModeFor(path: string, creationId: number, mode: Mode): Observable<void>
+  abstract setModeFor(path: string, creationId: number, mode: Maybe<ModeId>): Observable<void>
 
-  abstract getModeFor(path: string, creationId: number): Observable<Maybe<Mode>>
+  abstract getModeFor(path: string, creationId: number): Observable<Maybe<ModeId>>
 
-  abstract setWrapFor(path: string, creationId: number, enabled: boolean): Observable<void>
+  abstract setWrapFor(path: string, creationId: number, enabled: Maybe<boolean>): Observable<void>
 
   abstract getWrapFor(path: string, creationId: number): Observable<Maybe<boolean>>
 }

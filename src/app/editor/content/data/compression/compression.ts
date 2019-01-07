@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,11 +16,14 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Maybe} from "tsmonad";
-import {Formatter} from "./formatters";
-import {ModeId} from "../content";
+import {Observable} from "rxjs/Observable";
 
 @Injectable()
-export abstract class FormatterProvider {
-  abstract getFormatter(mode: ModeId): Maybe<Formatter>
+export abstract class Compression {
+
+  abstract isCompressed(bytes: ArrayBuffer): boolean;
+
+  abstract decompress(bytes: ArrayBuffer): Observable<ArrayBuffer>;
+
+  abstract compress(bytes: ArrayBuffer): Observable<ArrayBuffer>;
 }

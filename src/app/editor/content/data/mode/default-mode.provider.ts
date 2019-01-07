@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 import {Injectable} from "@angular/core";
-import {Maybe} from "tsmonad";
-import {Formatter} from "./formatters";
-import {ModeId} from "../content";
+import {ModeProvider} from "./mode.provider";
+import {Mode} from "./mode";
+import {ModeId} from "./mode-id";
+import {TextMode} from "./text-mode";
+import {Base64Mode} from "./base64-mode";
+import {XmlMode} from "./xml-mode";
+import {JsonMode} from "./json-mode";
+import {YamlMode} from "./yaml-mode";
 
 @Injectable()
-export abstract class FormatterProvider {
-  abstract getFormatter(mode: ModeId): Maybe<Formatter>
+export class DefaultModeProvider implements ModeProvider {
+  private modes: Map<ModeId, Mode> = new Map([
+    [ModeId.Text, new TextMode()],
+    [ModeId.Yaml, new YamlMode()],
+    [ModeId.Json, new JsonMode()],
+    [ModeId.Xml, new XmlMode()],
+    [ModeId.Base64, new Base64Mode()]
+  ]);
+
+  getMode(modeId: ModeId): Mode {
+    return this.modes.get(modeId);
+  }
 }

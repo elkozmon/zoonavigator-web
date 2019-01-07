@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,11 +16,17 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Maybe} from "tsmonad";
-import {Formatter} from "./formatters";
-import {ModeId} from "../content";
+import {Mode} from "./mode";
+import {TextDecoder, TextEncoder} from "text-encoding-utf-8";
 
 @Injectable()
-export abstract class FormatterProvider {
-  abstract getFormatter(mode: ModeId): Maybe<Formatter>
+export class XmlMode implements Mode {
+
+  decodeData(data: ArrayBuffer): string {
+    return TextDecoder("utf-8").decode(data);
+  }
+
+  encodeData(data: string): ArrayBuffer {
+    return TextEncoder("utf-8").encode(data).buffer;
+  }
 }

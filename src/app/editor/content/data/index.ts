@@ -16,3 +16,7 @@
  */
 
 export * from "./znode-data.component"
+export * from "./znode-data-editor.component"
+export * from "./znode-data-toolbar.component"
+export * from "./compression"
+export * from "./mode"

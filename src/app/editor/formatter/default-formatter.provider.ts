@@ -19,20 +19,20 @@ import {Inject, Injectable} from "@angular/core";
 import {Maybe} from "tsmonad";
 import {FormatterProvider} from "./formatter.provider";
 import {Formatter} from "./formatters";
-import {Mode} from "../mode";
+import {ModeId} from "../content";
 
 @Injectable()
 export class DefaultFormatterProvider extends FormatterProvider {
 
-  private formatters: Map<Mode, Formatter>;
+  private formatters: Map<ModeId, Formatter>;
 
   constructor(@Inject(Formatter) formatters: Formatter[]) {
     super();
 
-    this.formatters = new Map(formatters.map<[Mode, Formatter]>(f => [f.mode, f]));
+    this.formatters = new Map(formatters.map<[ModeId, Formatter]>(f => [f.mode, f]));
   }
 
-  getFormatter(mode: Mode): Maybe<Formatter> {
+  getFormatter(mode: ModeId): Maybe<Formatter> {
     return Maybe.maybe(this.formatters.get(mode) || null);
   }
 }

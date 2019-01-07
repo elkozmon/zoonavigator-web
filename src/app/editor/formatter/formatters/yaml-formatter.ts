@@ -18,14 +18,14 @@
 import {Injectable} from "@angular/core";
 import {Either} from "tsmonad";
 import {Formatter} from "./formatter";
-import {Mode} from "../../mode";
+import {ModeId} from "../../content/data/mode";
 
 const YAML = require("yamljs");
 
 @Injectable()
 export class YamlFormatter extends Formatter {
 
-  mode: Mode = Mode.Yaml;
+  mode: ModeId = ModeId.Yaml;
 
   format(data: string): Either<Error, string> {
     try {

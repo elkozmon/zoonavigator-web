@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,11 +16,24 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Maybe} from "tsmonad";
-import {Formatter} from "./formatters";
-import {ModeId} from "../content";
+import {Compression} from "./compression";
+import {Observable} from "rxjs/Observable";
+
+const pako = require("pako");
+const isGzip = require("is-gzip");
 
 @Injectable()
-export abstract class FormatterProvider {
-  abstract getFormatter(mode: ModeId): Maybe<Formatter>
+export class GzipCompression implements Compression {
+
+  isCompressed(bytes: ArrayBuffer): boolean {
+    return isGzip(new Uint8Array(bytes));
+  }
+
+  compress(bytes: ArrayBuffer): Observable<ArrayBuffer> {
+    return Observable.of(pako.gzip(new Uint8Array(bytes)).buffer);
+  }
+
+  decompress(bytes: ArrayBuffer): Observable<ArrayBuffer> {
+    return Observable.of(pako.ungzip(new Uint8Array(bytes)).buffer);
+  }
 }

@@ -17,12 +17,12 @@
 
 import {Injectable} from "@angular/core";
 import {Either} from "tsmonad";
-import {Mode} from "../../mode";
+import {ModeId} from "../../content/data/mode";
 
 @Injectable()
 export abstract class Formatter {
 
-  abstract mode: Mode;
+  abstract mode: ModeId;
 
   abstract format(data: string): Either<Error, string>
 }

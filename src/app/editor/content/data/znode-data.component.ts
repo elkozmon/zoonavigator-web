@@ -15,150 +15,175 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
+import {ChangeDetectionStrategy, Component, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {AceEditorComponent} from "ng2-ace-editor";
-import {Observable} from "rxjs/Rx";
+import {Observable, ReplaySubject, Subject} from "rxjs/Rx";
 import {Either, Maybe} from "tsmonad";
-import "brace";
-import "brace/ext/searchbox";
-import "brace/mode/text";
-import "brace/mode/json";
-import "brace/mode/yaml";
-import "brace/mode/xml";
-import "brace/theme/chrome";
-import {DialogService, ZNodeService, ZNodeWithChildren} from "../../../core";
+import {DialogService, ZNodeMeta, ZNodeService, ZNodeWithChildren, ZPathService} from "../../../core";
 import {CanDeactivateComponent} from "../../../shared";
 import {PreferencesService} from "../../preferences";
-import {ZPathService} from "../../../core/zpath";
-import {Mode} from "../../mode";
+import {Mode, ModeId, ModeProvider} from "./mode";
 import {Formatter, FormatterProvider} from "../../formatter";
-import {ZNodeMeta} from "../../../core/znode";
-import {ReplaySubject} from "rxjs/ReplaySubject";
+import {Compression, CompressionId, CompressionProvider} from "./compression";
 
 @Component({
   templateUrl: "znode-data.component.html",
-  styleUrls: ["znode-data.component.scss"]
+  styleUrls: ["znode-data.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
-  @ViewChild("dataEditor") set dataEditor(comp: AceEditorComponent) {
-    if (comp) {
-      this.editorSubject.next(comp);
-    }
-  }
+  static defaultMode = ModeId.Text;
+  static defaultWrap = true;
 
-  editorSubject: ReplaySubject<AceEditorComponent> = new ReplaySubject(1);
-  editor: Observable<AceEditorComponent> = Observable.from(this.editorSubject);
+  editorNode: Subject<ZNodeWithChildren | null> = new ReplaySubject(1);
+  editorDataTxt: Subject<string> = new ReplaySubject(1);
+  editorDataRaw: Observable<string>;
 
-  defaultMode: Mode = Mode.Text;
-  defaultWrap = true;
+  formatter: Observable<Maybe<Formatter>>;
+  isFormatterAvailable: Observable<boolean>;
+  isEditorDataPristine: Observable<boolean>;
+  isEditorReady: Observable<boolean>;
+  isSubmitReady: Observable<boolean>;
 
-  currentNode: ZNodeWithChildren;
+  editorWrap: Subject<boolean> = new ReplaySubject(1);
+  editorModeId: Subject<ModeId> = new ReplaySubject(1);
+  editorCompId: Subject<Maybe<CompressionId>> = new ReplaySubject(1);
 
-  isSubmitting = false;
+  editorMode: Observable<Mode>;
+  editorComp: Observable<Maybe<Compression>>;
 
-  editorData: string;
-  editorModes: Mode[] = [
-    Mode.Text,
-    Mode.Json,
-    Mode.Yaml,
-    Mode.Xml
-  ];
-  editorMode: Mode = this.defaultMode;
-  editorOpts: any = {
-    fontFamily: "\"Fira Code Retina\", monospace",
-    fontSize: "10pt",
-    wrap: this.defaultWrap
-  };
+  modeIds: ModeId[];
+  compIds: CompressionId[];
+
+  private isSubmitOngoing: Subject<boolean> = new ReplaySubject(1);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private zNodeService: ZNodeService,
     private zPathService: ZPathService,
+    private zNodeService: ZNodeService,
     private dialogService: DialogService,
     private preferencesService: PreferencesService,
+    private modeProvider: ModeProvider,
+    private compressionProvider: CompressionProvider,
     private formatterProvider: FormatterProvider,
-    private viewContainerRef: ViewContainerRef
+    private viewContainerRef: ViewContainerRef,
   ) {
-  }
-
-  get editorSubmitReady(): boolean {
-    return this.editorDirty && !this.isSubmitting;
-  }
-
-  get editorDirty(): boolean {
-    if (!this.currentNode) {
-      return false;
-    }
-
-    return this.currentNode.data !== this.editorData;
+    this.compIds = Object.keys(CompressionId).map(k => CompressionId[k]);
+    this.modeIds = Object.keys(ModeId).map(k => ModeId[k]);
   }
 
   ngOnInit(): void {
-    const currentNodeObservable: Observable<Either<Error, ZNodeWithChildren>> =
-      this.route
-        .parent
-        .data
-        .pluck("zNodeWithChildren");
+    // update editor node
+    this.route.parent.data
+      .pluck("zNodeWithChildren")
+      .switchMap((either: Either<Error, ZNodeWithChildren>) =>
+        either.caseOf({
+          left: error => {
+            return this.dialogService
+              .showError(error.message, this.viewContainerRef)
+              .mapTo(null)
+          },
+          right: node =>
+            Observable.of(node)
+        })
+      )
+      .forEach(nodeOrNull => this.editorNode.next(nodeOrNull));
 
-    // Update current node
-    currentNodeObservable
-      .do(either => either.caseOf({
-        left: error => this.currentNode = null,
-        right: node => this.currentNode = node
-      }))
-      .subscribe();
+    // update editor ready
+    this.isEditorReady = Observable
+      .combineLatest(this.editorNode, this.editorModeId, this.editorCompId, this.editorWrap)
+      .map(([n, m, c, w]) => n != null && m != null && c != null && w != null);
 
-    // Show popup on error or update editor data
-    currentNodeObservable
-      .do(either => either.caseOf<void>({
-        left: error => this.dialogService.showError(error.message, this.viewContainerRef),
-        right: node => this.editorData = node.data
-      }))
-      .subscribe();
+    // init rest of the observables and subjects
+    this.editorMode = this.editorModeId.map(id => this.modeProvider.getMode(id));
+    this.editorComp = this.editorCompId.map(mId => mId.map(id => this.compressionProvider.getCompression(id)));
+    this.isSubmitOngoing.next(false);
 
-    // Try to recall mode used the last time with this node
-    currentNodeObservable
-      .switchMap(either => either.caseOf({
-        left: () => Observable.empty<Maybe<Mode>>(),
-        right: n => this.preferencesService.getModeFor(n.path, n.meta.creationId)
-      }))
-      .do(maybeMode => this.setMode(maybeMode.valueOr(this.defaultMode), false))
-      .subscribe();
+    // update raw data on change of: txtData or mode or comp
+    this.editorDataRaw = Observable
+      .combineLatest(this.editorDataTxt, this.editorMode, this.editorComp)
+      .switchMap(([txtData, mode, mComp]) => ZNodeDataComponent.encodeToRawData(txtData, mode, mComp));
 
-    // Try to recall wrap setting used the last time with this node
-    currentNodeObservable
-      .switchMap(either => either.caseOf({
-        left: () => Observable.empty<Maybe<boolean>>(),
-        right: n => this.preferencesService.getWrapFor(n.path, n.meta.creationId)
-      }))
-      .do(maybeWrap => this.setWrap(maybeWrap.valueOr(this.defaultWrap), false))
-      .subscribe();
+    // update txt data on change of: mode
+    this.editorMode
+      .bufferCount(2, 1)
+      .switchMap(([oldMode, newMode]) => this.editorDataTxt.combineLatest(Observable.of(oldMode), Observable.of(newMode)).take(1))
+      .map(([txt, oldMode, newMode]) => ZNodeDataComponent.translateDataMode(txt, oldMode, newMode))
+      .forEach(data => this.editorDataTxt.next(data));
 
-    // Disable Ace editors search box
-    this.editor.forEach(e => e._editor.commands.removeCommand("find"))
+    // update formatter
+    this.formatter = this.editorModeId.map(mode => this.formatterProvider.getFormatter(mode));
+    this.isFormatterAvailable = this.formatter.map(maybe => maybe.map(() => true).valueOr(false));
+
+    // update pristine flag
+    this.isEditorDataPristine = Observable
+      .combineLatest(this.editorNode, this.editorDataRaw)
+      .map(([node, rawData]) => node.data == rawData);
+
+    // update submit ready flag
+    this.isSubmitReady = Observable
+      .combineLatest(this.isEditorDataPristine, this.isSubmitOngoing)
+      .map(([isEditorDataPristine, isSubmitOngoing]) => !isEditorDataPristine && !isSubmitOngoing);
+
+    // on change of node do following
+    this.editorNode
+      .switchMap(node => {
+        // change compression
+        const o1 = ZNodeDataComponent.inferCompression(node.data, this.compIds, this.compressionProvider)
+          .do(comp => this.editorCompId.next(comp));
+
+        // change mode
+        const o2 = this.preferencesService
+          .getModeFor(node.path, node.meta.creationId)
+          .map(maybeModeId => maybeModeId.valueOr(ZNodeDataComponent.defaultMode))
+          .do(mode => this.editorModeId.next(mode));
+
+        // change wrap
+        const o3 = this.preferencesService
+          .getWrapFor(node.path, node.meta.creationId)
+          .map(maybeWrap => maybeWrap.valueOr(ZNodeDataComponent.defaultWrap))
+          .do(wrap => this.editorWrap.next(wrap));
+
+        return Observable.zip(o1, o2, o3).take(1);
+      })
+      // update data txt
+      .switchMap(() => Observable.combineLatest(this.editorNode, this.editorMode, this.editorComp).take(1))
+      .switchMap(([node, mode, mComp]) => ZNodeDataComponent.decodeFromRawData(node.data, mode, mComp))
+      .forEach(data => this.editorDataTxt.next(data));
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.editorSubmitReady) {
-      return this.dialogService
-        .showDiscardChanges(this.viewContainerRef)
-        .switchMap(ref => ref.afterClosed());
-    }
+    return this.isSubmitReady.switchMap(ready => {
+      if (ready) {
+        return this.dialogService
+          .showDiscardChanges(this.viewContainerRef)
+          .switchMap(ref => ref.afterClosed());
+      }
 
-    return Observable.of(true);
+      return Observable.of(true);
+    });
   }
 
   onSubmit(): void {
-    this.isSubmitting = true;
+    this.isSubmitReady
+      .switchMap(ready => {
+        if (!ready) {
+          return Observable.empty();
+        }
 
-    this.zNodeService
-      .setData(
-        this.currentNode.path,
-        this.currentNode.meta.dataVersion,
-        this.editorData
+        this.isSubmitOngoing.next(true);
+
+        return Observable.combineLatest(this.editorNode, this.editorDataRaw);
+      })
+      .switchMap(([node, rawData]) =>
+        this.zNodeService
+          .setData(
+            node.path,
+            node.meta.dataVersion,
+            rawData
+          )
       )
       .switchMap((newMeta: ZNodeMeta) => {
         // refresh node data in resolver
@@ -179,89 +204,105 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
           );
       })
       .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-      .do(() => this.isSubmitting = false)
+      .do(() => this.isSubmitOngoing.next(false))
+      .take(1)
       .subscribe();
   }
 
-  onKeyDown(event: KeyboardEvent): void {
-    const code = event.which || event.keyCode;
-
-    if (!(code === 115 && event.ctrlKey) && code !== 19) {
-      return;
-    }
-
-    if (!this.editorSubmitReady) {
-      return;
-    }
-
-    // Submit on CTRL + S
-    event.preventDefault();
-    this.onSubmit();
+  onCompressionChange(newComp: Maybe<CompressionId>): void {
+    this.editorCompId.next(newComp);
   }
 
-  formatData(): void {
-    this.formatterProvider
-      .getFormatter(this.editorMode)
-      .map<Either<Error, Formatter>>(Either.right)
-      .valueOrCompute(() => Either.left<Error, Formatter>(
-        new Error("Unsupported mode '" + this.editorMode.toUpperCase() + "'")
-      ))
-      .bind((f: Formatter) => f.format(this.editorData))
-      .caseOf({
-        left: error => {
-          this.dialogService
-            .showSnackbar("Error:  " + error.message, this.viewContainerRef)
-            .subscribe()
-        },
-        right: data => this.editorData = data
-      });
+  onModeChange(newMode: ModeId): void {
+    this.editorNode
+      .take(1)
+      .switchMap(node =>
+        this.preferencesService
+          .setModeFor(
+            node.path,
+            node.meta.creationId,
+            Maybe.just(newMode)
+          )
+          .mapTo(newMode)
+      )
+      .forEach(newMode => this.editorModeId.next(newMode));
   }
 
-  get formatterAvailable(): boolean {
-    return this.formatterProvider
-      .getFormatter(this.editorMode)
-      .caseOf({
-        just: () => true,
-        nothing: () => false
-      });
+  onWrapChange(newWrap: boolean): void {
+    this.editorNode
+      .take(1)
+      .switchMap(node =>
+        this.preferencesService
+          .setWrapFor(
+            node.path,
+            node.meta.creationId,
+            Maybe.just(newWrap)
+          )
+          .mapTo(newWrap)
+      )
+      .forEach(newMode => this.editorWrap.next(newMode));
   }
 
-  setMode(mode: Mode, remember: boolean): void {
-    this.editorMode = mode;
-
-    if (remember) {
-      // Remember mode used for this node
-      this.preferencesService
-        .setModeFor(
-          this.currentNode.path,
-          this.currentNode.meta.creationId,
-          mode
-        )
-        .subscribe();
-    }
+  onFormatData(): void {
+    Observable
+      .combineLatest(this.editorDataTxt, this.formatter)
+      .switchMap(([txtData, maybeFormatter]) =>
+        maybeFormatter.caseOf<Observable<Either<Error, string>>>({
+          just: fmt => Observable.of(fmt.format(txtData)),
+          nothing: () => Observable.throw(new Error("Formatter unavailable"))
+        })
+      )
+      .switchMap(either => either.caseOf<Observable<string>>({
+        left: err => Observable.throw(err),
+        right: data => Observable.of(data)
+      }))
+      .take(1)
+      .do(data => this.editorDataTxt.next(data))
+      .catch(error => this.dialogService.showSnackbar("Error:  " + error.message, this.viewContainerRef))
+      .subscribe();
   }
 
-  setWrap(enabled: boolean, remember: boolean): void {
-    this.editorOpts.wrap = enabled;
-    this.updateOpts();
+  static inferCompression(base64: string, compIds: CompressionId[], compProvider: CompressionProvider): Observable<Maybe<CompressionId>> {
+    const raw = Buffer
+      .from(base64, "base64")
+      .buffer;
 
-    if (remember) {
-      // Remember wrap used for this node
-      this.preferencesService
-        .setWrapFor(
-          this.currentNode.path,
-          this.currentNode.meta.creationId,
-          enabled
-        )
-        .subscribe();
-    }
+    return Observable.of(
+      Maybe.maybe(
+        compIds.find(c => compProvider.getCompression(c).isCompressed(raw) || null)
+      )
+    );
   }
 
-  getWrap(): boolean {
-    return this.editorOpts.wrap;
+  static translateDataMode(data: string, oldMode: Mode, newMode: Mode): string {
+    const encodedData = oldMode.encodeData(data);
+
+    return newMode.decodeData(encodedData);
   }
 
-  private updateOpts(): void {
-    this.editor.forEach(e => e.setOptions(this.editorOpts));
+  static decodeFromRawData(base64: string, mode: Mode, maybeComp: Maybe<Compression>): Observable<string> {
+    const raw = Buffer
+      .from(base64, "base64")
+      .buffer;
+
+    const decompressedRx = maybeComp
+      .map(c => c.decompress(raw))
+      .valueOr(Observable.of(raw));
+
+    return decompressedRx.map(decompressed => mode.decodeData(decompressed));
+  }
+
+  static encodeToRawData(text: string, mode: Mode, maybeComp: Maybe<Compression>): Observable<string> {
+    const encoded = mode.encodeData(text);
+
+    const compressedRx = maybeComp
+      .map(c => c.compress(encoded))
+      .valueOr(Observable.of(encoded));
+
+    return compressedRx.map(compressed =>
+      Buffer
+        .from(compressed)
+        .toString("base64")
+    );
   }
 }
