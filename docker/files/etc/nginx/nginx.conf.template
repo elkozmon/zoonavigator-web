@@ -46,5 +46,11 @@ http {
             proxy_set_header X-Forwarded-Proto https;
             proxy_set_header Authorization $http_authorization;
         }
+
+        location /health {
+            access_log off;
+            return 200 "OK";
+            add_header Content-Type "text/plain";
+        }
     }
 }
