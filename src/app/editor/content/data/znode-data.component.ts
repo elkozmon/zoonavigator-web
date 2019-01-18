@@ -36,12 +36,13 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   static defaultMode = ModeId.Text;
   static defaultWrap = true;
 
-  editorNode: Subject<ZNodeWithChildren | null> = new ReplaySubject(1);
+  editorNode: Subject<Maybe<ZNodeWithChildren>> = new ReplaySubject(1);
+
   editorDataTxt: Subject<string> = new ReplaySubject(1);
   editorDataRaw: Observable<string>;
+  editorFormatter: Observable<Maybe<Formatter>>;
 
-  formatter: Observable<Maybe<Formatter>>;
-  isFormatterAvailable: Observable<boolean>;
+  isEditorFormatterAvailable: Observable<boolean>;
   isEditorDataPristine: Observable<boolean>;
   isEditorReady: Observable<boolean>;
   isSubmitReady: Observable<boolean>;
@@ -79,17 +80,17 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
     this.route.parent.data
       .pluck("zNodeWithChildren")
       .switchMap((either: Either<Error, ZNodeWithChildren>) =>
-        either.caseOf({
+        either.caseOf<Observable<Maybe<ZNodeWithChildren>>>({
           left: error => {
             return this.dialogService
               .showError(error.message, this.viewContainerRef)
-              .mapTo(null)
+              .mapTo(Maybe.nothing())
           },
           right: node =>
-            Observable.of(node)
+            Observable.of(Maybe.just(node))
         })
       )
-      .forEach(nodeOrNull => this.editorNode.next(nodeOrNull));
+      .forEach(maybeNode => this.editorNode.next(maybeNode));
 
     // update editor ready
     this.isEditorReady = Observable
@@ -114,13 +115,13 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
       .forEach(data => this.editorDataTxt.next(data));
 
     // update formatter
-    this.formatter = this.editorModeId.map(mode => this.formatterProvider.getFormatter(mode));
-    this.isFormatterAvailable = this.formatter.map(maybe => maybe.map(() => true).valueOr(false));
+    this.editorFormatter = this.editorModeId.map(mode => this.formatterProvider.getFormatter(mode));
+    this.isEditorFormatterAvailable = this.editorFormatter.map(maybe => maybe.map(() => true).valueOr(false));
 
-    // update pristine flag
+    // update pristine flag (note: if node not available -> editor is pristine)
     this.isEditorDataPristine = Observable
       .combineLatest(this.editorNode, this.editorDataRaw)
-      .map(([node, rawData]) => node.data == rawData);
+      .map(([node, rawData]) => node.map(n => n.data == rawData).valueOr(true));
 
     // update submit ready flag
     this.isSubmitReady = Observable
@@ -129,6 +130,8 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
     // on change of node do following
     this.editorNode
+      .map(maybeNode => maybeNode.valueOr(null))
+      .filter(nullableNode => nullableNode != null)
       .switchMap(node => {
         // change compression
         const o1 = ZNodeDataComponent.inferCompression(node.data, this.compIds, this.compressionProvider)
@@ -146,10 +149,10 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
           .map(maybeWrap => maybeWrap.valueOr(ZNodeDataComponent.defaultWrap))
           .do(wrap => this.editorWrap.next(wrap));
 
-        return Observable.zip(o1, o2, o3).take(1);
+        return Observable.zip(Observable.of(node), o1, o2, o3).take(1);
       })
       // update data txt
-      .switchMap(() => Observable.combineLatest(this.editorNode, this.editorMode, this.editorComp).take(1))
+      .switchMap(([node]) => Observable.combineLatest(Observable.of(node), this.editorMode, this.editorComp).take(1))
       .switchMap(([node, mode, mComp]) => ZNodeDataComponent.decodeFromRawData(node.data, mode, mComp))
       .forEach(data => this.editorDataTxt.next(data));
   }
@@ -167,16 +170,20 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   }
 
   onSubmit(): void {
-    this.isSubmitReady
-      .switchMap(ready => {
+    this.editorNode
+      .map(maybeNode => maybeNode.valueOr(null))
+      .filter(nullableNode => nullableNode != null)
+      .combineLatest(this.isSubmitReady)
+      .switchMap(([node, ready]) => {
         if (!ready) {
           return Observable.empty();
         }
 
         this.isSubmitOngoing.next(true);
 
-        return Observable.combineLatest(this.editorNode, this.editorDataRaw);
+        return Observable.combineLatest(Observable.of(node), this.editorDataRaw);
       })
+      .take(1)
       .switchMap(([node, rawData]) =>
         this.zNodeService
           .setData(
@@ -216,6 +223,8 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   onModeChange(newMode: ModeId): void {
     this.editorNode
       .take(1)
+      .map(maybeNode => maybeNode.valueOr(null))
+      .filter(nullableNode => nullableNode != null)
       .switchMap(node =>
         this.preferencesService
           .setModeFor(
@@ -231,6 +240,8 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   onWrapChange(newWrap: boolean): void {
     this.editorNode
       .take(1)
+      .map(maybeNode => maybeNode.valueOr(null))
+      .filter(nullableNode => nullableNode != null)
       .switchMap(node =>
         this.preferencesService
           .setWrapFor(
@@ -245,7 +256,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
 
   onFormatData(): void {
     Observable
-      .combineLatest(this.editorDataTxt, this.formatter)
+      .combineLatest(this.editorDataTxt, this.editorFormatter)
       .switchMap(([txtData, maybeFormatter]) =>
         maybeFormatter.caseOf<Observable<Either<Error, string>>>({
           just: fmt => Observable.of(fmt.format(txtData)),
