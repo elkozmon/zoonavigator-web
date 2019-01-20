@@ -1,5 +1,5 @@
 {
-  "apiUrlPath": "/api"
+  "apiUrlPath": "api"
   , "apiRequestTimeoutMillis": {{ $.Env.API_REQUEST_TIMEOUT_MILLIS }}
   {{ if $.Env.AUTO_CONNECT_CONNECTION_STRING }}
     , "autoConnectConnectionString": "{{ $.Env.AUTO_CONNECT_CONNECTION_STRING }}"

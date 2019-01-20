@@ -29,7 +29,7 @@ export class ConfigService {
 
   load() {
     return this.httpClient
-      .get("/config.json")
+      .get("config.json")
       .forEach((data: Config) => this._config = data);
   }
 
