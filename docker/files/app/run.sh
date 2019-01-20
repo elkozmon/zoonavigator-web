@@ -8,7 +8,7 @@
 
 # Generate configs
 dockerize \
-  -template /app/config.json.template:/app/config.json \
+  -template /app/config.json.template:/app/public/config.json \
   -template /etc/nginx/nginx.conf.template:/etc/nginx/nginx.conf
 
 # Start nginx
