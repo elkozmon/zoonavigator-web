@@ -184,14 +184,14 @@ export class DefaultDialogService extends DialogService {
   }
 
   showError(
-    message: string,
+    error: Error,
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<InfoDialogComponent>> {
     return this.showInfo(
       {
         icon: "error",
         title: "Error",
-        message: message,
+        message: error.message,
         dismissText: "Close"
       },
       viewRef

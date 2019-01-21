@@ -51,7 +51,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
       .forEach(either =>
         either.caseOf<void>({
           left: error => {
-            this.dialogService.showError(error.message, this.viewContainerRef);
+            this.dialogService.showError(error, this.viewContainerRef);
             this.aclForm = null;
           },
           right: node => {

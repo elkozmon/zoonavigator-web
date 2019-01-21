@@ -42,7 +42,7 @@ export class ZNodeMetaComponent implements OnInit {
       .forEach(either =>
         either.caseOf<void>({
           left: err => {
-            this.dialogService.showError(err.message, this.viewContainerRef);
+            this.dialogService.showError(err, this.viewContainerRef);
             this.meta = null;
           },
           right: node => this.meta = node.meta

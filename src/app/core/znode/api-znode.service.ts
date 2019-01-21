@@ -45,7 +45,7 @@ export class ApiZNodeService implements ZNodeService {
       .pipe(
         switchMap(maybeSessionInfo => maybeSessionInfo.caseOf({
           just: info => of(info.token),
-          nothing: () => throwError("Session was lost")
+          nothing: () => throwError(new Error("Session was lost"))
         })),
         switchMap(fun)
       );

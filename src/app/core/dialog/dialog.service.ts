@@ -40,7 +40,7 @@ import {ZSessionInfo} from "../zsession/zsession-info";
 export abstract class DialogService {
 
   showErrorAndThrowOnClose<T>(
-    error: string,
+    error: Error,
     viewRef?: ViewContainerRef
   ): Observable<T> {
     return this
@@ -86,7 +86,7 @@ export abstract class DialogService {
   ): Observable<MatDialogRef<SessionInfoDialogComponent>>
 
   abstract showError(
-    message: string,
+    error: Error,
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<InfoDialogComponent>>
 

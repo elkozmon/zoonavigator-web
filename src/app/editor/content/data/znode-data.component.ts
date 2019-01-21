@@ -86,7 +86,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
           either.caseOf<Observable<Maybe<ZNodeWithChildren>>>({
             left: error =>
               this.dialogService
-                .showError(error.message, this.viewContainerRef)
+                .showError(error, this.viewContainerRef)
                 .pipe(mapTo(Maybe.nothing())),
             right: node =>
               of(Maybe.just(node))
@@ -276,7 +276,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
         switchMap(([txtData, maybeFormatter]) =>
           maybeFormatter.caseOf<Observable<string>>({
             just: fmt => fmt.format(txtData),
-            nothing: () => throwError("Formatter unavailable")
+            nothing: () => throwError(new Error("Formatter unavailable"))
           })
         ),
         take(1),

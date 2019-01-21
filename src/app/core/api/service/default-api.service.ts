@@ -78,25 +78,25 @@ export class DefaultApiService implements ApiService {
       );
   }
 
-  private handleError<T>(error: any): Observable<T> {
-    let message: string;
+  private handleError<T>(anyError: any): Observable<T> {
+    let error: Error;
 
-    if (typeof error === "string" || error instanceof String) {
-      message = <string>error;
-    } else if (error instanceof Error) {
-      message = error.message;
-    } else if (error instanceof HttpErrorResponse) {
-      if (error.error.hasOwnProperty("success")) {
-        message = DefaultApiService.extractResponse(error.error).message;
+    if (typeof anyError === "string" || anyError instanceof String) {
+      error = new Error(<string>anyError);
+    } else if (anyError instanceof Error) {
+      error = anyError;
+    } else if (anyError instanceof HttpErrorResponse) {
+      if (anyError.error.hasOwnProperty("success")) {
+        error = new Error(DefaultApiService.extractResponse(anyError.error).message);
       } else {
-        message = error.error || "Unable to receive a response";
+        error = new Error(anyError.error || "Unable to receive a response");
       }
 
-      if (error.status === 401) {
+      if (anyError.status === 401) {
         const returnUrl = this.router.routerState.snapshot.url;
 
         this.dialogService
-          .showError(message, null)
+          .showError(error, null)
           .pipe(
             switchMap(ref => ref.afterClosed()),
             switchMapTo(this.zSessionHandler.removeSessionInfo()),
@@ -113,10 +113,10 @@ export class DefaultApiService implements ApiService {
           .subscribe();
       }
     } else {
-      message = "Unknown error occurred. See the console for details";
-      console.error(error);
+      error = new Error("Unknown error occurred. See the console for details");
+      console.error(anyError);
     }
 
-    return throwError(message);
+    return throwError(error);
   }
 }

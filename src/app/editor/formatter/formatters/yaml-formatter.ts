@@ -28,14 +28,12 @@ export class YamlFormatter extends Formatter {
   mode: ModeId = ModeId.Yaml;
 
   format(data: string): Observable<string> {
-    return <Observable<string>>
-      of(<string>YAML.stringify(YAML.parse(data)))
-        .pipe(
-          catchError(err => {
-            console.log(err);
+    try {
+      return of(<string>YAML.stringify(YAML.parse(data)));
+    } catch (e) {
+      console.log(e);
 
-            return throwError("Invalid YAML");
-          })
-        );
+      return throwError(new Error("Invalid YAML"));
+    }
   }
 }

@@ -78,7 +78,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
         map((either: Either<Error, ZNodeWithChildren>) =>
           either.caseOf<Maybe<ZNodeWithChildren>>({
             left: error => {
-              this.dialogService.showError(error.message, this.viewContainerRef);
+              this.dialogService.showError(error, this.viewContainerRef);
 
               return Maybe.nothing();
             },
@@ -115,7 +115,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
             just: sessionInfo =>
               this.dialogService.showSessionInfo(sessionInfo, this.viewContainerRef),
             nothing: () =>
-              throwError("Session was lost")
+              throwError(new Error("Session was lost"))
           })
         ),
         catchError(error => this.dialogService.showError(error, this.viewContainerRef))
@@ -132,7 +132,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
             just: sessionInfo =>
               this.zSessionService.close(sessionInfo),
             nothing: () =>
-              throwError("Session was already closed")
+              throwError(new Error("Session was already closed"))
           })
         ),
         switchMap(() => this.zSessionHandler.removeSessionInfo()),

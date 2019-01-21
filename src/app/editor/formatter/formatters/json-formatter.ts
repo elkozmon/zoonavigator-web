@@ -17,7 +17,6 @@
 
 import {Injectable} from "@angular/core";
 import {Observable, of, throwError} from "rxjs";
-import {catchError} from "rxjs/operators";
 import {Formatter} from "./formatter";
 import {ModeId} from "../../content/data/mode";
 
@@ -27,14 +26,12 @@ export class JsonFormatter extends Formatter {
   mode: ModeId = ModeId.Json;
 
   format(data: string): Observable<string> {
-    return <Observable<string>>
-      of(<string>JSON.stringify(JSON.parse(data), null, 4))
-        .pipe(
-          catchError(err => {
-            console.log(err);
+    try {
+      return of(<string>JSON.stringify(JSON.parse(data), null, 4));
+    } catch (e) {
+      console.log(e);
 
-            return throwError("Invalid JSON");
-          })
-        );
+      return throwError(new Error("Invalid JSON"));
+    }
   }
 }
