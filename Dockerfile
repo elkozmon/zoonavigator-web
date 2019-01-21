@@ -13,7 +13,7 @@ WORKDIR /src
 COPY . .
 
 # Install required packages
-RUN apk --no-cache add tar curl gettext
+RUN apk --no-cache add tar curl gettext python-dev make g++
 
 # Install dependencies & build
 RUN npm install -g @angular/cli \
