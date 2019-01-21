@@ -18,7 +18,7 @@
 import {ChangeDetectionStrategy, Component, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Observable, ReplaySubject, Subject, throwError, from, of, combineLatest, zip, EMPTY} from "rxjs";
-import {bufferCount, switchMap, switchMapTo, map, mapTo, catchError, pluck, take, filter, tap} from "rxjs/operators";
+import {bufferCount, switchMap, switchMapTo, map, mapTo, catchError, pluck, take, filter, tap, finalize} from "rxjs/operators";
 import {Either, Maybe} from "tsmonad";
 import {Buffer} from "buffer";
 import {DialogService, ZNodeMeta, ZNodeService, ZNodeWithChildren, ZPathService} from "../../../core";
@@ -171,9 +171,9 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    return this.isSubmitReady.pipe(
-      switchMap(ready => {
-        if (ready) {
+    return this.isEditorDataPristine.pipe(
+      switchMap(pristine => {
+        if (!pristine) {
           return this.dialogService
             .showDiscardChanges(this.viewContainerRef)
             .pipe(switchMap(ref => ref.afterClosed()));
@@ -223,9 +223,9 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
         }),
         switchMap(() => this.dialogService.showSnackbar("Changes saved", this.viewContainerRef)),
         switchMap(ref => ref.afterOpened()),
+        take(1),
         catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-        tap(() => this.isSubmitOngoing.next(false)),
-        take(1)
+        finalize(() => this.isSubmitOngoing.next(false))
       )
       .subscribe();
   }
@@ -276,7 +276,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
         switchMap(([txtData, maybeFormatter]) =>
           maybeFormatter.caseOf<Observable<string>>({
             just: fmt => fmt.format(txtData),
-            nothing: () => throwError(new Error("Formatter unavailable"))
+            nothing: () => throwError("Formatter unavailable")
           })
         ),
         take(1),

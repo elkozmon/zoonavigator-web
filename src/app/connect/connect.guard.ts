@@ -43,8 +43,12 @@ export class ConnectGuard implements CanActivate {
     return this.zSessionHandler
       .getSessionInfo()
       .pipe(
-        map((sessionInfo) => {
-          if (!sessionInfo) {
+        map((maybeSessionInfo) => {
+          const sessionInfoExists = maybeSessionInfo
+            .map(() => true)
+            .valueOr(false);
+
+          if (!sessionInfoExists) {
             return true;
           }
 

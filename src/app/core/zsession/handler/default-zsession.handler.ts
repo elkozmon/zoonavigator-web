@@ -18,6 +18,7 @@
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {map} from "rxjs/operators";
+import {Maybe} from "tsmonad";
 import {ZSessionHandler} from "./zsession.handler";
 import {ZSessionInfo} from "../zsession-info";
 import {StorageService} from "../../storage";
@@ -30,20 +31,20 @@ export class DefaultZSessionHandler implements ZSessionHandler {
   constructor(private storageService: StorageService) {
   }
 
-  getSessionInfo(): Observable<ZSessionInfo | null> {
+  getSessionInfo(): Observable<Maybe<ZSessionInfo>> {
     return this.storageService
       .get(this.sessionInfoKey)
       .pipe(
-        map((value) => value ? JSON.parse(value) : null)
+        map((value) => Maybe.maybe(value ? JSON.parse(value) : null))
       );
   }
 
-  setSessionInfo(value: ZSessionInfo | null): Observable<void> {
-    if (value) {
-      return this.storageService
-        .set(this.sessionInfoKey, JSON.stringify(value));
-    }
+  setSessionInfo(value: ZSessionInfo): Observable<void> {
+    return this.storageService
+      .set(this.sessionInfoKey, JSON.stringify(value));
+  }
 
+  removeSessionInfo(): Observable<void> {
     return this.storageService
       .remove(this.sessionInfoKey);
   }

@@ -18,8 +18,8 @@
 import {Injectable} from "@angular/core";
 import {Router} from "@angular/router";
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
-import {Observable, defer, throwError} from "rxjs";
-import {switchMap, switchMapTo, timeoutWith, catchError, map} from "rxjs/operators";
+import {defer, from, Observable, throwError} from "rxjs";
+import {catchError, map, switchMap, switchMapTo, take, timeoutWith} from "rxjs/operators";
 import {ConfigService} from "../../../config";
 import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
 import {ApiResponse} from "../response";
@@ -69,10 +69,10 @@ export class DefaultApiService implements ApiService {
       options.headers = options.headers.set("Authorization", apiRequest.authToken);
     }
 
-    return <Observable<ApiResponse<T>>> this.httpClient
+    return <Observable<ApiResponse<T>>>this.httpClient
       .request(apiRequest.method, url, options)
       .pipe(
-        timeoutWith(config.apiRequestTimeoutMillis, defer(() => throwError(new Error("Request timed out")))),
+        timeoutWith(config.apiRequestTimeoutMillis, defer(() => throwError("Request timed out"))),
         map((t) => DefaultApiService.extractResponse<T>(t)),
         catchError(err => this.handleError(err))
       );
@@ -82,7 +82,7 @@ export class DefaultApiService implements ApiService {
     let message: string;
 
     if (typeof error === "string" || error instanceof String) {
-      message = <string> error;
+      message = <string>error;
     } else if (error instanceof Error) {
       message = error.message;
     } else if (error instanceof HttpErrorResponse) {
@@ -99,15 +99,18 @@ export class DefaultApiService implements ApiService {
           .showError(message, null)
           .pipe(
             switchMap(ref => ref.afterClosed()),
-            switchMapTo(this.zSessionHandler.setSessionInfo(null))
+            switchMapTo(this.zSessionHandler.removeSessionInfo()),
+            switchMapTo(from(
+              this.router.navigate(["/"], {
+                queryParams: {
+                  [CONNECT_QUERY_RETURN_URL]: returnUrl
+                }
+              })
+            )),
+            catchError(err => this.dialogService.showError(err, null)),
+            take(1)
           )
-          .forEach(() => {
-            this.router.navigate(["/"], {
-              queryParams: {
-                [CONNECT_QUERY_RETURN_URL]: returnUrl
-              }
-            });
-          });
+          .subscribe();
       }
     } else {
       message = "Unknown error occurred. See the console for details";

@@ -17,7 +17,7 @@
 
 import {Injectable} from "@angular/core";
 import {HttpParams} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, of, throwError} from "rxjs";
 import {switchMap, map, mapTo} from "rxjs/operators";
 import {ZNodeService} from "./znode.service";
 import {ZNodeChildren} from "./znode-children";
@@ -43,7 +43,10 @@ export class ApiZNodeService implements ZNodeService {
     return this.zSessionHandler
       .getSessionInfo()
       .pipe(
-        map(info => info ? info.token : null),
+        switchMap(maybeSessionInfo => maybeSessionInfo.caseOf({
+          just: info => of(info.token),
+          nothing: () => throwError("Session was lost")
+        })),
         switchMap(fun)
       );
   }

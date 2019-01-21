@@ -16,13 +16,16 @@
  */
 
 import {Injectable} from "@angular/core";
-import {ZSessionInfo} from "../zsession-info";
 import {Observable} from "rxjs";
+import {Maybe} from "tsmonad";
+import {ZSessionInfo} from "../zsession-info";
 
 @Injectable()
 export abstract class ZSessionHandler {
 
-  abstract getSessionInfo(): Observable<ZSessionInfo | null>
+  abstract getSessionInfo(): Observable<Maybe<ZSessionInfo>>
 
-  abstract setSessionInfo(value: ZSessionInfo | null): Observable<void>
+  abstract setSessionInfo(value: ZSessionInfo): Observable<void>
+
+  abstract removeSessionInfo(): Observable<void>
 }

@@ -27,16 +27,14 @@ export class LocalStorageService implements StorageService {
   }
 
   set(key: string, value: any): Observable<void> {
-    return defer(() => of(localStorage.setItem(key, value)))
-      .pipe(mapTo(null));
+    return of(localStorage.setItem(key, value)).pipe(mapTo(null));
   }
 
   get(key: string): Observable<any> {
-    return defer(() => of(localStorage.getItem(key)));
+    return of(localStorage.getItem(key));
   }
 
   remove(key: string): Observable<void> {
-    return defer(() => of(localStorage.removeItem(key)))
-      .pipe(mapTo(null));
+    return of(localStorage.removeItem(key)).pipe(mapTo(null));
   }
 }
