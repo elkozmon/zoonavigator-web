@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
 import {ZNodeAcl} from "./znode-acl";
 import {ZNodeMeta} from "./znode-meta";
 import {ZNodeData} from "./znode-data";

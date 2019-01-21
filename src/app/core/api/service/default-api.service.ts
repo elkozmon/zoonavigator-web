@@ -18,10 +18,11 @@
 import {Injectable} from "@angular/core";
 import {Router} from "@angular/router";
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
-import {Observable} from "rxjs/Rx";
+import {Observable, defer, throwError} from "rxjs";
+import {switchMap, switchMapTo, timeoutWith, catchError, map} from "rxjs/operators";
 import {ConfigService} from "../../../config";
 import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
-import {ApiResponse} from "../response/api-response";
+import {ApiResponse} from "../response";
 import {ZSessionHandler} from "../../zsession/handler";
 import {DialogService} from "../../dialog";
 import {ApiRequest} from "../request";
@@ -70,12 +71,11 @@ export class DefaultApiService implements ApiService {
 
     return <Observable<ApiResponse<T>>> this.httpClient
       .request(apiRequest.method, url, options)
-      .timeoutWith(
-        config.apiRequestTimeoutMillis,
-        Observable.defer(() => Observable.throw(new Error("Request timed out")))
-      )
-      .map((t) => DefaultApiService.extractResponse<T>(t))
-      .catch(err => this.handleError(err));
+      .pipe(
+        timeoutWith(config.apiRequestTimeoutMillis, defer(() => throwError(new Error("Request timed out")))),
+        map((t) => DefaultApiService.extractResponse<T>(t)),
+        catchError(err => this.handleError(err))
+      );
   }
 
   private handleError<T>(error: any): Observable<T> {
@@ -97,8 +97,10 @@ export class DefaultApiService implements ApiService {
 
         this.dialogService
           .showError(message, null)
-          .switchMap(ref => ref.afterClosed())
-          .switchMapTo(this.zSessionHandler.setSessionInfo(null))
+          .pipe(
+            switchMap(ref => ref.afterClosed()),
+            switchMapTo(this.zSessionHandler.setSessionInfo(null))
+          )
           .forEach(() => {
             this.router.navigate(["/"], {
               queryParams: {
@@ -112,6 +114,6 @@ export class DefaultApiService implements ApiService {
       console.error(error);
     }
 
-    return Observable.throw(message);
+    return throwError(message);
   }
 }

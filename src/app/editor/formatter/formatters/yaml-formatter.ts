@@ -16,22 +16,26 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Either} from "tsmonad";
+import {Observable, throwError, of} from "rxjs";
+import {catchError} from "rxjs/operators";
+import YAML from "yaml";
 import {Formatter} from "./formatter";
 import {ModeId} from "../../content/data/mode";
-
-const YAML = require("yamljs");
 
 @Injectable()
 export class YamlFormatter extends Formatter {
 
   mode: ModeId = ModeId.Yaml;
 
-  format(data: string): Either<Error, string> {
-    try {
-      return Either.right(YAML.stringify(YAML.parse(data), 4));
-    } catch (error) {
-      return Either.left(new Error("Invalid YAML"));
-    }
+  format(data: string): Observable<string> {
+    return <Observable<string>>
+      of(<string>YAML.stringify(YAML.parse(data)))
+        .pipe(
+          catchError(err => {
+            console.log(err);
+
+            return throwError("Invalid YAML");
+          })
+        );
   }
 }

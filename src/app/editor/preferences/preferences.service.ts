@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
 import {Maybe} from "tsmonad";
 import {ModeId} from "../content";
 

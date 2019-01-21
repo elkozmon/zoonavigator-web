@@ -16,9 +16,9 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Rx";
-import {ApiResponse} from "../response/api-response";
-import {ApiRequest} from "../request/api-request";
+import {Observable} from "rxjs";
+import {ApiResponse} from "../response";
+import {ApiRequest} from "../request";
 
 @Injectable()
 export abstract class ApiService {

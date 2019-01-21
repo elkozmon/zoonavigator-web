@@ -16,7 +16,8 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {map, mapTo} from "rxjs/operators";
 import {ZSessionService} from "./zsession.service";
 import {ConnectionParams} from "../connection-params";
 import {ZSessionInfo} from "../zsession-info";
@@ -41,7 +42,9 @@ export class ApiZSessionService implements ZSessionService {
 
     return this.apiService
       .dispatch(request)
-      .map(response => response.payload);
+      .pipe(
+        map(response => response.payload)
+      );
   }
 
   close(session: ZSessionInfo): Observable<void> {
@@ -54,6 +57,8 @@ export class ApiZSessionService implements ZSessionService {
 
     return this.apiService
       .dispatch(request)
-      .mapTo(null);
+      .pipe(
+        mapTo(null)
+      );
   }
 }

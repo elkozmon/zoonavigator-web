@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
 
 export interface CanDeactivateComponent {
   canDeactivate(): Observable<boolean>|Promise<boolean>|boolean;

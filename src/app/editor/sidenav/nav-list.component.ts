@@ -15,11 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, Input, EventEmitter, Output, OnChanges, SimpleChanges, ViewContainerRef} from "@angular/core";
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {EMPTY, of} from "rxjs";
+import {catchError, map, switchMap, switchMapTo} from "rxjs/operators";
 import {Ordering} from "../ordering";
-import {ZNode, ZNodeService, ZPath, DialogService, FileSaverService, ZNodeExport} from "../../core";
+import {DialogService, FileSaverService, ZNodeExport, ZNodeService, ZPath} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {DuplicateZNodeData, MoveZNodeData} from "../../core/dialog/dialogs";
 import {CreateZNodeData} from "../../core/dialog";
@@ -104,26 +105,29 @@ export class NavListComponent implements OnChanges {
         `Do you want to delete node '${zPath.name.valueOrThrow()}' and its children?`,
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((confirm: boolean) => {
-        if (confirm) {
-          const parentDir = zPath.goUp().path;
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMap((confirm: boolean) => {
+          if (confirm) {
+            const parentDir = zPath.goUp().path;
 
-          return this.zNodeService
-            .deleteChildren(parentDir, [zPath.name.valueOrThrow()])
-            .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.refresh.emit());
-        }
+            return this.zNodeService.deleteChildren(parentDir, [zPath.name.valueOrThrow()]);
+          }
 
-        return Observable.empty<void>();
-      })
+          return EMPTY;
+        }),
+        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+        map(() => this.refresh.emit())
+      )
       .subscribe();
   }
 
   onNodeExportClick(zPath: ZPath): void {
     this.zNodeService
       .exportNodes([zPath.path])
-      .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      .pipe(
+        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      )
       .forEach((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name));
   }
 
@@ -136,17 +140,21 @@ export class NavListComponent implements OnChanges {
         },
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((data: DuplicateZNodeData) => {
-        if (data) {
-          return this.zNodeService
-            .duplicateNode(zPath.path, data.path)
-            .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .switchMapTo(Observable.of(data));
-        }
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMap((data: DuplicateZNodeData) => {
+          if (data) {
+            return this.zNodeService
+              .duplicateNode(zPath.path, data.path)
+              .pipe(
+                catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                switchMapTo(of(data))
+              );
+          }
 
-        return Observable.empty();
-      })
+          return EMPTY;
+        })
+      )
       .forEach((data: CreateZNodeData) => {
         if (data.redirect) {
           this.router.navigate([], {
@@ -173,17 +181,21 @@ export class NavListComponent implements OnChanges {
         },
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((data: MoveZNodeData) => {
-        if (data) {
-          return this.zNodeService
-            .moveNode(zPath.path, data.path)
-            .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .switchMapTo(Observable.of(data));
-        }
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMap((data: MoveZNodeData) => {
+          if (data) {
+            return this.zNodeService
+              .moveNode(zPath.path, data.path)
+              .pipe(
+                catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                switchMapTo(of(data))
+              );
+          }
 
-        return Observable.empty();
-      })
+          return EMPTY;
+        })
+      )
       .forEach((data: CreateZNodeData) => {
         if (data.redirect) {
           this.router.navigate([], {

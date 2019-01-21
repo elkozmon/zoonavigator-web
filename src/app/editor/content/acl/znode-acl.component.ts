@@ -17,7 +17,8 @@
 
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {Observable, of, from} from "rxjs";
+import {pluck, switchMap, catchError} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {DialogService, ZNodeAcl, ZNodeService, ZNodeWithChildren} from "../../../core";
 import {CanDeactivateComponent} from "../../../shared";
@@ -46,7 +47,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
   }
 
   ngOnInit(): void {
-    (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pluck("zNodeWithChildren"))
+    (<Observable<Either<Error, ZNodeWithChildren>>>this.route.parent.data.pipe(pluck("zNodeWithChildren")))
       .forEach(either =>
         either.caseOf<void>({
           left: error => {
@@ -64,14 +65,16 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     if (this.aclForm && this.aclForm.isDirty) {
       return this.dialogService
         .showDiscardChanges(this.viewContainerRef)
-        .switchMap(ref => ref.afterClosed());
+        .pipe(
+          switchMap(ref => ref.afterClosed())
+        );
     }
 
-    return Observable.of(true);
+    return of(true);
   }
 
   onSubmit(recursive: boolean): void {
-    let confirmation: Observable<boolean> = Observable.of(true);
+    let confirmation: Observable<boolean> = of(true);
 
     if (recursive) {
       confirmation = this.dialogService
@@ -85,7 +88,9 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
           },
           this.viewContainerRef
         )
-        .switchMap(ref => ref.afterClosed());
+        .pipe(
+          switchMap(ref => ref.afterClosed())
+        );
     }
 
     const values = this.aclForm.values;
@@ -120,7 +125,9 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
         },
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
+      .pipe(
+        switchMap(ref => ref.afterClosed())
+      )
       .forEach(
         discard => {
           if (discard) {
@@ -138,27 +145,25 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
         acl,
         recursive
       )
-      .switchMap(newMeta => {
-        this.aclForm.markAsPristine();
+      .pipe(
+        switchMap(newMeta => {
+          this.aclForm.markAsPristine();
 
-        // refresh node data in resolver
-        const redirect = this.router.navigate([], {
-          relativeTo: this.route,
-          queryParams: {
-            aclVersion: newMeta.aclVersion
-          },
-          queryParamsHandling: "merge"
-        });
+          // refresh node data in resolver
+          const redirect = this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+              aclVersion: newMeta.aclVersion
+            },
+            queryParamsHandling: "merge"
+          });
 
-        return Observable
-          .fromPromise(redirect)
-          .switchMap(() =>
-            this.dialogService
-              .showSnackbar("Changes saved", this.viewContainerRef)
-              .switchMap(ref => ref.afterOpened())
-          );
-      })
-      .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+          return from(redirect);
+        }),
+        switchMap(() => this.dialogService.showSnackbar("Changes saved", this.viewContainerRef)),
+        switchMap(ref => ref.afterOpened()),
+        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      )
       .subscribe();
   }
 

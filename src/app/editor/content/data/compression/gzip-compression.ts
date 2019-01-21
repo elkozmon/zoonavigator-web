@@ -17,7 +17,7 @@
 
 import {Injectable} from "@angular/core";
 import {Compression} from "./compression";
-import {Observable} from "rxjs/Observable";
+import {Observable, of} from "rxjs";
 
 const pako = require("pako");
 const isGzip = require("is-gzip");
@@ -30,10 +30,10 @@ export class GzipCompression implements Compression {
   }
 
   compress(bytes: ArrayBuffer): Observable<ArrayBuffer> {
-    return Observable.of(pako.gzip(new Uint8Array(bytes)).buffer);
+    return of(pako.gzip(new Uint8Array(bytes)).buffer);
   }
 
   decompress(bytes: ArrayBuffer): Observable<ArrayBuffer> {
-    return Observable.of(pako.ungzip(new Uint8Array(bytes)).buffer);
+    return of(pako.ungzip(new Uint8Array(bytes)).buffer);
   }
 }

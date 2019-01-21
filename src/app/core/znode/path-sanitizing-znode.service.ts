@@ -17,7 +17,7 @@
 
 import {Injectable} from "@angular/core";
 import {ZNodeService} from "./znode.service";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
 import {ZNodeExport} from "./znode-export";
 import {ZNodeChildren} from "./znode-children";
 import {ZNodeWithChildren} from "./znode-with-children";

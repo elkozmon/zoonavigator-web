@@ -16,6 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
+import {Buffer} from "buffer";
 import {Mode} from "./mode";
 
 @Injectable()

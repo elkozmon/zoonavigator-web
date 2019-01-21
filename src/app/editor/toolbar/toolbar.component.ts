@@ -19,7 +19,8 @@ import {Component, EventEmitter, Input, Output, ViewChild, ViewContainerRef} fro
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {MatInput} from "@angular/material";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {EMPTY, of} from "rxjs";
+import {catchError, switchMap, switchMapTo} from "rxjs/operators";
 import {Maybe} from "tsmonad";
 import {DialogService, FileSaverService, ZNodeExport, ZNodeService, ZNodeWithChildren, ZPath, ZPathService} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
@@ -88,16 +89,17 @@ export class ToolbarComponent {
         "Do you want to delete this node and its children?",
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((confirm: boolean) => {
-        if (confirm) {
-          return this.zNodeService
-            .deleteNode(zNode.path, zNode.meta.dataVersion)
-            .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef));
-        }
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMap((confirm: boolean) => {
+          if (confirm) {
+            return this.zNodeService.deleteNode(zNode.path, zNode.meta.dataVersion);
+          }
 
-        return Observable.empty<void>();
-      })
+          return EMPTY;
+        }),
+        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      )
       .forEach(() => {
         this.router.navigate([], {
           relativeTo: this.route,
@@ -112,7 +114,9 @@ export class ToolbarComponent {
   onExportClick(): void {
     this.zNodeService
       .exportNodes([this.zPath.path])
-      .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      .pipe(
+        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      )
       .forEach((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name));
   }
 
@@ -127,17 +131,19 @@ export class ToolbarComponent {
         },
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((data: DuplicateZNodeData) => {
-        if (data) {
-          return this.zNodeService
-            .duplicateNode(source, data.path)
-            .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .switchMapTo(Observable.of(data));
-        }
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMap((data: DuplicateZNodeData) => {
+          if (data) {
+            return this.zNodeService
+              .duplicateNode(source, data.path)
+              .pipe(switchMapTo(of(data)));
+          }
 
-        return Observable.empty();
-      })
+          return EMPTY;
+        }),
+        catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      )
       .forEach((data: CreateZNodeData) => {
         if (data.redirect) {
           this.router.navigate([], {
@@ -165,17 +171,19 @@ export class ToolbarComponent {
         },
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((data: MoveZNodeData) => {
-        if (data) {
-          return this.zNodeService
-            .moveNode(source, data.path)
-            .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .switchMapTo(Observable.of(data));
-        }
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMap((data: MoveZNodeData) => {
+          if (data) {
+            return this.zNodeService
+              .moveNode(source, data.path)
+              .pipe(switchMapTo(of(data)));
+          }
 
-        return Observable.empty();
-      })
+          return EMPTY;
+        }),
+        catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      )
       .forEach((data: CreateZNodeData) => {
         this.router.navigate([], {
           relativeTo: this.route,

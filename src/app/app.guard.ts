@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {Observable, of} from "rxjs";
+import {switchMap} from "rxjs/operators";
 import {ConfigService} from "./config";
 import {ZSessionHandler, ZSessionService} from "./core";
 import {AuthInfo, ConnectionParams} from "./core/zsession";
@@ -63,7 +64,9 @@ export class AppGuard implements CanActivate {
 
       this.zSessionService
         .create(connectionParams)
-        .switchMap(sessionInfo => this.zSessionHandler.setSessionInfo(sessionInfo))
+        .pipe(
+          switchMap(sessionInfo => this.zSessionHandler.setSessionInfo(sessionInfo))
+        )
         .subscribe(
           () => {
             if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {
@@ -80,7 +83,7 @@ export class AppGuard implements CanActivate {
       this.navigateToConnect(route);
     }
 
-    return Observable.of(false);
+    return of(false);
   }
 
   private navigateToEditor(): void {

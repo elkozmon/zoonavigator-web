@@ -17,7 +17,7 @@
 
 import {Injectable} from "@angular/core";
 import {ZSessionInfo} from "../zsession-info";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
 
 @Injectable()
 export abstract class ZSessionHandler {

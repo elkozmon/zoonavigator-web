@@ -23,7 +23,6 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
 import {CovalentCommonModule} from "@covalent/core";
 import {AngularFontAwesomeModule} from "angular-font-awesome";
-import {AsyncLocalStorageModule} from "angular-async-local-storage";
 import {ConfigService, getConfigLoader} from "./config";
 import {AppComponent} from "./app.component";
 import {AppRoutingModule} from "./app-routing.module";
@@ -33,7 +32,6 @@ import {EditorModule} from "./editor";
 
 @NgModule({
   imports: [
-    AsyncLocalStorageModule,
     BrowserAnimationsModule,
     AngularFontAwesomeModule,
     ReactiveFormsModule,

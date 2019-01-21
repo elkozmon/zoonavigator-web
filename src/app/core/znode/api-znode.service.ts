@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {HttpParams} from "@angular/common/http";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {switchMap, map, mapTo} from "rxjs/operators";
 import {ZNodeService} from "./znode.service";
 import {ZNodeChildren} from "./znode-children";
 import {ZNodeMeta} from "./znode-meta";
@@ -41,8 +42,10 @@ export class ApiZNodeService implements ZNodeService {
   private withAuthToken<T>(fun: (string) => Observable<T>): Observable<T> {
     return this.zSessionHandler
       .getSessionInfo()
-      .map(info => info ? info.token : null)
-      .switchMap(fun)
+      .pipe(
+        map(info => info ? info.token : null),
+        switchMap(fun)
+      );
   }
 
   getNode(path: string): Observable<ZNodeWithChildren> {
@@ -62,7 +65,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch<ZNodeWithChildren>(request)
-        .map(response => response.payload);
+        .pipe(
+          map(response => response.payload)
+        );
     });
   }
 
@@ -86,7 +91,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 
@@ -111,7 +118,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 
@@ -137,7 +146,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 
@@ -163,7 +174,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 
@@ -195,7 +208,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch<ZNodeMeta>(request)
-        .map(response => response.payload);
+        .pipe(
+          map(response => response.payload)
+        );
     });
   }
 
@@ -222,7 +237,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch<ZNodeMeta>(request)
-        .map(response => response.payload);
+        .pipe(
+          map(response => response.payload)
+        );
     });
   }
 
@@ -245,7 +262,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch<ZNodeChildren>(request)
-        .map(response => response.payload);
+        .pipe(
+          map(response => response.payload)
+        );
     });
   }
 
@@ -270,7 +289,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 
@@ -293,12 +314,14 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .map(response => {
-          return {
-            blob: new Blob([JSON.stringify(response.payload)], {type: "text/plain"}),
-            name: "znode-export-" + new Date().toISOString() + ".json"
-          }
-        });
+        .pipe(
+          map(response => {
+            return {
+              blob: new Blob([JSON.stringify(response.payload)], {type: "text/plain"}),
+              name: "znode-export-" + new Date().toISOString() + ".json"
+            }
+          })
+        );
     });
   }
 
@@ -323,7 +346,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 }

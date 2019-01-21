@@ -16,28 +16,24 @@
  */
 
 import {Injectable, ViewContainerRef} from "@angular/core";
-import {
-  IAlertConfig,
-  TdAlertDialogComponent,
-  TdDialogService
-} from "@covalent/core";
+import {TdDialogService} from "@covalent/core";
 import {MatDialog, MatDialogRef, MatSnackBar, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
-import {Observable} from "rxjs/Rx";
+import {Observable, of} from "rxjs";
 import {DialogService} from "./dialog.service";
 import {
-  CreateZNodeData,
-  CreateZNodeDialogComponent,
   ConfirmData,
   ConfirmDialogComponent,
+  CreateZNodeData,
+  CreateZNodeDialogComponent,
   DuplicateZNodeData,
   DuplicateZNodeDialogComponent,
   ImportZNodesData,
   ImportZNodesDialogComponent,
+  InfoData,
+  InfoDialogComponent,
   MoveZNodeData,
   MoveZNodeDialogComponent,
-  SessionInfoDialogComponent,
-  InfoData,
-  InfoDialogComponent
+  SessionInfoDialogComponent
 } from "./dialogs";
 import {ZSessionInfo} from "../zsession/zsession-info";
 
@@ -88,7 +84,7 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
-    return Observable.of(dialog);
+    return of(dialog);
   }
 
   showImportZNodes(
@@ -109,7 +105,7 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
-    return Observable.of(dialog);
+    return of(dialog);
   }
 
   showDuplicateZNode(
@@ -130,7 +126,7 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
-    return Observable.of(dialog);
+    return of(dialog);
   }
 
   showRecursiveDeleteZNode(
@@ -164,7 +160,7 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
-    return Observable.of(dialog);
+    return of(dialog);
   }
 
   showSessionInfo(
@@ -184,7 +180,7 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
-    return Observable.of(dialog);
+    return of(dialog);
   }
 
   showError(
@@ -210,7 +206,7 @@ export class DefaultDialogService extends DialogService {
 
     // Look for cached dialog
     if (this.showConfirmInstances.has(key)) {
-      return Observable.of(this.showConfirmInstances.get(key));
+      return of(this.showConfirmInstances.get(key));
     }
 
     const dialog = this.dialog.open(ConfirmDialogComponent, {
@@ -234,7 +230,7 @@ export class DefaultDialogService extends DialogService {
       .afterClosed()
       .forEach(() => this.showConfirmInstances.delete(key));
 
-    return Observable.of(dialog);
+    return of(dialog);
   }
 
   showInfo(
@@ -245,7 +241,7 @@ export class DefaultDialogService extends DialogService {
 
     // Look for cached dialog
     if (this.showInfoInstances.has(key)) {
-      return Observable.of(this.showInfoInstances.get(key));
+      return of(this.showInfoInstances.get(key));
     }
 
     const dialog = this.dialog.open(InfoDialogComponent, {
@@ -269,7 +265,7 @@ export class DefaultDialogService extends DialogService {
       .afterClosed()
       .forEach(() => this.showInfoInstances.delete(key));
 
-    return Observable.of(dialog);
+    return of(dialog);
   }
 
   showSnackbar(
@@ -285,6 +281,6 @@ export class DefaultDialogService extends DialogService {
       }
     );
 
-    return Observable.of(snackBar);
+    return of(snackBar);
   }
 }

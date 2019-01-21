@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {StorageService} from "./storage.service";
-import {Observable} from "rxjs/Rx";
+import {Observable, of, defer} from "rxjs";
+import {mapTo} from "rxjs/operators";
 
 @Injectable()
 export class LocalStorageService implements StorageService {
@@ -26,18 +27,16 @@ export class LocalStorageService implements StorageService {
   }
 
   set(key: string, value: any): Observable<void> {
-    return Observable
-      .defer(() => Observable.of(localStorage.setItem(key, value)))
-      .mapTo(null);
+    return defer(() => of(localStorage.setItem(key, value)))
+      .pipe(mapTo(null));
   }
 
   get(key: string): Observable<any> {
-    return Observable.defer(() => Observable.of(localStorage.getItem(key)));
+    return defer(() => of(localStorage.getItem(key)));
   }
 
   remove(key: string): Observable<void> {
-    return Observable
-      .defer(() => Observable.of(localStorage.removeItem(key)))
-      .mapTo(null);
+    return defer(() => of(localStorage.removeItem(key)))
+      .pipe(mapTo(null));
   }
 }

@@ -16,7 +16,8 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 import {ZSessionHandler} from "./zsession.handler";
 import {ZSessionInfo} from "../zsession-info";
 import {StorageService} from "../../storage";
@@ -32,7 +33,9 @@ export class DefaultZSessionHandler implements ZSessionHandler {
   getSessionInfo(): Observable<ZSessionInfo | null> {
     return this.storageService
       .get(this.sessionInfoKey)
-      .map((value) => value ? JSON.parse(value) : null);
+      .pipe(
+        map((value) => value ? JSON.parse(value) : null)
+      );
   }
 
   setSessionInfo(value: ZSessionInfo | null): Observable<void> {

@@ -16,7 +16,8 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 import {Maybe} from "tsmonad";
 import {PreferencesService} from "./preferences.service";
 import {ModeId} from "../content";
@@ -51,7 +52,9 @@ export class DefaultPreferencesService extends PreferencesService {
 
     return this.storageService
       .get(key)
-      .map(Maybe.maybe);
+      .pipe(
+        map(Maybe.maybe)
+      );
   }
 
   setWrapFor(path: string, creationId: number, enabled: Maybe<boolean>): Observable<void> {
@@ -68,7 +71,9 @@ export class DefaultPreferencesService extends PreferencesService {
 
     return this.storageService
       .get(key)
-      .map(Maybe.maybe)
-      .map(ms => ms.map(s => s === "true"));
+      .pipe(
+        map(Maybe.maybe),
+        map(ms => ms.map(s => s === "true"))
+      );
   }
 }

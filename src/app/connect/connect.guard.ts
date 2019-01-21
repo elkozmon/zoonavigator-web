@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 import {ZSessionHandler} from "../core/zsession/handler";
 import {CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 import {EDITOR_QUERY_NODE_PATH} from "../editor";
@@ -41,23 +42,25 @@ export class ConnectGuard implements CanActivate {
   ): Observable<boolean> | Promise<boolean> | boolean {
     return this.zSessionHandler
       .getSessionInfo()
-      .map((sessionInfo) => {
-        if (!sessionInfo) {
-          return true;
-        }
-
-        const queryParams = {};
-
-        if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {
-          queryParams[EDITOR_QUERY_NODE_PATH] = route.queryParamMap.get(CONNECT_QUERY_RETURN_URL);
-        }
-
-        this.router.navigate(["/editor"], {
-            queryParams: queryParams
+      .pipe(
+        map((sessionInfo) => {
+          if (!sessionInfo) {
+            return true;
           }
-        );
 
-        return false;
-      });
+          const queryParams = {};
+
+          if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {
+            queryParams[EDITOR_QUERY_NODE_PATH] = route.queryParamMap.get(CONNECT_QUERY_RETURN_URL);
+          }
+
+          this.router.navigate(["/editor"], {
+              queryParams: queryParams
+            }
+          );
+
+          return false;
+        })
+      );
   }
 }

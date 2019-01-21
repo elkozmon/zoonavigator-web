@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {Observable, of} from "rxjs";
+import {map, catchError} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {ZNodeService, ZNodeWithChildren} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
@@ -42,7 +43,9 @@ export class ZNodeWithChildrenResolver implements Resolve<Either<Error, ZNodeWit
 
     return this.zNodeService
       .getNode(nodePath)
-      .map(Either.right)
-      .catch(err => Observable.of(Either.left<Error, ZNodeWithChildren>(new Error(err))));
+      .pipe(
+        map(Either.right),
+        catchError(err => of(Either.left<Error, ZNodeWithChildren>(new Error(err))))
+      );
   }
 }

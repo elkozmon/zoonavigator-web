@@ -17,6 +17,7 @@
 
 import {Component, OnInit} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
+import {switchMap, finalize} from "rxjs/operators";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {LoadingMode, LoadingType, TdLoadingService} from "@covalent/core";
 import {AuthInfo, ZSessionHandler, ZSessionService, Scheme} from "../core";
@@ -87,9 +88,11 @@ export class ConnectComponent implements OnInit {
         connectionString: this.getConnectionStringFormValue(),
         authInfo: this.getAuthInfoFormValue()
       })
-      .switchMap((sessionInfo) => this.zSessionHandler.setSessionInfo(sessionInfo))
+      .pipe(
+        switchMap((sessionInfo) => this.zSessionHandler.setSessionInfo(sessionInfo)),
+        finalize(() => this.stopLoader())
+      )
       // .first()
-      .finally(() => this.stopLoader())
       .subscribe(
         () => this.router.navigateByUrl(this.redirectUrl),
         error => this.errorMsg = error

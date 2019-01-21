@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 import {ZSessionHandler} from "../core/zsession/handler";
 import {CONNECT_QUERY_RETURN_URL} from "../connect/connect-routing.constants";
 
@@ -47,19 +48,21 @@ export class EditorGuard implements CanActivate, CanActivateChild {
   private checkSession(url: string): Observable<boolean> {
     return this.zSessionHandler
       .getSessionInfo()
-      .map((sessionInfo) => {
-        if (sessionInfo) {
-          return true;
-        }
-
-        this.router.navigate(["/"], {
-            queryParams: {
-              [CONNECT_QUERY_RETURN_URL]: url
-            }
+      .pipe(
+        map((sessionInfo) => {
+          if (sessionInfo) {
+            return true;
           }
-        );
 
-        return false;
-      });
+          this.router.navigate(["/"], {
+              queryParams: {
+                [CONNECT_QUERY_RETURN_URL]: url
+              }
+            }
+          );
+
+          return false;
+        })
+      );
   }
 }

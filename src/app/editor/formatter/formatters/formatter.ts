@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Either} from "tsmonad";
+import {Observable} from "rxjs";
 import {ModeId} from "../../content/data/mode";
 
 @Injectable()
@@ -24,5 +24,5 @@ export abstract class Formatter {
 
   abstract mode: ModeId;
 
-  abstract format(data: string): Either<Error, string>
+  abstract format(data: string): Observable<string>
 }

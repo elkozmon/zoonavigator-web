@@ -18,7 +18,8 @@
 import {Injectable, ViewContainerRef} from "@angular/core";
 import {TdAlertDialogComponent} from "@covalent/core";
 import {MatDialogRef, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
-import {Observable} from "rxjs/Rx";
+import {Observable, throwError} from "rxjs";
+import {switchMap, switchMapTo} from "rxjs/operators";
 import {
   ConfirmData,
   ConfirmDialogComponent,
@@ -45,8 +46,10 @@ export abstract class DialogService {
   ): Observable<T> {
     return this
       .showError(error, viewRef)
-      .switchMap(ref => ref.afterClosed())
-      .switchMapTo(Observable.throw(error));
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMapTo(throwError(error))
+      );
   }
 
   abstract showDiscardChanges(
