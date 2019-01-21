@@ -29,9 +29,9 @@ export class JsonFormatter extends Formatter {
     try {
       return of(<string>JSON.stringify(JSON.parse(data), null, 4));
     } catch (e) {
-      console.log(e);
+      console.error(e);
 
-      return throwError(new Error("Invalid JSON"));
+      return throwError(new Error("Invalid JSON (see console for more info)"));
     }
   }
 }
