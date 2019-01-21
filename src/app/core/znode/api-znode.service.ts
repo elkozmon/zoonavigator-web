@@ -18,7 +18,7 @@
 import {Injectable} from "@angular/core";
 import {HttpParams} from "@angular/common/http";
 import {Observable, of, throwError} from "rxjs";
-import {switchMap, map, mapTo} from "rxjs/operators";
+import {map, mapTo, switchMap} from "rxjs/operators";
 import {ZNodeService} from "./znode.service";
 import {ZNodeChildren} from "./znode-children";
 import {ZNodeMeta} from "./znode-meta";

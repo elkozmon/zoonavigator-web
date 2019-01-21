@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {RouterStateSnapshot, ActivatedRouteSnapshot, CanDeactivate} from "@angular/router";
+import {ActivatedRouteSnapshot, CanDeactivate, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs";
 import {CanDeactivateComponent} from "./can-deactivate-component";
 

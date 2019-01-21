@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable, from} from "rxjs";
+import {from, Observable} from "rxjs";
 import {FileReaderService} from "./file-reader.service";
 
 @Injectable()

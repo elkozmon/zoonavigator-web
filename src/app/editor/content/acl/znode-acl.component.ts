@@ -17,8 +17,8 @@
 
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Observable, of, from} from "rxjs";
-import {pluck, switchMap, catchError} from "rxjs/operators";
+import {from, Observable, of} from "rxjs";
+import {catchError, pluck, switchMap} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {DialogService, ZNodeAcl, ZNodeService, ZNodeWithChildren} from "../../../core";
 import {CanDeactivateComponent} from "../../../shared";

@@ -17,8 +17,8 @@
 
 import {ChangeDetectionStrategy, Component, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Observable, ReplaySubject, Subject, throwError, from, of, combineLatest, zip, EMPTY} from "rxjs";
-import {bufferCount, switchMap, switchMapTo, map, mapTo, catchError, pluck, take, filter, tap, finalize} from "rxjs/operators";
+import {combineLatest, EMPTY, from, Observable, of, ReplaySubject, Subject, throwError, zip} from "rxjs";
+import {bufferCount, catchError, filter, finalize, map, mapTo, pluck, switchMap, take, tap} from "rxjs/operators";
 import {Either, Maybe} from "tsmonad";
 import {Buffer} from "buffer";
 import {DialogService, ZNodeMeta, ZNodeService, ZNodeWithChildren, ZPathService} from "../../../core";

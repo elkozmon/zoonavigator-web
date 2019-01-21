@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable, throwError, of} from "rxjs";
+import {Observable, of, throwError} from "rxjs";
 import {catchError} from "rxjs/operators";
 import YAML from "yaml";
 import {Formatter} from "./formatter";

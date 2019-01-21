@@ -20,7 +20,7 @@ import {RouterModule, RunGuardsAndResolvers} from "@angular/router";
 import {CanDeactivateComponentGuard} from "../shared";
 import {EditorComponent} from "./editor.component";
 import {EditorGuard} from "./editor.guard";
-import {ZNodeDataComponent, ZNodeAclComponent, ZNodeMetaComponent} from "./content";
+import {ZNodeAclComponent, ZNodeDataComponent, ZNodeMetaComponent} from "./content";
 import {ZNodeWithChildrenResolver} from "./znode/znode-with-children.resolver";
 
 const editorRoutes = [

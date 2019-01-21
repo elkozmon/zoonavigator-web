@@ -18,20 +18,12 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
-import {Observable, of, from, EMPTY, throwError} from "rxjs";
-import {map, mapTo, switchMap, catchError, pluck} from "rxjs/operators";
+import {Observable, throwError} from "rxjs";
+import {catchError, map, pluck, switchMap} from "rxjs/operators";
 import {Either, Maybe} from "tsmonad";
 import {Ordering} from "./ordering";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
-import {
-  ZPath,
-  ZPathService,
-  DialogService,
-  ZSessionService,
-  ZSessionHandler,
-  ZNodePath,
-  ZNodeWithChildren
-} from "../core";
+import {DialogService, ZNodePath, ZNodeWithChildren, ZPath, ZPathService, ZSessionHandler, ZSessionService} from "../core";
 import {RegexpFilterComponent} from "../shared";
 
 @Component({

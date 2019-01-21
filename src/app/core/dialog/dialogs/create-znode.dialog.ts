@@ -18,7 +18,6 @@
 import {Component, Inject, ViewChild} from "@angular/core";
 import {MAT_DIALOG_DATA, MatButton} from "@angular/material"
 import {CreateZNodeData} from "./create-znode.data";
-import {RegexpFilterComponent} from "../../../shared";
 
 @Component({
   selector: "zoo-create-znode.dialog",

@@ -17,10 +17,10 @@
 
 import {Component, OnInit} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {switchMap, finalize, catchError} from "rxjs/operators";
+import {catchError, finalize, switchMap} from "rxjs/operators";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {LoadingMode, LoadingType, TdLoadingService} from "@covalent/core";
-import {AuthInfo, ZSessionHandler, ZSessionService, Scheme} from "../core";
+import {AuthInfo, Scheme, ZSessionHandler, ZSessionService} from "../core";
 import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 
 @Component({

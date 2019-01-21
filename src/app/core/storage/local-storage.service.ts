@@ -17,7 +17,7 @@
 
 import {Injectable} from "@angular/core";
 import {StorageService} from "./storage.service";
-import {Observable, of, defer} from "rxjs";
+import {Observable, of} from "rxjs";
 import {mapTo} from "rxjs/operators";
 
 @Injectable()

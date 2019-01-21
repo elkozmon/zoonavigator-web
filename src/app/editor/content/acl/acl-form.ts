@@ -16,7 +16,7 @@
  */
 
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {Acl, Permission, Scheme, ZNodeMeta, ZNodeAcl} from "../../../core";
+import {Acl, Permission, Scheme, ZNodeAcl, ZNodeMeta} from "../../../core";
 
 export class AclForm {
 

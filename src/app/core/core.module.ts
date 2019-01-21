@@ -23,18 +23,18 @@ import {CovalentFileModule} from "@covalent/core";
 import {ApiRequestFactory, ApiService, DefaultApiRequestFactory, DefaultApiService} from "./api";
 import {ApiZSessionService, DefaultZSessionHandler, ZSessionHandler, ZSessionService} from "./zsession";
 import {
-  DialogService,
-  DefaultDialogService,
-  MoveZNodeDialogComponent,
-  CreateZNodeDialogComponent,
-  DuplicateZNodeDialogComponent,
   ConfirmDialogComponent,
+  CreateZNodeDialogComponent,
+  DefaultDialogService,
+  DialogService,
+  DuplicateZNodeDialogComponent,
+  ImportZNodesDialogComponent,
   InfoDialogComponent,
-  SessionInfoDialogComponent,
-  ImportZNodesDialogComponent
+  MoveZNodeDialogComponent,
+  SessionInfoDialogComponent
 } from "./dialog";
-import {StorageService, LocalStorageService} from "./storage";
-import {FileSaverService, DefaultFileSaverService} from "./file-saver";
+import {LocalStorageService, StorageService} from "./storage";
+import {DefaultFileSaverService, FileSaverService} from "./file-saver";
 import {DefaultZPathService, ZPathService} from "./zpath";
 import {ApiZNodeService, ZNodeService} from "./znode";
 import {DefaultFileReaderService, FileReaderService} from "./file-reader";

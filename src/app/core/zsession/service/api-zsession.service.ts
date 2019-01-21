@@ -21,7 +21,7 @@ import {map, mapTo} from "rxjs/operators";
 import {ZSessionService} from "./zsession.service";
 import {ConnectionParams} from "../connection-params";
 import {ZSessionInfo} from "../zsession-info";
-import {ApiService, ApiRequestFactory, JsonRequestContent} from "../../api";
+import {ApiRequestFactory, ApiService, JsonRequestContent} from "../../api";
 
 @Injectable()
 export class ApiZSessionService implements ZSessionService {

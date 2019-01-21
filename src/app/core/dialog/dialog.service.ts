@@ -16,7 +16,6 @@
  */
 
 import {Injectable, ViewContainerRef} from "@angular/core";
-import {TdAlertDialogComponent} from "@covalent/core";
 import {MatDialogRef, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
 import {Observable, throwError} from "rxjs";
 import {switchMap, switchMapTo} from "rxjs/operators";

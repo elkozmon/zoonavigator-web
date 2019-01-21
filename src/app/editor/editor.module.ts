@@ -19,36 +19,37 @@ import {NgModule} from "@angular/core";
 import {DomSanitizer} from "@angular/platform-browser";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {
+  MatButtonModule,
   MatCardModule,
+  MatCheckboxModule,
+  MatIconModule,
   MatIconRegistry,
   MatInputModule,
-  MatOptionModule,
-  MatSelectModule,
-  MatCheckboxModule,
-  MatButtonModule,
-  MatIconModule,
   MatListModule,
   MatMenuModule,
-  MatTooltipModule,
+  MatOptionModule,
+  MatSelectModule,
   MatTabsModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatTooltipModule
 } from "@angular/material";
-import {
-  CovalentCommonModule,
-  CovalentDialogsModule,
-  CovalentLayoutModule,
-  CovalentMediaModule
-} from "@covalent/core";
+import {CovalentCommonModule, CovalentDialogsModule, CovalentLayoutModule, CovalentMediaModule} from "@covalent/core";
 import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {AceEditorModule} from "ng2-ace-editor";
 import {
-  ActionbarComponent, CompressionProvider,
-  ContentComponent, DefaultCompressionProvider, DefaultModeProvider, ModeProvider,
+  ActionbarComponent,
+  CompressionProvider,
+  ContentComponent,
+  DefaultCompressionProvider,
+  DefaultModeProvider,
+  ModeProvider,
   ZNodeAclComponent,
-  ZNodeDataComponent, ZNodeDataEditorComponent, ZNodeDataToolbarComponent,
+  ZNodeDataComponent,
+  ZNodeDataEditorComponent,
+  ZNodeDataToolbarComponent,
   ZNodeMetaComponent
 } from "./content";
-import {PreferencesService, DefaultPreferencesService} from "./preferences";
+import {DefaultPreferencesService, PreferencesService} from "./preferences";
 import {ToolbarComponent} from "./toolbar";
 import {NavActionsComponent, NavListComponent} from "./sidenav";
 import {EditorRoutingModule} from "./editor-routing.module";

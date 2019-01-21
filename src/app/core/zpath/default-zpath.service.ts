@@ -18,7 +18,6 @@
 import {Injectable} from "@angular/core";
 import {ZPathService} from "./zpath.service";
 import {ZPath} from "./zpath";
-import {ZNode} from "../znode/znode";
 
 @Injectable()
 export class DefaultZPathService implements ZPathService {
