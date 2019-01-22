@@ -64,9 +64,7 @@ export class AppGuard implements CanActivate {
 
       this.zSessionService
         .create(connectionParams)
-        .pipe(
-          switchMap(sessionInfo => this.zSessionHandler.setSessionInfo(sessionInfo))
-        )
+        .pipe(switchMap(sessionInfo => this.zSessionHandler.setSessionInfo(sessionInfo)))
         .subscribe(
           () => {
             if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {

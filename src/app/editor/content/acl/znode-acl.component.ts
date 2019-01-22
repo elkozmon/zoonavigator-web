@@ -76,7 +76,7 @@ export class ZNodeAclComponent implements OnInit {
           this.viewContainerRef
         )
         .pipe(
-          switchMap(ref => ref.afterClosed())
+          switchMap(([ref, result]) => result)
         );
     }
 
@@ -113,7 +113,7 @@ export class ZNodeAclComponent implements OnInit {
         this.viewContainerRef
       )
       .pipe(
-        switchMap(ref => ref.afterClosed())
+        switchMap(([ref, result]) => result)
       )
       .forEach(
         discard => {

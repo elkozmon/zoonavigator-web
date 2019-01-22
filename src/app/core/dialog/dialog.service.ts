@@ -53,7 +53,7 @@ export abstract class DialogService {
 
   abstract showDiscardChanges(
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<ConfirmDialogComponent>>
+  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]>
 
   abstract showCreateZNode(
     defaults: CreateZNodeData,
@@ -73,7 +73,7 @@ export abstract class DialogService {
   abstract showRecursiveDeleteZNode(
     message: string,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<ConfirmDialogComponent>>
+  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]>
 
   abstract showMoveZNode(
     defaults: MoveZNodeData,
@@ -93,7 +93,7 @@ export abstract class DialogService {
   abstract showConfirm(
     options: ConfirmData,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<ConfirmDialogComponent>>
+  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]>
 
   abstract showInfo(
     options: InfoData,

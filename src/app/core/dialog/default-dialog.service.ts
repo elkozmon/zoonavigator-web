@@ -18,7 +18,8 @@
 import {Injectable, ViewContainerRef} from "@angular/core";
 import {TdDialogService} from "@covalent/core";
 import {MatDialog, MatDialogRef, MatSnackBar, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
-import {Observable, of} from "rxjs";
+import {Observable, ConnectableObservable, of} from "rxjs";
+import {delay, publishReplay, publishLast, tap} from "rxjs/operators";
 import {DialogService} from "./dialog.service";
 import {
   ConfirmData,
@@ -42,7 +43,7 @@ type GroupKey = string;
 @Injectable()
 export class DefaultDialogService extends DialogService {
 
-  private showConfirmInstances: Map<GroupKey, MatDialogRef<ConfirmDialogComponent>> = new Map();
+  private showConfirmInstances: Map<GroupKey, [MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]> = new Map();
 
   private showInfoInstances: Map<GroupKey, MatDialogRef<InfoDialogComponent>> = new Map();
 
@@ -56,7 +57,7 @@ export class DefaultDialogService extends DialogService {
 
   showDiscardChanges(
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<ConfirmDialogComponent>> {
+  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]> {
     return this.showConfirm({
       icon: "help",
       title: "Discard changes?",
@@ -132,7 +133,7 @@ export class DefaultDialogService extends DialogService {
   showRecursiveDeleteZNode(
     message: string,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<ConfirmDialogComponent>> {
+  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]> {
     return this.showConfirm({
       icon: "help",
       title: "Confirm recursive delete",
@@ -201,7 +202,7 @@ export class DefaultDialogService extends DialogService {
   showConfirm(
     options: ConfirmData,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<ConfirmDialogComponent>> {
+  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]> {
     const key: GroupKey = options.title + options.message + options.acceptText;
 
     // Look for cached dialog
@@ -222,15 +223,21 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
+    const afterClosedRx = dialog
+      .afterClosed()
+      .pipe(publishLast()) as ConnectableObservable<boolean>;
+
+    afterClosedRx.connect();
+
     // Cache dialog
-    this.showConfirmInstances.set(key, dialog);
+    this.showConfirmInstances.set(key, [dialog, afterClosedRx]);
 
     // Uncache dialog once closed
-    dialog
-      .afterClosed()
+    afterClosedRx
+      .pipe(delay(100))
       .forEach(() => this.showConfirmInstances.delete(key));
 
-    return of(dialog);
+    return of(this.showConfirmInstances.get(key));
   }
 
   showInfo(
@@ -263,9 +270,10 @@ export class DefaultDialogService extends DialogService {
     // Uncache dialog once closed
     dialog
       .afterClosed()
+      .pipe(delay(100))
       .forEach(() => this.showInfoInstances.delete(key));
 
-    return of(dialog);
+    return of(this.showInfoInstances.get(key));
   }
 
   showSnackbar(

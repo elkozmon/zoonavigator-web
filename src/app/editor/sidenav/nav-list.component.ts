@@ -106,7 +106,7 @@ export class NavListComponent implements OnChanges {
         this.viewContainerRef
       )
       .pipe(
-        switchMap(ref => ref.afterClosed()),
+        switchMap(([ref, result]) => result),
         switchMap((confirm: boolean) => {
           if (confirm) {
             const parentDir = zPath.goUp().path;

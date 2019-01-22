@@ -90,7 +90,7 @@ export class ToolbarComponent {
         this.viewContainerRef
       )
       .pipe(
-        switchMap(ref => ref.afterClosed()),
+        switchMap(([ref, result]) => result),
         switchMap((confirm: boolean) => {
           if (confirm) {
             return this.zNodeService.deleteNode(zNode.path, zNode.meta.dataVersion);

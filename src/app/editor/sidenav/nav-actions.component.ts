@@ -190,7 +190,7 @@ export class NavActionsComponent {
     this.dialogService
       .showRecursiveDeleteZNode(message, this.viewContainerRef)
       .pipe(
-        switchMap(ref => ref.afterClosed()),
+        switchMap(([ref, result]) => result),
         switchMap((confirm: boolean) => {
           if (confirm) {
             return this.zNodeService

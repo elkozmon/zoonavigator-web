@@ -18,7 +18,7 @@
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanDeactivate, RouterStateSnapshot, UrlTree} from "@angular/router";
 import {Observable, of} from "rxjs";
-import {switchMap} from "rxjs/operators";
+import {switchMap, tap} from "rxjs/operators";
 import {ZNodeDataComponent} from "./znode-data.component";
 import {DialogService} from "../../../core/dialog";
 
@@ -56,7 +56,7 @@ export class CanDeactivateZNodeDataComponent implements CanDeactivate<ZNodeDataC
 
         return this.dialogService
           .showDiscardChanges(component.viewContainerRef)
-          .pipe(switchMap(ref => ref.afterClosed()));
+          .pipe(switchMap(([ref, result]) => result));
       })
     );
   }
