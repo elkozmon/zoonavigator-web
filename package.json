@@ -16,7 +16,7 @@
     "version": "./scripts/version.sh $npm_package_version",
     "test": "ng test",
     "test:docker": "docker-compose -f docker-compose.test.yml up --build --exit-code-from sut",
-    "test:ci": "ng test --browser ChromeHeadlessCI --single-run=true && ng e2e",
+    "test:ci": "ng test --browsers=ChromeHeadlessCI --no-watch --no-progress && ng e2e --protractor-config=protractor.conf.js",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
