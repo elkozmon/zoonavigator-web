@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,17 +16,18 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 import {Maybe} from "tsmonad";
-import {Mode} from "../mode";
 import {PreferencesService} from "./preferences.service";
+import {ModeId} from "../content";
 import {StorageService} from "../../core/storage";
 
 @Injectable()
 export class DefaultPreferencesService extends PreferencesService {
 
   private static getModeKey(path: string, creationId: number): string {
-    return "DefaultPreferencesService.mode:" + path + "@" + creationId;
+    return "DefaultPreferencesService.modeId:" + path + "@" + creationId;
   }
 
   private static getWrapKey(path: string, creationId: number): string {
@@ -37,27 +38,42 @@ export class DefaultPreferencesService extends PreferencesService {
     super();
   }
 
-  setModeFor(path: string, creationId: number, mode: Mode): Observable<void> {
+  setModeFor(path: string, creationId: number, mode: Maybe<ModeId>): Observable<void> {
     const key = DefaultPreferencesService.getModeKey(path, creationId);
 
-    return this.storageService.set(key, mode);
+    return mode.caseOf({
+      just: val => this.storageService.set(key, val),
+      nothing: () => this.storageService.remove(key)
+    });
   }
 
-  getModeFor(path: string, creationId: number): Observable<Maybe<Mode>> {
+  getModeFor(path: string, creationId: number): Observable<Maybe<ModeId>> {
     const key = DefaultPreferencesService.getModeKey(path, creationId);
 
-    return this.storageService.get(key).map(Maybe.maybe);
+    return this.storageService
+      .get(key)
+      .pipe(
+        map(Maybe.maybe)
+      );
   }
 
-  setWrapFor(path: string, creationId: number, enabled: boolean): Observable<void> {
+  setWrapFor(path: string, creationId: number, enabled: Maybe<boolean>): Observable<void> {
     const key = DefaultPreferencesService.getWrapKey(path, creationId);
 
-    return this.storageService.set(key, enabled ? "true" : "false");
+    return enabled.caseOf({
+      just: val => this.storageService.set(key, val ? "true" : "false"),
+      nothing: () => this.storageService.remove(key)
+    });
   }
 
   getWrapFor(path: string, creationId: number): Observable<Maybe<boolean>> {
     const key = DefaultPreferencesService.getWrapKey(path, creationId);
 
-    return this.storageService.get(key).map(Maybe.maybe).map(ms => ms.map(s => s === "true"));
+    return this.storageService
+      .get(key)
+      .pipe(
+        map(Maybe.maybe),
+        map(ms => ms.map(s => s === "true"))
+      );
   }
 }

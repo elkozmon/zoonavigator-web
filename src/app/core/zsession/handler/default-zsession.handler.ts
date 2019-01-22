@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,9 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
+import {Maybe} from "tsmonad";
 import {ZSessionHandler} from "./zsession.handler";
 import {ZSessionInfo} from "../zsession-info";
 import {StorageService} from "../../storage";
@@ -29,18 +31,20 @@ export class DefaultZSessionHandler implements ZSessionHandler {
   constructor(private storageService: StorageService) {
   }
 
-  getSessionInfo(): Observable<ZSessionInfo | null> {
+  getSessionInfo(): Observable<Maybe<ZSessionInfo>> {
     return this.storageService
       .get(this.sessionInfoKey)
-      .map((value) => value ? JSON.parse(value) : null);
+      .pipe(
+        map((value) => Maybe.maybe(value ? JSON.parse(value) : null))
+      );
   }
 
-  setSessionInfo(value: ZSessionInfo | null): Observable<void> {
-    if (value) {
-      return this.storageService
-        .set(this.sessionInfoKey, JSON.stringify(value));
-    }
+  setSessionInfo(value: ZSessionInfo): Observable<void> {
+    return this.storageService
+      .set(this.sessionInfoKey, JSON.stringify(value));
+  }
 
+  removeSessionInfo(): Observable<void> {
     return this.storageService
       .remove(this.sessionInfoKey);
   }

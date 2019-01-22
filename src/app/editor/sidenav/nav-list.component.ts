@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,11 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, Input, EventEmitter, Output, OnChanges, SimpleChanges, ViewContainerRef} from "@angular/core";
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {EMPTY, of} from "rxjs";
+import {catchError, map, switchMap, switchMapTo} from "rxjs/operators";
 import {Ordering} from "../ordering";
-import {ZNode, ZNodeService, ZPath, DialogService} from "../../core";
+import {DialogService, FileSaverService, ZNodeExport, ZNodeService, ZPath} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {DuplicateZNodeData, MoveZNodeData} from "../../core/dialog/dialogs";
 import {CreateZNodeData} from "../../core/dialog";
@@ -69,6 +70,7 @@ export class NavListComponent implements OnChanges {
     private router: Router,
     private zNodeService: ZNodeService,
     private dialogService: DialogService,
+    private fileSaverService: FileSaverService,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -99,49 +101,60 @@ export class NavListComponent implements OnChanges {
 
   onNodeDeleteClick(zPath: ZPath): void {
     this.dialogService
-      .showConfirm(
-        "Confirm recursive delete",
+      .showRecursiveDeleteZNode(
         `Do you want to delete node '${zPath.name.valueOrThrow()}' and its children?`,
-        "Delete",
-        "Cancel",
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((confirm: boolean) => {
-        if (confirm) {
-          const parentDir = zPath.goUp().path;
+      .pipe(
+        switchMap(([ref, result]) => result),
+        switchMap((confirm: boolean) => {
+          if (confirm) {
+            const parentDir = zPath.goUp().path;
 
-          return this.zNodeService
-            .deleteChildren(parentDir, [zPath.name.valueOrThrow()])
-            .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.refresh.emit());
-        }
+            return this.zNodeService.deleteChildren(parentDir, [zPath.name.valueOrThrow()]);
+          }
 
-        return Observable.empty<void>();
-      })
+          return EMPTY;
+        }),
+        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+        map(() => this.refresh.emit())
+      )
       .subscribe();
   }
 
-  onNodeDuplicateClick(zNode: ZNode): void {
+  onNodeExportClick(zPath: ZPath): void {
+    this.zNodeService
+      .exportNodes([zPath.path])
+      .pipe(
+        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      )
+      .forEach((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name));
+  }
+
+  onNodeDuplicateClick(zPath: ZPath): void {
     this.dialogService
       .showDuplicateZNode(
         {
-          path: zNode.path,
+          path: zPath.path,
           redirect: false
         },
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((data: DuplicateZNodeData) => {
-        if (data) {
-          return this.zNodeService
-            .duplicateNode(zNode.path, data.path)
-            .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .switchMapTo(Observable.of(data));
-        }
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMap((data: DuplicateZNodeData) => {
+          if (data) {
+            return this.zNodeService
+              .duplicateNode(zPath.path, data.path)
+              .pipe(
+                catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                switchMapTo(of(data))
+              );
+          }
 
-        return Observable.empty();
-      })
+          return EMPTY;
+        })
+      )
       .forEach((data: CreateZNodeData) => {
         if (data.redirect) {
           this.router.navigate([], {
@@ -159,26 +172,30 @@ export class NavListComponent implements OnChanges {
       });
   }
 
-  onNodeMoveClick(zNode: ZNode): void {
+  onNodeMoveClick(zPath: ZPath): void {
     this.dialogService
       .showMoveZNode(
         {
-          path: zNode.path,
+          path: zPath.path,
           redirect: false
         },
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((data: MoveZNodeData) => {
-        if (data) {
-          return this.zNodeService
-            .moveNode(zNode.path, data.path)
-            .catch((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .switchMapTo(Observable.of(data));
-        }
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMap((data: MoveZNodeData) => {
+          if (data) {
+            return this.zNodeService
+              .moveNode(zPath.path, data.path)
+              .pipe(
+                catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                switchMapTo(of(data))
+              );
+          }
 
-        return Observable.empty();
-      })
+          return EMPTY;
+        })
+      )
       .forEach((data: CreateZNodeData) => {
         if (data.redirect) {
           this.router.navigate([], {
@@ -197,8 +214,8 @@ export class NavListComponent implements OnChanges {
   }
 
   //noinspection JSMethodCanBeStatic,JSUnusedLocalSymbols
-  trackByPath(index: number, zNode: ZNode): string {
-    return zNode.path;
+  trackByPath(index: number, zPath: ZPath): string {
+    return zPath.path;
   }
 
   private sortZNodes(): void {

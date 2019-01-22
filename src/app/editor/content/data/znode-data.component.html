@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2018  Ľuboš Kozmon
+  ~ Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -16,66 +16,27 @@
   -->
 
 <!--suppress HtmlUnknownAttribute, HtmlFormInputWithoutLabel, HtmlUnknownTag -->
-<zoo-editor-content *ngIf="currentNode" layout-fill layout="column" [flex]="1">
-  <zoo-editor-actionbar>
-    <button
-      class="tc-deep-orange-500"
-      matTooltip="CTRL+S"
-      matTooltipPosition="below"
-      (click)="onSubmit()"
-      [disabled]="!editorSubmitReady">
-      <mat-icon class="mat-24">save</mat-icon>
-      <span>save</span>
-    </button>
+<zoo-editor-content *ngIf="isEditorReady | async" layout-fill layout="column" [flex]="1">
+  <zoo-editor-data-toolbar
+    [modes]="modeIds"
+    [compressions]="compIds"
+    [mode]="editorModeId | async"
+    (modeChange)="onModeChange($event)"
+    [compression]="editorCompId | async"
+    (compressionChange)="onCompressionChange($event)"
+    [wrapEnabled]="editorWrap | async"
+    (wrapChange)="onWrapChange($event)"
+    [formatEnabled]="isEditorFormatterAvailable | async"
+    (format)="onFormatData()"
+    [submitEnabled]="isSubmitReady | async"
+    (submit)="onSubmit()">
+  </zoo-editor-data-toolbar>
 
-    <button
-      class="tc-blue-grey-600"
-      (click)="setWrap(!getWrap(), true)">
-      <mat-icon class="mat-24">wrap_text</mat-icon>
-      <span>wrap: {{getWrap() ? 'on' : 'off'}}</span>
-    </button>
-
-    <button
-      class="tc-blue-grey-600"
-      [matMenuTriggerFor]="editorModesMenu">
-      <mat-icon class="mat-24">code</mat-icon>
-      <span>mode: {{editorMode}}</span>
-    </button>
-
-    <mat-menu #editorModesMenu="matMenu">
-      <button
-        mat-menu-item
-        *ngFor="let mode of editorModes"
-        [value]="mode"
-        (click)="setMode(mode, true)">
-        {{mode}}
-      </button>
-    </mat-menu>
-
-    <button
-      class="tc-blue-grey-600"
-      (click)="formatData()"
-      [matTooltip]="formatterAvailable ? null : 'Unavailable in \'' + editorMode.toString() + '\' mode'"
-      matTooltipPosition="below"
-      [disabled]="!formatterAvailable">
-      <mat-icon class="mat-24">format_paint</mat-icon>
-      <span>reformat</span>
-    </button>
-  </zoo-editor-actionbar>
-
-  <div class="zoo-editor-container">
-    <ace-editor
-      ace-editor
-      flex
-      #dataEditor
-      (keypress)="onKeyDown($event)"
-      theme="chrome"
-      [(text)]="editorData"
-      [mode]="editorMode"
-      [options]="editorOpts"
-      [readOnly]="false"
-      [autoUpdateContent]="true"
-      style="height: 100%; overflow: auto;">
-    </ace-editor>
-  </div>
+  <zoo-editor-data-editor
+    [mode]="editorModeId | async"
+    [wrapEnabled]="editorWrap | async"
+    [data]="editorDataTxt | async"
+    (dataChange)="editorDataTxt.next($event)"
+    (submit)="onSubmit()">
+  </zoo-editor-data-editor>
 </zoo-editor-content>

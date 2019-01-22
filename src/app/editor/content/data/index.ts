@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+export * from "./can-deactivate-znode-data-component"
 export * from "./znode-data.component"
+export * from "./znode-data-editor.component"
+export * from "./znode-data-toolbar.component"
+export * from "./compression"
+export * from "./mode"

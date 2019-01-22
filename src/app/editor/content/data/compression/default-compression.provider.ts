@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,18 +16,19 @@
  */
 
 import {Injectable} from "@angular/core";
-import {RouterStateSnapshot, ActivatedRouteSnapshot, CanDeactivate} from "@angular/router";
-import {Observable} from "rxjs/Rx";
-import {CanDeactivateComponent} from "./can-deactivate-component";
+import {CompressionProvider} from "./compression.provider";
+import {Compression} from "./compression";
+import {CompressionId} from "./compression-id";
+import {GzipCompression} from "./gzip-compression";
 
 @Injectable()
-export class CanDeactivateComponentGuard implements CanDeactivate<CanDeactivateComponent> {
+export class DefaultCompressionProvider implements CompressionProvider {
 
-  canDeactivate(
-    component: CanDeactivateComponent,
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean>|Promise<boolean>|boolean {
-    return component.canDeactivate();
+  private compressions: Map<CompressionId, Compression> = new Map([
+    [CompressionId.Gzip, new GzipCompression()],
+  ]);
+
+  getCompression(compressionId: CompressionId): Compression {
+    return this.compressions.get(compressionId);
   }
 }

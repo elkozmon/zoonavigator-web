@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,21 +16,22 @@
  */
 
 import {Injectable} from "@angular/core";
-import "yamljs";
-import {Either} from "tsmonad";
+import {Observable, of, throwError} from "rxjs";
 import {Formatter} from "./formatter";
-import {Mode} from "../../mode";
+import {ModeId} from "../../content/data/mode";
 
 @Injectable()
 export class JsonFormatter extends Formatter {
 
-  mode: Mode = Mode.Json;
+  mode: ModeId = ModeId.Json;
 
-  format(data: string): Either<Error, string> {
+  format(data: string): Observable<string> {
     try {
-      return Either.right(JSON.stringify(JSON.parse(data), null, 4));
-    } catch (error) {
-      return Either.left(new Error("Invalid JSON"));
+      return of(<string>JSON.stringify(JSON.parse(data), null, 4));
+    } catch (e) {
+      console.error(e);
+
+      return throwError(new Error("Invalid JSON (see console for more info)"));
     }
   }
 }

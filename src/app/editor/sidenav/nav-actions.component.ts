@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,18 @@
 import {Component, EventEmitter, Input, Output, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {state, style, trigger} from "@angular/animations";
-import {Observable} from "rxjs/Rx";
-import {ZNodeService, ZPath} from "../../core";
-import {DialogService, CreateZNodeData} from "../../core/dialog";
+import {EMPTY, of} from "rxjs";
+import {catchError, map, switchMap, switchMapTo} from "rxjs/operators";
+import {
+  CreateZNodeData,
+  DialogService,
+  FileReaderService,
+  FileSaverService,
+  ImportZNodesData,
+  ZNodeExport,
+  ZNodeService,
+  ZPath
+} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {Ordering} from "../ordering";
 
@@ -53,6 +62,8 @@ export class NavActionsComponent {
     private router: Router,
     private zNodeService: ZNodeService,
     private dialogService: DialogService,
+    private fileSaverService: FileSaverService,
+    private fileReaderService: FileReaderService,
     private viewContainerRef: ViewContainerRef
   ) {
   }
@@ -76,6 +87,48 @@ export class NavActionsComponent {
     this.orderingChange.emit(newOrdering);
   }
 
+  onImportClick(): void {
+    this.dialogService
+      .showImportZNodes(
+        {
+          path: this.zPath.isRoot ? "/" : this.zPath.path.concat("/"),
+          redirect: false
+        },
+        this.viewContainerRef
+      )
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMap((data: ImportZNodesData) => {
+          if (data && data.file) {
+            return this.fileReaderService
+              .readAsText(data.file)
+              .pipe(
+                switchMap(str => this.zNodeService.importNodes(data.path, JSON.parse(str))),
+                catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                switchMapTo(of(data))
+              );
+          }
+
+          return EMPTY;
+        })
+      )
+      .forEach((data: ImportZNodesData) => {
+        if (data.redirect) {
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+              [EDITOR_QUERY_NODE_PATH]: data.path
+            },
+            queryParamsHandling: "merge"
+          });
+
+          return;
+        }
+
+        this.refresh.emit();
+      });
+  }
+
   onCreateClick(): void {
     this.dialogService
       .showCreateZNode(
@@ -85,17 +138,21 @@ export class NavActionsComponent {
         },
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((data: CreateZNodeData) => {
-        if (data) {
-          return this.zNodeService
-            .createNode(data.path)
-            .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .switchMapTo(Observable.of(data));
-        }
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMap((data: CreateZNodeData) => {
+          if (data) {
+            return this.zNodeService
+              .createNode(data.path)
+              .pipe(
+                catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                switchMapTo(of(data))
+              );
+          }
 
-        return Observable.empty();
-      })
+          return EMPTY;
+        })
+      )
       .forEach((data: CreateZNodeData) => {
         if (data.redirect) {
           this.router.navigate([], {
@@ -113,6 +170,17 @@ export class NavActionsComponent {
       });
   }
 
+  onExportClick(): void {
+    const paths = this.zNodes.map(node => node.path);
+
+    this.zNodeService
+      .exportNodes(paths)
+      .pipe(
+        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      )
+      .forEach((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name));
+  }
+
   onDeleteClick(): void {
     const path = this.zPath.path;
     const names = this.zNodes.map(node => node.name);
@@ -120,24 +188,22 @@ export class NavActionsComponent {
     const message = `Do you want to delete ${names.length} ${names.length === 1 ? "node and its" : "nodes and their"} children?`;
 
     this.dialogService
-      .showConfirm(
-        "Confirm recursive delete",
-        message,
-        "Delete",
-        "Cancel",
-        this.viewContainerRef
-      )
-      .switchMap(ref => ref.afterClosed())
-      .switchMap((confirm: boolean) => {
-        if (confirm) {
-          return this.zNodeService
-            .deleteChildren(path, names.map(name => name.valueOrThrow()))
-            .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-            .map(() => this.refresh.emit());
-        }
+      .showRecursiveDeleteZNode(message, this.viewContainerRef)
+      .pipe(
+        switchMap(([ref, result]) => result),
+        switchMap((confirm: boolean) => {
+          if (confirm) {
+            return this.zNodeService
+              .deleteChildren(path, names.map(name => name.valueOrThrow()))
+              .pipe(
+                catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                map(() => this.refresh.emit())
+              );
+          }
 
-        return Observable.empty<void>();
-      })
+          return EMPTY;
+        })
+      )
       .subscribe();
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,11 +16,11 @@
  */
 
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
-import {ActivatedRoute, Router} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {ActivatedRoute, Router, UrlTree} from "@angular/router";
+import {from, Observable, of} from "rxjs";
+import {catchError, pluck, switchMap} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {DialogService, ZNodeAcl, ZNodeService, ZNodeWithChildren} from "../../../core";
-import {CanDeactivateComponent} from "../../../shared";
 import {ZPathService} from "../../../core/zpath";
 import {AclFormFactory} from "./acl-form.factory";
 import {AclForm} from "./acl-form";
@@ -30,7 +30,7 @@ import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
   templateUrl: "znode-acl.component.html",
   styleUrls: ["znode-acl.component.scss"]
 })
-export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
+export class ZNodeAclComponent implements OnInit {
 
   aclForm: AclForm;
 
@@ -41,16 +41,16 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     private zPathService: ZPathService,
     private dialogService: DialogService,
     private aclFormFactory: AclFormFactory,
-    private viewContainerRef: ViewContainerRef
+    public viewContainerRef: ViewContainerRef
   ) {
   }
 
   ngOnInit(): void {
-    (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pluck("zNodeWithChildren"))
+    (<Observable<Either<Error, ZNodeWithChildren>>>this.route.parent.data.pipe(pluck("zNodeWithChildren")))
       .forEach(either =>
         either.caseOf<void>({
           left: error => {
-            this.dialogService.showError(error.message, this.viewContainerRef);
+            this.dialogService.showError(error, this.viewContainerRef);
             this.aclForm = null;
           },
           right: node => {
@@ -60,29 +60,24 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
       );
   }
 
-  canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.aclForm && this.aclForm.isDirty) {
-      return this.dialogService
-        .showDiscardChanges(this.viewContainerRef)
-        .switchMap(ref => ref.afterClosed());
-    }
-
-    return Observable.of(true);
-  }
-
   onSubmit(recursive: boolean): void {
-    let confirmation: Observable<boolean> = Observable.of(true);
+    let confirmation: Observable<boolean> = of(true);
 
     if (recursive) {
       confirmation = this.dialogService
         .showConfirm(
-          "Confirm recursive change",
-          "Do you want to apply these settings to this node and its children?",
-          "Apply",
-          "Cancel",
+          {
+            icon: "help",
+            title: "Confirm recursive change",
+            message: "Do you want to apply these settings to this node and its children?",
+            acceptText: "Apply",
+            cancelText: "Cancel"
+          },
           this.viewContainerRef
         )
-        .switchMap(ref => ref.afterClosed());
+        .pipe(
+          switchMap(([ref, result]) => result)
+        );
     }
 
     const values = this.aclForm.values;
@@ -108,13 +103,18 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
 
     this.dialogService
       .showConfirm(
-        "Confirm clearing the form",
-        "Do you want to remove all ACL inputs? Changes will not be applied yet.",
-        "Clear",
-        "Cancel",
+        {
+          icon: "help",
+          title: "Confirm clearing the form",
+          message: "Do you want to remove all ACL inputs? Changes will not be applied yet.",
+          acceptText: "Clear",
+          cancelText: "Cancel"
+        },
         this.viewContainerRef
       )
-      .switchMap(ref => ref.afterClosed())
+      .pipe(
+        switchMap(([ref, result]) => result)
+      )
       .forEach(
         discard => {
           if (discard) {
@@ -132,27 +132,25 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
         acl,
         recursive
       )
-      .switchMap(newMeta => {
-        this.aclForm.markAsPristine();
+      .pipe(
+        switchMap(newMeta => {
+          this.aclForm.markAsPristine();
 
-        // refresh node data in resolver
-        const redirect = this.router.navigate([], {
-          relativeTo: this.route,
-          queryParams: {
-            aclVersion: newMeta.aclVersion
-          },
-          queryParamsHandling: "merge"
-        });
+          // refresh node data in resolver
+          const redirect = this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+              aclVersion: newMeta.aclVersion
+            },
+            queryParamsHandling: "merge"
+          });
 
-        return Observable
-          .fromPromise(redirect)
-          .switchMap(() =>
-            this.dialogService
-              .showSnackbar("Changes saved", this.viewContainerRef)
-              .switchMap(ref => ref.afterOpened())
-          );
-      })
-      .catch(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+          return from(redirect);
+        }),
+        switchMap(() => this.dialogService.showSnackbar("Changes saved", this.viewContainerRef)),
+        switchMap(ref => ref.afterOpened()),
+        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+      )
       .subscribe();
   }
 

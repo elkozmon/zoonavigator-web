@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,21 +18,27 @@
 import {NgModule} from "@angular/core";
 import {FormsModule} from "@angular/forms";
 import {CommonModule} from "@angular/common";
-import {MatButtonModule, MatCheckboxModule, MatDialogModule, MatInputModule} from "@angular/material";
+import {MatButtonModule, MatCheckboxModule, MatDialogModule, MatIconModule, MatInputModule} from "@angular/material";
+import {CovalentFileModule} from "@covalent/core";
 import {ApiRequestFactory, ApiService, DefaultApiRequestFactory, DefaultApiService} from "./api";
 import {ApiZSessionService, DefaultZSessionHandler, ZSessionHandler, ZSessionService} from "./zsession";
 import {
-  DialogService,
-  DefaultDialogService,
-  MoveZNodeDialogComponent,
+  ConfirmDialogComponent,
   CreateZNodeDialogComponent,
+  DefaultDialogService,
+  DialogService,
   DuplicateZNodeDialogComponent,
-  DiscardChangesDialogComponent,
+  ImportZNodesDialogComponent,
+  InfoDialogComponent,
+  MoveZNodeDialogComponent,
   SessionInfoDialogComponent
 } from "./dialog";
-import {StorageService, LocalStorageService} from "./storage";
+import {LocalStorageService, StorageService} from "./storage";
+import {DefaultFileSaverService, FileSaverService} from "./file-saver";
 import {DefaultZPathService, ZPathService} from "./zpath";
 import {ApiZNodeService, ZNodeService} from "./znode";
+import {DefaultFileReaderService, FileReaderService} from "./file-reader";
+import {PathSanitizingZNodeService} from "./znode/path-sanitizing-znode.service";
 
 @NgModule({
   imports: [
@@ -41,13 +47,18 @@ import {ApiZNodeService, ZNodeService} from "./znode";
     MatButtonModule,
     MatDialogModule,
     MatInputModule,
-    MatCheckboxModule
+    MatIconModule,
+    MatCheckboxModule,
+    CovalentFileModule
   ],
   providers: [
     {provide: ApiService, useClass: DefaultApiService},
     {provide: ApiRequestFactory, useClass: DefaultApiRequestFactory},
     {provide: StorageService, useClass: LocalStorageService},
-    {provide: ZNodeService, useClass: ApiZNodeService},
+    {provide: FileSaverService, useClass: DefaultFileSaverService},
+    {provide: FileReaderService, useClass: DefaultFileReaderService},
+    ApiZNodeService,
+    {provide: ZNodeService, deps: [ApiZNodeService], useFactory: (apiService) => new PathSanitizingZNodeService(apiService)},
     {provide: ZPathService, useClass: DefaultZPathService},
     {provide: ZSessionService, useClass: ApiZSessionService},
     {provide: ZSessionHandler, useClass: DefaultZSessionHandler},
@@ -56,15 +67,19 @@ import {ApiZNodeService, ZNodeService} from "./znode";
   entryComponents: [
     MoveZNodeDialogComponent,
     CreateZNodeDialogComponent,
+    ImportZNodesDialogComponent,
     DuplicateZNodeDialogComponent,
-    DiscardChangesDialogComponent,
+    ConfirmDialogComponent,
+    InfoDialogComponent,
     SessionInfoDialogComponent
   ],
   declarations: [
     MoveZNodeDialogComponent,
     CreateZNodeDialogComponent,
+    ImportZNodesDialogComponent,
     DuplicateZNodeDialogComponent,
-    DiscardChangesDialogComponent,
+    ConfirmDialogComponent,
+    InfoDialogComponent,
     SessionInfoDialogComponent
   ]
 })

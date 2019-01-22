@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {HttpParams} from "@angular/common/http";
-import {Observable} from "rxjs/Rx";
+import {Observable, of, throwError} from "rxjs";
+import {map, mapTo, switchMap} from "rxjs/operators";
 import {ZNodeService} from "./znode.service";
 import {ZNodeChildren} from "./znode-children";
 import {ZNodeMeta} from "./znode-meta";
@@ -26,6 +27,7 @@ import {ZNodeAcl} from "./znode-acl";
 import {ZNodeWithChildren} from "./znode-with-children";
 import {ZSessionHandler} from "../zsession";
 import {ApiRequestFactory, ApiService, JsonRequestContent, TextRequestContent} from "../api";
+import {ZNodeExport} from "./znode-export";
 
 @Injectable()
 export class ApiZNodeService implements ZNodeService {
@@ -40,8 +42,13 @@ export class ApiZNodeService implements ZNodeService {
   private withAuthToken<T>(fun: (string) => Observable<T>): Observable<T> {
     return this.zSessionHandler
       .getSessionInfo()
-      .map(info => info ? info.token : null)
-      .switchMap(fun)
+      .pipe(
+        switchMap(maybeSessionInfo => maybeSessionInfo.caseOf({
+          just: info => of(info.token),
+          nothing: () => throwError(new Error("Session was lost"))
+        })),
+        switchMap(fun)
+      );
   }
 
   getNode(path: string): Observable<ZNodeWithChildren> {
@@ -61,7 +68,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch<ZNodeWithChildren>(request)
-        .map(response => response.payload);
+        .pipe(
+          map(response => response.payload)
+        );
     });
   }
 
@@ -85,7 +94,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 
@@ -110,7 +121,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 
@@ -136,7 +149,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 
@@ -162,7 +177,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 
@@ -194,7 +211,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch<ZNodeMeta>(request)
-        .map(response => response.payload);
+        .pipe(
+          map(response => response.payload)
+        );
     });
   }
 
@@ -221,7 +240,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch<ZNodeMeta>(request)
-        .map(response => response.payload);
+        .pipe(
+          map(response => response.payload)
+        );
     });
   }
 
@@ -244,7 +265,9 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch<ZNodeChildren>(request)
-        .map(response => response.payload);
+        .pipe(
+          map(response => response.payload)
+        );
     });
   }
 
@@ -256,7 +279,7 @@ export class ApiZNodeService implements ZNodeService {
       const params = new HttpParams({
         fromObject: {
           path: path,
-          names: names.join("/")
+          names: names
         }
       });
 
@@ -269,7 +292,66 @@ export class ApiZNodeService implements ZNodeService {
 
       return this.apiService
         .dispatch(request)
-        .mapTo(null);
+        .pipe(
+          mapTo(null)
+        );
+    });
+  }
+
+  exportNodes(
+    paths: string[]
+  ): Observable<ZNodeExport> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          paths: paths
+        }
+      });
+
+      const request = this.apiRequestFactory.getRequest(
+        "/znode/export",
+        params,
+        null,
+        token
+      );
+
+      return this.apiService
+        .dispatch(request)
+        .pipe(
+          map(response => {
+            return {
+              blob: new Blob([JSON.stringify(response.payload)], {type: "text/plain"}),
+              name: "znode-export-" + new Date().toISOString() + ".json"
+            }
+          })
+        );
+    });
+  }
+
+  importNodes(
+    path: string,
+    nodes: any
+  ): Observable<void> {
+    return this.withAuthToken(token => {
+      const params = new HttpParams({
+        fromObject: {
+          path: path
+        }
+      });
+
+      const request = this.apiRequestFactory.postRequest(
+        "/znode/import",
+        params,
+        null,
+        new JsonRequestContent(nodes),
+        token
+      );
+
+      return this.apiService
+        .dispatch(request)
+        .pipe(
+          mapTo(null)
+        );
     });
   }
 }

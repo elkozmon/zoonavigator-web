@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {StorageService} from "./storage.service";
-import {Observable} from "rxjs/Rx";
+import {Observable, of} from "rxjs";
+import {mapTo} from "rxjs/operators";
 
 @Injectable()
 export class LocalStorageService implements StorageService {
@@ -26,18 +27,14 @@ export class LocalStorageService implements StorageService {
   }
 
   set(key: string, value: any): Observable<void> {
-    return Observable
-      .defer(() => Observable.of(localStorage.setItem(key, value)))
-      .mapTo(null);
+    return of(localStorage.setItem(key, value)).pipe(mapTo(null));
   }
 
   get(key: string): Observable<any> {
-    return Observable.defer(() => Observable.of(localStorage.getItem(key)));
+    return of(localStorage.getItem(key));
   }
 
   remove(key: string): Observable<void> {
-    return Observable
-      .defer(() => Observable.of(localStorage.removeItem(key)))
-      .mapTo(null);
+    return of(localStorage.removeItem(key)).pipe(mapTo(null));
   }
 }

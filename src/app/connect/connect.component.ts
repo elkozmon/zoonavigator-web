@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,9 +17,10 @@
 
 import {Component, OnInit} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
+import {catchError, finalize, switchMap} from "rxjs/operators";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {LoadingMode, LoadingType, TdLoadingService} from "@covalent/core";
-import {AuthInfo, ZSessionHandler, ZSessionService, Scheme} from "../core";
+import {AuthInfo, Scheme, ZSessionHandler, ZSessionService} from "../core";
 import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 
 @Component({
@@ -87,13 +88,13 @@ export class ConnectComponent implements OnInit {
         connectionString: this.getConnectionStringFormValue(),
         authInfo: this.getAuthInfoFormValue()
       })
-      .switchMap((sessionInfo) => this.zSessionHandler.setSessionInfo(sessionInfo))
-      // .first()
-      .finally(() => this.stopLoader())
-      .subscribe(
-        () => this.router.navigateByUrl(this.redirectUrl),
-        error => this.errorMsg = error
-      );
+      .pipe(
+        switchMap((sessionInfo) => this.zSessionHandler.setSessionInfo(sessionInfo)),
+        switchMap(() => this.router.navigateByUrl(this.redirectUrl)),
+        finalize(() => this.stopLoader()),
+        catchError(err => this.errorMsg = err)
+      )
+      .subscribe();
   }
 
   get credentialsFormArray(): FormArray {

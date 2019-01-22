@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 
 import {NgModule} from "@angular/core";
 import {ReactiveFormsModule} from "@angular/forms";
-import {MatCardModule, MatInputModule, MatButtonModule, MatSnackBarModule} from "@angular/material";
+import {MatButtonModule, MatCardModule, MatInputModule, MatSnackBarModule} from "@angular/material";
 import {CovalentCommonModule, CovalentLoadingModule} from "@covalent/core";
 import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {ConnectRoutingModule} from "./connect-routing.module";

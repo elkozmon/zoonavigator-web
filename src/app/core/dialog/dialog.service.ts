@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,47 +16,64 @@
  */
 
 import {Injectable, ViewContainerRef} from "@angular/core";
-import {TdAlertDialogComponent, TdConfirmDialogComponent, TdPromptDialogComponent} from "@covalent/core";
 import {MatDialogRef, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
-import {Observable} from "rxjs/Rx";
+import {Observable, throwError} from "rxjs";
+import {switchMap, switchMapTo} from "rxjs/operators";
 import {
-  CreateZNodeDialogComponent,
+  ConfirmData,
+  ConfirmDialogComponent,
   CreateZNodeData,
-  DiscardChangesDialogComponent,
+  CreateZNodeDialogComponent,
+  DuplicateZNodeData,
+  DuplicateZNodeDialogComponent,
+  ImportZNodesData,
+  ImportZNodesDialogComponent,
+  InfoData,
+  InfoDialogComponent,
   MoveZNodeData,
   MoveZNodeDialogComponent,
-  DuplicateZNodeDialogComponent,
-  DuplicateZNodeData
+  SessionInfoDialogComponent
 } from "./dialogs";
-import {SessionInfoDialogComponent} from "./dialogs/session-info.dialog";
 import {ZSessionInfo} from "../zsession/zsession-info";
 
 @Injectable()
 export abstract class DialogService {
 
   showErrorAndThrowOnClose<T>(
-    error: string,
+    error: Error,
     viewRef?: ViewContainerRef
   ): Observable<T> {
     return this
       .showError(error, viewRef)
-      .switchMap(ref => ref.afterClosed())
-      .switchMapTo(Observable.throw(error));
+      .pipe(
+        switchMap(ref => ref.afterClosed()),
+        switchMapTo(throwError(error))
+      );
   }
 
   abstract showDiscardChanges(
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<DiscardChangesDialogComponent>>
+  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]>
 
   abstract showCreateZNode(
     defaults: CreateZNodeData,
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<CreateZNodeDialogComponent>>
 
+  abstract showImportZNodes(
+    defaults: ImportZNodesData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<ImportZNodesDialogComponent>>
+
   abstract showDuplicateZNode(
     defaults: DuplicateZNodeData,
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<DuplicateZNodeDialogComponent>>
+
+  abstract showRecursiveDeleteZNode(
+    message: string,
+    viewRef?: ViewContainerRef
+  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]>
 
   abstract showMoveZNode(
     defaults: MoveZNodeData,
@@ -68,25 +85,20 @@ export abstract class DialogService {
     viewRef?: ViewContainerRef
   ): Observable<MatDialogRef<SessionInfoDialogComponent>>
 
-  abstract showConfirm(
-    title: string,
-    message: string,
-    acceptBtn: string,
-    cancelBtn: string,
-    viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<TdConfirmDialogComponent>>
-
-  abstract showAlert(
-    title: string,
-    message: string,
-    closeBtn: string,
-    viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<TdAlertDialogComponent>>
-
   abstract showError(
-    message: string,
+    error: Error,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<TdAlertDialogComponent>>
+  ): Observable<MatDialogRef<InfoDialogComponent>>
+
+  abstract showConfirm(
+    options: ConfirmData,
+    viewRef?: ViewContainerRef
+  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]>
+
+  abstract showInfo(
+    options: InfoData,
+    viewRef?: ViewContainerRef
+  ): Observable<MatDialogRef<InfoDialogComponent>>
 
   abstract showSnackbar(
     message: string,

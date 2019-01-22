@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Maybe} from "tsmonad";
-import {Mode} from "../mode";
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Observable";
+import {Observable} from "rxjs";
+import {Maybe} from "tsmonad";
+import {ModeId} from "../content";
 
 @Injectable()
 export abstract class PreferencesService {
 
-  abstract setModeFor(path: string, creationId: number, mode: Mode): Observable<void>
+  abstract setModeFor(path: string, creationId: number, mode: Maybe<ModeId>): Observable<void>
 
-  abstract getModeFor(path: string, creationId: number): Observable<Maybe<Mode>>
+  abstract getModeFor(path: string, creationId: number): Observable<Maybe<ModeId>>
 
-  abstract setWrapFor(path: string, creationId: number, enabled: boolean): Observable<void>
+  abstract setWrapFor(path: string, creationId: number, enabled: Maybe<boolean>): Observable<void>
 
   abstract getWrapFor(path: string, creationId: number): Observable<Maybe<boolean>>
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component} from "@angular/core";
-
-@Component({
-  selector: "zoo-discard-changes.dialog",
-  templateUrl: "discard-changes.dialog.html",
-  styleUrls: ["dialog.scss"]
-})
-export class DiscardChangesDialogComponent {
-  constructor() {
-  }
-}
+export * from "./mode"
+export * from "./mode-id"
+export * from "./mode.provider"
+export * from "./default-mode.provider"
+export * from "./base64-mode"
+export * from "./json-mode"
+export * from "./text-mode"
+export * from "./xml-mode"
+export * from "./yaml-mode"
