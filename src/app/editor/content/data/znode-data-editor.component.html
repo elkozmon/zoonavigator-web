@@ -22,9 +22,7 @@
   #dataEditor
   (keypress)="onKeyDown($event)"
   theme="chrome"
-  [text]="data"
   (textChange)="onDataChange($event)"
-  [mode]="getMode()"
   [options]="editorOpts"
   [readOnly]="false"
   [autoUpdateContent]="true"

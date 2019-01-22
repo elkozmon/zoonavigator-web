@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+export * from "./can-deactivate-znode-data-component"
 export * from "./znode-data.component"
 export * from "./znode-data-editor.component"
 export * from "./znode-data-toolbar.component"

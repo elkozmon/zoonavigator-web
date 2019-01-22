@@ -45,15 +45,20 @@ export class ZNodeDataEditorComponent {
 
   @Output() submit: EventEmitter<any> = new EventEmitter();
 
-  @Input() mode: ModeId;
+  @Output() dataChange: EventEmitter<string> = new EventEmitter<string>();
+
+  @Input("mode") set mode(id: ModeId) {
+    this._dataEditor.setMode(this.modeIdToEditorMode.get(id));
+  }
 
   @Input("wrapEnabled") set wrap(enabled: boolean) {
     this.editorOpts.wrap = enabled;
     this._dataEditor.setOptions(this.editorOpts);
   }
 
-  @Input() data: string;
-  @Output() dataChange: EventEmitter<string> = new EventEmitter<string>();
+  @Input("data") set data(data: string) {
+    this._dataEditor.setText(data);
+  }
 
   editorOpts: any = {
     fontFamily: "\"Fira Code Retina\", monospace",
@@ -70,10 +75,6 @@ export class ZNodeDataEditorComponent {
     [ModeId.Yaml, "yaml"],
     [ModeId.Xml, "xml"],
   ]);
-
-  getMode(): string {
-    return this.modeIdToEditorMode.get(this.mode);
-  }
 
   onDataChange(data: string): void {
     this.dataChange.emit(data);

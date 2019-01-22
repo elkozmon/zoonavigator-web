@@ -17,4 +17,3 @@
 
 export * from "./shared.module"
 export * from "./regexp/regexp-filter.component"
-export * from "./guards"

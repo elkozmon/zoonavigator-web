@@ -37,7 +37,7 @@ import {CovalentCommonModule, CovalentDialogsModule, CovalentLayoutModule, Coval
 import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {AceEditorModule} from "ng2-ace-editor";
 import {
-  ActionbarComponent,
+  ActionbarComponent, CanDeactivateZNodeAclComponent, CanDeactivateZNodeDataComponent,
   CompressionProvider,
   ContentComponent,
   DefaultCompressionProvider,
@@ -86,6 +86,8 @@ import {DefaultFormatterProvider, FormatterProvider} from "./formatter";
   ],
   providers: [
     AclFormFactory,
+    CanDeactivateZNodeDataComponent,
+    CanDeactivateZNodeAclComponent,
     {provide: PreferencesService, useClass: DefaultPreferencesService},
     {provide: Formatter, multi: true, useClass: JsonFormatter},
     {provide: Formatter, multi: true, useClass: YamlFormatter},

@@ -16,13 +16,12 @@
  */
 
 import {ChangeDetectionStrategy, Component, OnInit, ViewContainerRef} from "@angular/core";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, Router, UrlTree} from "@angular/router";
 import {combineLatest, EMPTY, from, Observable, of, ReplaySubject, Subject, throwError, zip} from "rxjs";
 import {bufferCount, catchError, filter, finalize, map, mapTo, pluck, switchMap, take, tap} from "rxjs/operators";
 import {Either, Maybe} from "tsmonad";
 import {Buffer} from "buffer";
 import {DialogService, ZNodeMeta, ZNodeService, ZNodeWithChildren, ZPathService} from "../../../core";
-import {CanDeactivateComponent} from "../../../shared";
 import {PreferencesService} from "../../preferences";
 import {Mode, ModeId, ModeProvider} from "./mode";
 import {Formatter, FormatterProvider} from "../../formatter";
@@ -33,7 +32,7 @@ import {Compression, CompressionId, CompressionProvider} from "./compression";
   styleUrls: ["znode-data.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
+export class ZNodeDataComponent implements OnInit {
 
   static defaultMode = ModeId.Text;
   static defaultWrap = true;
@@ -48,6 +47,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   isEditorDataPristine: Observable<boolean>;
   isEditorReady: Observable<boolean>;
   isSubmitReady: Observable<boolean>;
+  isSubmitOngoing: Subject<boolean> = new ReplaySubject(1);
 
   editorWrap: Subject<boolean> = new ReplaySubject(1);
   editorModeId: Subject<ModeId> = new ReplaySubject(1);
@@ -59,8 +59,6 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
   modeIds: ModeId[];
   compIds: CompressionId[];
 
-  private isSubmitOngoing: Subject<boolean> = new ReplaySubject(1);
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -71,7 +69,7 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
     private modeProvider: ModeProvider,
     private compressionProvider: CompressionProvider,
     private formatterProvider: FormatterProvider,
-    private viewContainerRef: ViewContainerRef,
+    public viewContainerRef: ViewContainerRef,
   ) {
     this.compIds = Object.keys(CompressionId).map(k => CompressionId[k]);
     this.modeIds = Object.keys(ModeId).map(k => ModeId[k]);
@@ -170,20 +168,6 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
       .forEach(data => this.editorDataTxt.next(data));
   }
 
-  canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    return this.isEditorDataPristine.pipe(
-      switchMap(pristine => {
-        if (!pristine) {
-          return this.dialogService
-            .showDiscardChanges(this.viewContainerRef)
-            .pipe(switchMap(ref => ref.afterClosed()));
-        }
-
-        return of(true);
-      })
-    );
-  }
-
   onSubmit(): void {
     const submitNode = this.editorNode.pipe(
       map(maybeNode => maybeNode.valueOr(null)),
@@ -202,12 +186,11 @@ export class ZNodeDataComponent implements OnInit, CanDeactivateComponent {
           return combineLatest(of(node), this.editorDataRaw);
         }),
         switchMap(([node, rawData]) =>
-          this.zNodeService
-            .setData(
-              node.path,
-              node.meta.dataVersion,
-              rawData
-            )
+          this.zNodeService.setData(
+            node.path,
+            node.meta.dataVersion,
+            rawData
+          )
         ),
         switchMap((newMeta: ZNodeMeta) => {
           // refresh node data in resolver

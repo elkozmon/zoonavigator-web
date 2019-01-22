@@ -19,7 +19,6 @@ import {NgModule} from "@angular/core";
 import {MatIconModule, MatInputModule} from "@angular/material";
 import {CovalentCommonModule} from "@covalent/core";
 import {RegexpFilterComponent} from "./regexp/regexp-filter.component";
-import {CanDeactivateComponentGuard} from "./guards";
 
 @NgModule({
   imports: [
@@ -29,9 +28,6 @@ import {CanDeactivateComponentGuard} from "./guards";
   ],
   declarations: [
     RegexpFilterComponent
-  ],
-  providers: [
-    CanDeactivateComponentGuard
   ],
   exports: [
     RegexpFilterComponent

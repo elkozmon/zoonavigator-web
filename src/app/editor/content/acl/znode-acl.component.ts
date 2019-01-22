@@ -16,12 +16,11 @@
  */
 
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, Router, UrlTree} from "@angular/router";
 import {from, Observable, of} from "rxjs";
 import {catchError, pluck, switchMap} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {DialogService, ZNodeAcl, ZNodeService, ZNodeWithChildren} from "../../../core";
-import {CanDeactivateComponent} from "../../../shared";
 import {ZPathService} from "../../../core/zpath";
 import {AclFormFactory} from "./acl-form.factory";
 import {AclForm} from "./acl-form";
@@ -31,7 +30,7 @@ import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
   templateUrl: "znode-acl.component.html",
   styleUrls: ["znode-acl.component.scss"]
 })
-export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
+export class ZNodeAclComponent implements OnInit {
 
   aclForm: AclForm;
 
@@ -42,7 +41,7 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
     private zPathService: ZPathService,
     private dialogService: DialogService,
     private aclFormFactory: AclFormFactory,
-    private viewContainerRef: ViewContainerRef
+    public viewContainerRef: ViewContainerRef
   ) {
   }
 
@@ -59,18 +58,6 @@ export class ZNodeAclComponent implements OnInit, CanDeactivateComponent {
           }
         })
       );
-  }
-
-  canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.aclForm && this.aclForm.isDirty) {
-      return this.dialogService
-        .showDiscardChanges(this.viewContainerRef)
-        .pipe(
-          switchMap(ref => ref.afterClosed())
-        );
-    }
-
-    return of(true);
   }
 
   onSubmit(recursive: boolean): void {
