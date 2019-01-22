@@ -18,8 +18,8 @@
 import {Injectable, ViewContainerRef} from "@angular/core";
 import {TdDialogService} from "@covalent/core";
 import {MatDialog, MatDialogRef, MatSnackBar, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
-import {Observable, ConnectableObservable, of} from "rxjs";
-import {delay, publishReplay, publishLast, tap} from "rxjs/operators";
+import {Observable, ConnectableObservable, of, defer, Subject, AsyncSubject} from "rxjs";
+import {delay, publishReplay, publishLast, tap, switchMapTo, switchMap} from "rxjs/operators";
 import {DialogService} from "./dialog.service";
 import {
   ConfirmData,
@@ -37,6 +37,7 @@ import {
   SessionInfoDialogComponent
 } from "./dialogs";
 import {ZSessionInfo} from "../zsession/zsession-info";
+import {ReplaySubject} from "rxjs/Rx";
 
 type GroupKey = string;
 
@@ -45,7 +46,7 @@ export class DefaultDialogService extends DialogService {
 
   private showConfirmInstances: Map<GroupKey, [MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]> = new Map();
 
-  private showInfoInstances: Map<GroupKey, MatDialogRef<InfoDialogComponent>> = new Map();
+  private showInfoInstances: Map<GroupKey, ReplaySubject<MatDialogRef<InfoDialogComponent>>> = new Map();
 
   constructor(
     private dialogService: TdDialogService,
@@ -248,32 +249,42 @@ export class DefaultDialogService extends DialogService {
 
     // Look for cached dialog
     if (this.showInfoInstances.has(key)) {
-      return of(this.showInfoInstances.get(key));
+      return this.showInfoInstances.get(key);
     }
 
-    const dialog = this.dialog.open(InfoDialogComponent, {
-      data: options,
-      viewContainerRef: viewRef,
-      role: "dialog",
-      hasBackdrop: true,
-      width: "500px",
-      maxWidth: "80vw",
-      height: "210px",
-      maxHeight: "80vw",
-      direction: "ltr",
-      autoFocus: true
-    });
+    this.showInfoInstances.set(key, new ReplaySubject(1));
 
-    // Cache dialog
-    this.showInfoInstances.set(key, dialog);
+    return of(null)
+      .pipe(
+        delay(10),
+        switchMap(() => {
+          const dialog = this.dialog.open(InfoDialogComponent, {
+            data: options,
+            viewContainerRef: viewRef,
+            role: "dialog",
+            hasBackdrop: true,
+            width: "500px",
+            maxWidth: "80vw",
+            height: "210px",
+            maxHeight: "80vw",
+            direction: "ltr",
+            autoFocus: true
+          });
 
-    // Uncache dialog once closed
-    dialog
-      .afterClosed()
-      .pipe(delay(100))
-      .forEach(() => this.showInfoInstances.delete(key));
+          // Cache dialog
+          this.showInfoInstances
+            .get(key)
+            .next(dialog);
 
-    return of(this.showInfoInstances.get(key));
+          // Uncache dialog once closed
+          dialog
+            .afterClosed()
+            .pipe(delay(100))
+            .forEach(() => this.showInfoInstances.delete(key));
+
+          return of(dialog);
+        })
+      );
   }
 
   showSnackbar(
