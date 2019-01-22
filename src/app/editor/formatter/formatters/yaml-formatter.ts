@@ -35,9 +35,7 @@ export class YamlFormatter extends Formatter {
     try {
       return of(<string>YAML.stringify(YAML.parse(data)));
     } catch (e) {
-      console.error(e);
-
-      return throwError(new Error("Invalid YAML (see console for more info)"));
+      return throwError(e);
     }
   }
 }
