@@ -14,16 +14,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 .zoo-nav-item {
   cursor: pointer;
+
+  mat-icon {
+    margin: 0
+  }
 }
 
 .zoo-node-item {
-  display: flex;
-  flex-direction: row;
+  display: block;
   align-items: center;
   box-sizing: border-box;
-  padding: 0 16px;
   height: 48px;
 
   .zoo-node-actions button {
