@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,9 +16,9 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Rx";
-import {ApiResponse} from "../response/api-response";
-import {ApiRequest} from "../request/api-request";
+import {Observable} from "rxjs";
+import {ApiResponse} from "../response";
+import {ApiRequest} from "../request";
 
 @Injectable()
 export abstract class ApiService {

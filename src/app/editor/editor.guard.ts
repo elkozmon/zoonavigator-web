@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 import {ZSessionHandler} from "../core/zsession/handler";
 import {CONNECT_QUERY_RETURN_URL} from "../connect/connect-routing.constants";
 
@@ -47,19 +48,25 @@ export class EditorGuard implements CanActivate, CanActivateChild {
   private checkSession(url: string): Observable<boolean> {
     return this.zSessionHandler
       .getSessionInfo()
-      .map((sessionInfo) => {
-        if (sessionInfo) {
-          return true;
-        }
+      .pipe(
+        map((maybeSessionInfo) => {
+          const sessionInfoExists = maybeSessionInfo
+            .map(() => true)
+            .valueOr(false);
 
-        this.router.navigate(["/"], {
-            queryParams: {
-              [CONNECT_QUERY_RETURN_URL]: url
-            }
+          if (sessionInfoExists) {
+            return true;
           }
-        );
 
-        return false;
-      });
+          this.router.navigate(["/"], {
+              queryParams: {
+                [CONNECT_QUERY_RETURN_URL]: url
+              }
+            }
+          );
+
+          return false;
+        })
+      );
   }
 }

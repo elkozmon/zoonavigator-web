@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,10 +18,11 @@
 import {Injectable} from "@angular/core";
 import {Router} from "@angular/router";
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
-import {Observable} from "rxjs/Rx";
+import {defer, from, Observable, throwError} from "rxjs";
+import {catchError, map, switchMap, switchMapTo, take, timeoutWith} from "rxjs/operators";
 import {ConfigService} from "../../../config";
 import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
-import {ApiResponse} from "../response/api-response";
+import {ApiResponse} from "../response";
 import {ZSessionHandler} from "../../zsession/handler";
 import {DialogService} from "../../dialog";
 import {ApiRequest} from "../request";
@@ -68,50 +69,54 @@ export class DefaultApiService implements ApiService {
       options.headers = options.headers.set("Authorization", apiRequest.authToken);
     }
 
-    return <Observable<ApiResponse<T>>> this.httpClient
+    return <Observable<ApiResponse<T>>>this.httpClient
       .request(apiRequest.method, url, options)
-      .timeoutWith(
-        config.apiRequestTimeoutMillis,
-        Observable.defer(() => Observable.throw(new Error("Request timed out")))
-      )
-      .map((t) => DefaultApiService.extractResponse<T>(t))
-      .catch(err => this.handleError(err));
+      .pipe(
+        timeoutWith(config.apiRequestTimeoutMillis, defer(() => throwError("Request timed out"))),
+        map((t) => DefaultApiService.extractResponse<T>(t)),
+        catchError(err => this.handleError(err))
+      );
   }
 
-  private handleError<T>(error: any): Observable<T> {
-    let message: string;
+  private handleError<T>(anyError: any): Observable<T> {
+    let error: Error;
 
-    if (typeof error === "string" || error instanceof String) {
-      message = <string> error;
-    } else if (error instanceof Error) {
-      message = error.message;
-    } else if (error instanceof HttpErrorResponse) {
-      if (error.error.hasOwnProperty("success")) {
-        message = DefaultApiService.extractResponse(error.error).message;
+    if (typeof anyError === "string" || anyError instanceof String) {
+      error = new Error(<string>anyError);
+    } else if (anyError instanceof Error) {
+      error = anyError;
+    } else if (anyError instanceof HttpErrorResponse) {
+      if (anyError.error.hasOwnProperty("success")) {
+        error = new Error(DefaultApiService.extractResponse(anyError.error).message);
       } else {
-        message = error.error || "Unable to receive a response";
+        error = new Error(anyError.error || "Unable to receive a response");
       }
 
-      if (error.status === 401) {
+      if (anyError.status === 401) {
         const returnUrl = this.router.routerState.snapshot.url;
 
         this.dialogService
-          .showError(message, null)
-          .switchMap(ref => ref.afterClosed())
-          .switchMapTo(this.zSessionHandler.setSessionInfo(null))
-          .forEach(() => {
-            this.router.navigate(["/"], {
-              queryParams: {
-                [CONNECT_QUERY_RETURN_URL]: returnUrl
-              }
-            });
-          });
+          .showError(error, null)
+          .pipe(
+            switchMap(ref => ref.afterClosed()),
+            switchMapTo(this.zSessionHandler.removeSessionInfo()),
+            switchMapTo(from(
+              this.router.navigate(["/"], {
+                queryParams: {
+                  [CONNECT_QUERY_RETURN_URL]: returnUrl
+                }
+              })
+            )),
+            catchError(err => this.dialogService.showError(err, null)),
+            take(1)
+          )
+          .subscribe();
       }
     } else {
-      message = "Unknown error occurred. See the console for details";
-      console.error(error);
+      error = new Error("Unknown error occurred. See the console for details");
+      console.error(anyError);
     }
 
-    return Observable.throw(message);
+    return throwError(error);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export enum Mode {
-  Text = "text",
-  Json = "json",
-  Yaml = "yaml",
-  Xml = "xml"
+import {Component, Inject} from "@angular/core";
+import {MAT_DIALOG_DATA} from "@angular/material";
+import {ConfirmData} from "./confirm.data";
+
+@Component({
+  selector: "zoo-confirm.dialog",
+  templateUrl: "confirm.dialog.html",
+  styleUrls: ["dialog.scss"]
+})
+export class ConfirmDialogComponent {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: ConfirmData) {
+  }
 }

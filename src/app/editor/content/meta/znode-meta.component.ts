@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,8 @@
 
 import {Component, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {pluck} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {DialogService, ZNodeMeta, ZNodeWithChildren} from "../../../core";
 
@@ -37,11 +38,11 @@ export class ZNodeMetaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pluck("zNodeWithChildren"))
+    (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pipe(pluck("zNodeWithChildren")))
       .forEach(either =>
         either.caseOf<void>({
           left: err => {
-            this.dialogService.showError(err.message, this.viewContainerRef);
+            this.dialogService.showError(err, this.viewContainerRef);
             this.meta = null;
           },
           right: node => this.meta = node.meta

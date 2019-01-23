@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -23,7 +23,6 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
 import {CovalentCommonModule} from "@covalent/core";
 import {AngularFontAwesomeModule} from "angular-font-awesome";
-import {AsyncLocalStorageModule} from "angular-async-local-storage";
 import {ConfigService, getConfigLoader} from "./config";
 import {AppComponent} from "./app.component";
 import {AppRoutingModule} from "./app-routing.module";
@@ -33,7 +32,6 @@ import {EditorModule} from "./editor";
 
 @NgModule({
   imports: [
-    AsyncLocalStorageModule,
     BrowserAnimationsModule,
     AngularFontAwesomeModule,
     ReactiveFormsModule,

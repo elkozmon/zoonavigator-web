@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {of} from "rxjs";
+import {catchError, map} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {ZNodeService, ZNodeWithChildren} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
@@ -42,7 +43,9 @@ export class ZNodeWithChildrenResolver implements Resolve<Either<Error, ZNodeWit
 
     return this.zNodeService
       .getNode(nodePath)
-      .map(Either.right)
-      .catch(err => Observable.of(Either.left<Error, ZNodeWithChildren>(new Error(err))));
+      .pipe(
+        map(Either.right),
+        catchError(err => of(Either.left<Error, ZNodeWithChildren>(new Error(err))))
+      );
   }
 }

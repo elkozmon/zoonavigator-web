@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,6 @@
 import {Injectable} from "@angular/core";
 import {ZPathService} from "./zpath.service";
 import {ZPath} from "./zpath";
-import {ZNode} from "../znode/znode";
 
 @Injectable()
 export class DefaultZPathService implements ZPathService {

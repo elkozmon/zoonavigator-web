@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,36 +19,37 @@ import {NgModule} from "@angular/core";
 import {DomSanitizer} from "@angular/platform-browser";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {
+  MatButtonModule,
   MatCardModule,
+  MatCheckboxModule,
+  MatIconModule,
   MatIconRegistry,
   MatInputModule,
-  MatOptionModule,
-  MatSelectModule,
-  MatCheckboxModule,
-  MatButtonModule,
-  MatIconModule,
   MatListModule,
   MatMenuModule,
-  MatTooltipModule,
+  MatOptionModule,
+  MatSelectModule,
   MatTabsModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatTooltipModule
 } from "@angular/material";
-import {
-  CovalentCommonModule,
-  CovalentDialogsModule,
-  CovalentLayoutModule,
-  CovalentMediaModule
-} from "@covalent/core";
+import {CovalentCommonModule, CovalentDialogsModule, CovalentLayoutModule, CovalentMediaModule} from "@covalent/core";
 import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {AceEditorModule} from "ng2-ace-editor";
 import {
-  ActionbarComponent,
+  ActionbarComponent, CanDeactivateZNodeAclComponent, CanDeactivateZNodeDataComponent,
+  CompressionProvider,
   ContentComponent,
+  DefaultCompressionProvider,
+  DefaultModeProvider,
+  ModeProvider,
   ZNodeAclComponent,
   ZNodeDataComponent,
+  ZNodeDataEditorComponent,
+  ZNodeDataToolbarComponent,
   ZNodeMetaComponent
 } from "./content";
-import {PreferencesService, DefaultPreferencesService} from "./preferences";
+import {DefaultPreferencesService, PreferencesService} from "./preferences";
 import {ToolbarComponent} from "./toolbar";
 import {NavActionsComponent, NavListComponent} from "./sidenav";
 import {EditorRoutingModule} from "./editor-routing.module";
@@ -85,10 +86,14 @@ import {DefaultFormatterProvider, FormatterProvider} from "./formatter";
   ],
   providers: [
     AclFormFactory,
+    CanDeactivateZNodeDataComponent,
+    CanDeactivateZNodeAclComponent,
     {provide: PreferencesService, useClass: DefaultPreferencesService},
     {provide: Formatter, multi: true, useClass: JsonFormatter},
     {provide: Formatter, multi: true, useClass: YamlFormatter},
-    {provide: FormatterProvider, useClass: DefaultFormatterProvider}
+    {provide: FormatterProvider, useClass: DefaultFormatterProvider},
+    {provide: ModeProvider, useClass: DefaultModeProvider},
+    {provide: CompressionProvider, useClass: DefaultCompressionProvider}
   ],
   declarations: [
     EditorComponent,
@@ -99,6 +104,8 @@ import {DefaultFormatterProvider, FormatterProvider} from "./formatter";
     ActionbarComponent,
     ZNodeAclComponent,
     ZNodeDataComponent,
+    ZNodeDataEditorComponent,
+    ZNodeDataToolbarComponent,
     ZNodeMetaComponent
   ]
 })

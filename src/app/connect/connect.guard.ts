@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,8 @@
 
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 import {ZSessionHandler} from "../core/zsession/handler";
 import {CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 import {EDITOR_QUERY_NODE_PATH} from "../editor";
@@ -41,23 +42,29 @@ export class ConnectGuard implements CanActivate {
   ): Observable<boolean> | Promise<boolean> | boolean {
     return this.zSessionHandler
       .getSessionInfo()
-      .map((sessionInfo) => {
-        if (!sessionInfo) {
-          return true;
-        }
+      .pipe(
+        map((maybeSessionInfo) => {
+          const sessionInfoExists = maybeSessionInfo
+            .map(() => true)
+            .valueOr(false);
 
-        const queryParams = {};
-
-        if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {
-          queryParams[EDITOR_QUERY_NODE_PATH] = route.queryParamMap.get(CONNECT_QUERY_RETURN_URL);
-        }
-
-        this.router.navigate(["/editor"], {
-            queryParams: queryParams
+          if (!sessionInfoExists) {
+            return true;
           }
-        );
 
-        return false;
-      });
+          const queryParams = {};
+
+          if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {
+            queryParams[EDITOR_QUERY_NODE_PATH] = route.queryParamMap.get(CONNECT_QUERY_RETURN_URL);
+          }
+
+          this.router.navigate(["/editor"], {
+              queryParams: queryParams
+            }
+          );
+
+          return false;
+        })
+      );
   }
 }

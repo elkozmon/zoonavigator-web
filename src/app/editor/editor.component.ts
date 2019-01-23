@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,19 +18,12 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
-import {Observable} from "rxjs/Rx";
+import {Observable, throwError} from "rxjs";
+import {catchError, map, pluck, switchMap} from "rxjs/operators";
 import {Either, Maybe} from "tsmonad";
 import {Ordering} from "./ordering";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
-import {
-  ZPath,
-  ZPathService,
-  DialogService,
-  ZSessionService,
-  ZSessionHandler,
-  ZNodePath,
-  ZNodeWithChildren
-} from "../core";
+import {DialogService, ZNodePath, ZNodeWithChildren, ZPath, ZPathService, ZSessionHandler, ZSessionService} from "../core";
 import {RegexpFilterComponent} from "../shared";
 
 @Component({
@@ -67,22 +60,31 @@ export class EditorComponent implements OnInit, AfterViewInit {
   ) {
   }
 
+  get selectedFilteredNodes(): ZPath[] {
+    return this.selectedZNodes.filter(value => -1 !== this.filteredZNodes.indexOf(value));
+  }
+
   ngOnInit(): void {
     this.zPath = this.route
       .queryParams
-      .pluck(EDITOR_QUERY_NODE_PATH)
-      .map((maybePath: string) => this.zPathService.parse(maybePath || "/"));
+      .pipe(
+        pluck(EDITOR_QUERY_NODE_PATH),
+        map((maybePath: string) => this.zPathService.parse(maybePath || "/"))
+      );
 
-    this.zNode = (<Observable<Either<Error, ZNodeWithChildren>>> this.route.data.pluck("zNodeWithChildren"))
-      .map(either =>
-        either.caseOf<Maybe<ZNodeWithChildren>>({
-          left: error => {
-            this.dialogService.showError(error.message, this.viewContainerRef);
+    this.zNode = (<Observable<Either<Error, ZNodeWithChildren>>>this.route.data)
+      .pipe(
+        pluck("zNodeWithChildren"),
+        map((either: Either<Error, ZNodeWithChildren>) =>
+          either.caseOf<Maybe<ZNodeWithChildren>>({
+            left: error => {
+              this.dialogService.showError(error, this.viewContainerRef);
 
-            return Maybe.nothing();
-          },
-          right: node => Maybe.just(node)
-        })
+              return Maybe.nothing();
+            },
+            right: node => Maybe.just(node)
+          })
+        )
       );
 
     this.zNode.forEach(maybeNode =>
@@ -107,16 +109,16 @@ export class EditorComponent implements OnInit, AfterViewInit {
   showSessionInfo(): void {
     this.zSessionHandler
       .getSessionInfo()
-      .switchMap((sessionInfo) => {
-          if (sessionInfo) {
-            return this.dialogService.showSessionInfo(
-              sessionInfo,
-              this.viewContainerRef
-            );
-          }
-
-          return Observable.empty();
-        }
+      .pipe(
+        switchMap((maybeSessionInfo) =>
+          maybeSessionInfo.caseOf({
+            just: sessionInfo =>
+              this.dialogService.showSessionInfo(sessionInfo, this.viewContainerRef),
+            nothing: () =>
+              throwError(new Error("Session was lost"))
+          })
+        ),
+        catchError(error => this.dialogService.showError(error, this.viewContainerRef))
       )
       .subscribe();
   }
@@ -124,13 +126,20 @@ export class EditorComponent implements OnInit, AfterViewInit {
   disconnect(): void {
     this.zSessionHandler
       .getSessionInfo()
-      .switchMap(sessionInfo => this.zSessionService.close(sessionInfo))
-      .switchMap(() => this.zSessionHandler.setSessionInfo(null))
-      .catch(error => this.dialogService.showError(error, this.viewContainerRef))
-      .forEach(() => this.router
-        .navigate(["/connect"])
-        .catch(error => this.dialogService.showError(error, this.viewContainerRef))
-      );
+      .pipe(
+        switchMap(maybeSessionInfo =>
+          maybeSessionInfo.caseOf({
+            just: sessionInfo =>
+              this.zSessionService.close(sessionInfo),
+            nothing: () =>
+              throwError(new Error("Session was already closed"))
+          })
+        ),
+        switchMap(() => this.zSessionHandler.removeSessionInfo()),
+        switchMap(() => this.router.navigate(["/connect"])),
+        catchError(error => this.dialogService.showError(error, this.viewContainerRef))
+      )
+      .subscribe();
   }
 
   selectZNode(zPath: ZPath): void {

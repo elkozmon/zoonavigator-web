@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,9 @@
 import {Injectable} from "@angular/core";
 import {Maybe} from "tsmonad";
 import {Formatter} from "./formatters";
-import {Mode} from "../mode";
+import {ModeId} from "../content";
 
 @Injectable()
 export abstract class FormatterProvider {
-  abstract getFormatter(mode: Mode): Maybe<Formatter>
+  abstract getFormatter(mode: ModeId): Maybe<Formatter>
 }

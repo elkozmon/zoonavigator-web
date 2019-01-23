@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Observable} from "rxjs/Rx";
-
-export interface CanDeactivateComponent {
-  canDeactivate(): Observable<boolean>|Promise<boolean>|boolean;
-}
+export * from "./compression"
+export * from "./compression-id"
+export * from "./compression.provider"
+export * from "./default-compression.provider"
+export * from "./gzip-compression"

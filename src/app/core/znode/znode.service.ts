@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,12 +16,13 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
 import {ZNodeAcl} from "./znode-acl";
 import {ZNodeMeta} from "./znode-meta";
 import {ZNodeData} from "./znode-data";
 import {ZNodeChildren} from "./znode-children";
 import {ZNodeWithChildren} from "./znode-with-children";
+import {ZNodeExport} from "./znode-export";
 
 @Injectable()
 export abstract class ZNodeService {
@@ -69,5 +70,14 @@ export abstract class ZNodeService {
   abstract deleteChildren(
     path: string,
     names: string[]
+  ): Observable<void>
+
+  abstract exportNodes(
+    paths: string[]
+  ): Observable<ZNodeExport>
+
+  abstract importNodes(
+    path: string,
+    nodes: any
   ): Observable<void>
 }

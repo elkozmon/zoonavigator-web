@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,13 +16,13 @@
  */
 
 import {Injectable} from "@angular/core";
-import {Either} from "tsmonad";
-import {Mode} from "../../mode";
+import {Observable} from "rxjs";
+import {ModeId} from "../../content/data/mode";
 
 @Injectable()
 export abstract class Formatter {
 
-  abstract mode: Mode;
+  abstract mode: ModeId;
 
-  abstract format(data: string): Either<Error, string>
+  abstract format(data: string): Observable<string>
 }

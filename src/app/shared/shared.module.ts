@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,6 @@ import {NgModule} from "@angular/core";
 import {MatIconModule, MatInputModule} from "@angular/material";
 import {CovalentCommonModule} from "@covalent/core";
 import {RegexpFilterComponent} from "./regexp/regexp-filter.component";
-import {CanDeactivateComponentGuard} from "./guards";
 
 @NgModule({
   imports: [
@@ -29,9 +28,6 @@ import {CanDeactivateComponentGuard} from "./guards";
   ],
   declarations: [
     RegexpFilterComponent
-  ],
-  providers: [
-    CanDeactivateComponentGuard
   ],
   exports: [
     RegexpFilterComponent

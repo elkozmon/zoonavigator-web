@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,5 +21,7 @@ export * from "./znode"
 export * from "./zpath"
 export * from "./zsession"
 export * from "./dialog"
+export * from "./file-saver"
+export * from "./file-reader"
 export * from "./storage"
 export * from "./core.module"

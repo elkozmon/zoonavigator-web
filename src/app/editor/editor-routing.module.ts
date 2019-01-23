@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Ľuboš Kozmon
+ * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,11 +17,16 @@
 
 import {NgModule} from "@angular/core";
 import {RouterModule, RunGuardsAndResolvers} from "@angular/router";
-import {CanDeactivateComponentGuard} from "../shared";
 import {EditorComponent} from "./editor.component";
 import {EditorGuard} from "./editor.guard";
-import {ZNodeDataComponent, ZNodeAclComponent, ZNodeMetaComponent} from "./content";
 import {ZNodeWithChildrenResolver} from "./znode/znode-with-children.resolver";
+import {
+  CanDeactivateZNodeAclComponent,
+  CanDeactivateZNodeDataComponent,
+  ZNodeAclComponent,
+  ZNodeDataComponent,
+  ZNodeMetaComponent
+} from "./content";
 
 const editorRoutes = [
   {
@@ -37,13 +42,13 @@ const editorRoutes = [
       {
         path: "data",
         component: ZNodeDataComponent,
-        canDeactivate: [CanDeactivateComponentGuard],
+        canDeactivate: [CanDeactivateZNodeDataComponent],
         runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange"
       },
       {
         path: "acl",
         component: ZNodeAclComponent,
-        canDeactivate: [CanDeactivateComponentGuard],
+        canDeactivate: [CanDeactivateZNodeAclComponent],
         runGuardsAndResolvers: <RunGuardsAndResolvers>"paramsOrQueryParamsChange"
       },
       {
