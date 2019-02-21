@@ -18,7 +18,7 @@
 import {ChangeDetectionStrategy, Component, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router, UrlTree} from "@angular/router";
 import {combineLatest, EMPTY, from, Observable, of, ReplaySubject, Subject, throwError, zip} from "rxjs";
-import {bufferCount, catchError, filter, finalize, map, mapTo, pluck, switchMap, take, tap} from "rxjs/operators";
+import {bufferCount, catchError, delay, filter, finalize, map, mapTo, pluck, switchMap, take, tap} from "rxjs/operators";
 import {Either, Maybe} from "tsmonad";
 import {Buffer} from "buffer";
 import {DialogService, ZNodeMeta, ZNodeService, ZNodeWithChildren, ZPathService} from "../../../core";
@@ -76,6 +76,12 @@ export class ZNodeDataComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // defaults
+    this.editorModeId.next(ZNodeDataComponent.defaultMode);
+    this.editorWrap.next(ZNodeDataComponent.defaultWrap);
+    this.editorCompId.next(Maybe.nothing());
+    this.editorDataTxt.next("");
+
     // update editor node
     this.route.parent.data
       .pipe(
@@ -96,7 +102,7 @@ export class ZNodeDataComponent implements OnInit {
     // update editor ready
     this.isEditorReady =
       combineLatest(this.editorNode, this.editorModeId, this.editorCompId, this.editorWrap)
-        .pipe(map(([n, m, c, w]) => n != null && m != null && c != null && w != null));
+        .pipe(map(([n, m, c, w]) => n != null && n.valueOr(null) != null && m != null && c != null && w != null));
 
     // init rest of the observables and subjects
     this.editorMode = this.editorModeId.pipe(map(id => this.modeProvider.getMode(id)));

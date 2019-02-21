@@ -18,8 +18,8 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
-import {Observable, throwError} from "rxjs";
-import {catchError, map, pluck, switchMap} from "rxjs/operators";
+import {Observable, throwError, of} from "rxjs";
+import {catchError, map, pluck, switchMap, mapTo} from "rxjs/operators";
 import {Either, Maybe} from "tsmonad";
 import {Ordering} from "./ordering";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
@@ -75,14 +75,13 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.zNode = (<Observable<Either<Error, ZNodeWithChildren>>>this.route.data)
       .pipe(
         pluck("zNodeWithChildren"),
-        map((either: Either<Error, ZNodeWithChildren>) =>
-          either.caseOf<Maybe<ZNodeWithChildren>>({
-            left: error => {
-              this.dialogService.showError(error, this.viewContainerRef);
-
-              return Maybe.nothing();
-            },
-            right: node => Maybe.just(node)
+        switchMap((either: Either<Error, ZNodeWithChildren>) =>
+          either.caseOf<Observable<Maybe<ZNodeWithChildren>>>({
+            left: error => this.dialogService
+                .showError(error, this.viewContainerRef)
+                .pipe(mapTo(Maybe.nothing())),
+            right: node =>
+              of(Maybe.just(node))
           })
         )
       );
@@ -90,8 +89,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.zNode.forEach(maybeNode =>
       maybeNode.caseOf({
         just: node => this.updateChildren(node.children),
-        nothing: () => {
-        }
+        nothing: () => {}
       })
     );
   }

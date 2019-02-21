@@ -46,7 +46,7 @@ export class DefaultDialogService extends DialogService {
 
   private showConfirmInstances: Map<GroupKey, [MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]> = new Map();
 
-  private showInfoInstances: Map<GroupKey, ReplaySubject<MatDialogRef<InfoDialogComponent>>> = new Map();
+  private showInfoInstances: Map<GroupKey, Subject<MatDialogRef<InfoDialogComponent>>> = new Map();
 
   constructor(
     private dialogService: TdDialogService,
