@@ -1,4 +1,5 @@
 error_log /var/log/nginx/error.log error;
+pid       /var/cache/nginx/nginx.pid;
 
 worker_processes 4;
 

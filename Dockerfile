@@ -39,7 +39,11 @@ RUN curl \
     https://github.com/jwilder/dockerize/releases/download/v${DOCKERIZE_VERSION}/dockerize-alpine-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz \
   && tar xzvf dockerize-alpine-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz -C /usr/local/bin
 
-FROM nginx:1.13.12-alpine
+FROM nginxinc/nginx-unprivileged:1.14.2-alpine
+
+# The unprivileged nginx Dockerfile switches to user 1001
+# We switch back to root during the build process
+USER root
 
 # Default config
 ENV WEB_HTTP_PORT=8000 \
@@ -56,6 +60,13 @@ WORKDIR /app
 
 # Install curl
 RUN apk --no-cache add curl
+
+# We need to ensure that user 1001 has read on everything we installed
+RUN chown -R 1001 /app/public
+RUN chown 1001 /etc/nginx/nginx.conf
+
+# Now that we are doine with the image build, we switch back to user 1001
+USER 1001
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=3s \
