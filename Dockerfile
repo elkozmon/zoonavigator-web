@@ -65,7 +65,7 @@ RUN apk --no-cache add curl
 RUN chown -R 1001 /app/public
 RUN chown 1001 /etc/nginx/nginx.conf
 
-# Now that we are doine with the image build, we switch back to user 1001
+# Now that we are done with the image build, we switch back to user 1001
 USER 1001
 
 # Add health check
