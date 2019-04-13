@@ -62,8 +62,9 @@ WORKDIR /app
 RUN apk --no-cache add curl
 
 # We need to ensure that user 1001 has read on everything we installed
-RUN chown -R 1001 /app/public
-RUN chown 1001 /etc/nginx/nginx.conf
+RUN chown -R 1001 \
+  /app/public \
+  /etc/nginx/nginx.conf
 
 # Now that we are done with the image build, we switch back to user 1001
 USER 1001
