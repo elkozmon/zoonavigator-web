@@ -1,4 +1,4 @@
-FROM node:9.11.1-alpine as npm
+FROM node:11.15.0-alpine as npm
 MAINTAINER Lubos Kozmon <lubosh91@gmail.com>
 
 # Arguments
