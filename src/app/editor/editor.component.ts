@@ -134,7 +134,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
           })
         ),
         switchMap(() => this.zSessionHandler.removeSessionInfo()),
-        switchMap(() => this.router.navigate(["/connect"])),
+        switchMap(() => this.router.navigate(["connect"])),
         catchError(error => this.dialogService.showError(error, this.viewContainerRef))
       )
       .subscribe();

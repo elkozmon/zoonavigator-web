@@ -16,7 +16,7 @@
  */
 
 import {APP_INITIALIZER, NgModule} from "@angular/core";
-import {Location, LocationStrategy, PathLocationStrategy} from "@angular/common";
+import {APP_BASE_HREF, Location, LocationStrategy, PathLocationStrategy} from "@angular/common";
 import {BrowserModule, Title} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ReactiveFormsModule} from "@angular/forms";
@@ -29,6 +29,7 @@ import {AppRoutingModule} from "./app-routing.module";
 import {CoreModule} from "./core";
 import {ConnectModule} from "./connect";
 import {EditorModule} from "./editor";
+import {environment} from "../environments/environment";
 
 @NgModule({
   imports: [
@@ -56,6 +57,10 @@ import {EditorModule} from "./editor";
     {
       provide: LocationStrategy,
       useClass: PathLocationStrategy
+    },
+    {
+      provide: APP_BASE_HREF,
+      useValue: environment.baseHref
     }
   ],
   declarations: [

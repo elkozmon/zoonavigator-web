@@ -85,7 +85,7 @@ export class AppGuard implements CanActivate {
   }
 
   private navigateToEditor(): void {
-    this.router.navigate(["/editor"]);
+    this.router.navigate(["editor"]);
   }
 
   private navigateToConnect(
@@ -102,7 +102,7 @@ export class AppGuard implements CanActivate {
       queryParams[CONNECT_QUERY_RETURN_URL] = route.queryParamMap.get(CONNECT_QUERY_RETURN_URL);
     }
 
-    this.router.navigate(["/connect"], {
+    this.router.navigate(["connect"], {
       queryParams: queryParams
     });
   }

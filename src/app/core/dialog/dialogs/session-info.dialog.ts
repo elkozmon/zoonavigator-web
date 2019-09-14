@@ -18,7 +18,7 @@
 import {Component, Inject} from "@angular/core";
 import {MAT_DIALOG_DATA} from "@angular/material"
 import {ZSessionInfo} from "../../zsession/zsession-info";
-import {APP_VERSION} from "../../../app.version";
+import {environment} from "../../../../environments/environment";
 
 @Component({
   selector: "zoo-session-info.dialog",
@@ -27,7 +27,7 @@ import {APP_VERSION} from "../../../app.version";
 })
 export class SessionInfoDialogComponent {
 
-  appVersion = APP_VERSION;
+  appVersion = environment.appVersion;
 
   constructor(@Inject(MAT_DIALOG_DATA) public sessionInfo: ZSessionInfo) {
   }

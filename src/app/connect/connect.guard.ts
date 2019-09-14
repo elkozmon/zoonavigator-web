@@ -58,7 +58,7 @@ export class ConnectGuard implements CanActivate {
             queryParams[EDITOR_QUERY_NODE_PATH] = route.queryParamMap.get(CONNECT_QUERY_RETURN_URL);
           }
 
-          this.router.navigate(["/editor"], {
+          this.router.navigate(["editor"], {
               queryParams: queryParams
             }
           );

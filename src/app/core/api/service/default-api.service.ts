@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Injectable} from "@angular/core";
+import {Inject, Injectable} from "@angular/core";
 import {Router} from "@angular/router";
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {defer, from, Observable, throwError} from "rxjs";
@@ -27,6 +27,8 @@ import {ZSessionHandler} from "../../zsession/handler";
 import {DialogService} from "../../dialog";
 import {ApiRequest} from "../request";
 import {ApiService} from "./api.service";
+import {APP_BASE_HREF} from "@angular/common";
+import {environment} from "../../../../environments/environment";
 
 @Injectable()
 export class DefaultApiService implements ApiService {
@@ -44,14 +46,15 @@ export class DefaultApiService implements ApiService {
     private httpClient: HttpClient,
     private zSessionHandler: ZSessionHandler,
     private dialogService: DialogService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    @Inject(APP_BASE_HREF) private baseHref: string
   ) {
   }
 
   dispatch<T>(apiRequest: ApiRequest<T>): Observable<ApiResponse<T>> {
     const config = this.configService.config;
 
-    const url: string = config.apiUrlPath.replace(/\/$/, "") + apiRequest.path;
+    const url: string = this.baseHref.replace(/\/$/, "") + environment.apiHref.replace(/\/$/, "") + apiRequest.path;
 
     const options = {
       body: null,
@@ -101,7 +104,7 @@ export class DefaultApiService implements ApiService {
             switchMap(ref => ref.afterClosed()),
             switchMapTo(this.zSessionHandler.removeSessionInfo()),
             switchMapTo(from(
-              this.router.navigate(["/"], {
+              this.router.navigate([], {
                 queryParams: {
                   [CONNECT_QUERY_RETURN_URL]: returnUrl
                 }

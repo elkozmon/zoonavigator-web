@@ -16,7 +16,7 @@
  */
 
 export interface Config {
-  apiUrlPath: string;
+  apiHref: string,
   apiRequestTimeoutMillis: number;
   autoConnectConnectionString?: string;
   autoConnectAuthInfo?: string[];

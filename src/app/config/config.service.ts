@@ -16,20 +16,24 @@
  */
 
 import {HttpClient} from "@angular/common/http";
-import {Injectable} from "@angular/core";
+import {Inject, Injectable} from "@angular/core";
 import {Config} from "./config";
+import {APP_BASE_HREF} from "@angular/common";
 
 @Injectable()
 export class ConfigService {
 
   private _config: Config;
 
-  constructor(private httpClient: HttpClient) {
+  constructor(
+    private httpClient: HttpClient,
+    @Inject(APP_BASE_HREF) private baseHref: string
+  ) {
   }
 
   load() {
     return this.httpClient
-      .get("config.json")
+      .get(this.baseHref.replace(/\/$/, "") + "/config.json")
       .forEach((data: Config) => this._config = data);
   }
 
