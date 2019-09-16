@@ -81,14 +81,28 @@ export class ZNodeDataEditorComponent {
   }
 
   onKeyDown(event: KeyboardEvent): void {
-    const code = event.which || event.keyCode;
-
-    if (!(code === 115 && event.ctrlKey) && code !== 19) {
-      return;
+    if(navigator.platform.match('Mac')){
+      this.onMacKeyDown(event);
+    } else {
+      this.onWindowsKeyDown(event);
     }
+  }
 
-    // Submit on CTRL + S
-    event.preventDefault();
-    this.submit.emit();
+  onMacKeyDown(event: KeyboardEvent) {
+    let charCode = String.fromCharCode(event.which).toLowerCase();
+    if (event.metaKey && charCode === 's') {
+      // Submit on CMD + S
+      event.preventDefault();
+      this.submit.emit();
+    }
+  }
+
+  onWindowsKeyDown(event: KeyboardEvent) {
+    let charCode = String.fromCharCode(event.which).toLowerCase();
+    if (event.ctrlKey && charCode === 's') {
+      // Submit on CTRL + S
+      event.preventDefault();
+      this.submit.emit();
+    }
   }
 }

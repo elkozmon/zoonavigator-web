@@ -19,7 +19,7 @@
 <zoo-editor-actionbar>
   <button
     class="tc-deep-orange-500"
-    matTooltip="CTRL+S"
+    [matTooltip]="submitShortcutTooltip"
     matTooltipPosition="below"
     (click)="onSubmit()"
     [disabled]="!submitEnabled">

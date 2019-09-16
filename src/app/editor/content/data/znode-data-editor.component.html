@@ -20,7 +20,7 @@
   ace-editor
   flex
   #dataEditor
-  (keypress)="onKeyDown($event)"
+  (keydown)="onKeyDown($event)"
   theme="chrome"
   (textChange)="onDataChange($event)"
   [options]="editorOpts"

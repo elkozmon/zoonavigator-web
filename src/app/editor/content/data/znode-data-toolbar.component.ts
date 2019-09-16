@@ -52,6 +52,14 @@ export class ZNodeDataToolbarComponent {
       .valueOr("none");
   }
 
+  get submitShortcutTooltip(): string {
+    if(navigator.platform.match('Mac')){
+      return "CMD+S";
+    } else {
+      return "CTRL+S";
+    }
+  }
+
   onSubmit(): void {
     this.submit.emit();
   }
