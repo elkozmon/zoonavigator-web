@@ -294,7 +294,7 @@ export class ZNodeDataComponent implements OnInit {
   }
 
   static decodeFromRawData(base64: string, mode: Mode, maybeComp: Maybe<Compression>): Observable<string> {
-    const raw = Buffer
+    const raw: ArrayBuffer = Buffer
       .from(base64, "base64")
       .buffer;
 
@@ -302,10 +302,9 @@ export class ZNodeDataComponent implements OnInit {
       .map(c => c.decompress(raw))
       .valueOr(of(raw));
 
+
     return decompressedRx.pipe(
-      map(decompressed =>
-        mode.decodeData(decompressed)
-      )
+      map(decompressed => mode.decodeData(decompressed))
     );
   }
 

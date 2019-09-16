@@ -16,7 +16,7 @@
     "version": "./scripts/version.sh $npm_package_version",
     "test": "ng test",
     "test:docker": "docker-compose -f docker-compose.test.yml up --build --exit-code-from sut",
-    "test:ci": "ng test --browsers=ChromeHeadlessCI --no-watch --no-progress && ng e2e --protractor-config=protractor.conf.js",
+    "test:ci": "ng test --browsers=ChromeHeadlessCI --no-watch --no-progress",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
@@ -75,7 +75,6 @@
     "karma-jasmine-html-reporter": "^1.4.0",
     "node-sass": "^4.11.0",
     "protractor": "5.4.2",
-    "chromedriver": "76.0.1",
     "ts-node": "^7.0.1",
     "tslint": "^5.12.1",
     "typescript": "3.2.4"
