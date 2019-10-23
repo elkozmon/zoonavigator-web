@@ -104,7 +104,7 @@ export class DefaultApiService implements ApiService {
             switchMap(ref => ref.afterClosed()),
             switchMapTo(this.zSessionHandler.removeSessionInfo()),
             switchMapTo(from(
-              this.router.navigate([], {
+              this.router.navigate(["/"], {
                 queryParams: {
                   [CONNECT_QUERY_RETURN_URL]: returnUrl
                 }
