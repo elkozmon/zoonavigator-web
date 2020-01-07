@@ -101,7 +101,7 @@ export class ZNodeDataComponent implements OnInit {
 
     // update editor ready
     this.isEditorReady =
-      combineLatest(this.editorNode, this.editorModeId, this.editorCompId, this.editorWrap)
+      combineLatest([this.editorNode, this.editorModeId, this.editorCompId, this.editorWrap])
         .pipe(map(([n, m, c, w]) => n != null && n.valueOr(null) != null && m != null && c != null && w != null));
 
     // init rest of the observables and subjects
@@ -111,14 +111,14 @@ export class ZNodeDataComponent implements OnInit {
 
     // update raw data on change of: txtData or mode or comp
     this.editorDataRaw =
-      combineLatest(this.editorDataTxt, this.editorMode, this.editorComp)
+      combineLatest([this.editorDataTxt, this.editorMode, this.editorComp])
         .pipe(switchMap(([txtData, mode, mComp]) => ZNodeDataComponent.encodeToRawData(txtData, mode, mComp)));
 
     // update txt data on change of: mode
     this.editorMode
       .pipe(
         bufferCount(2, 1),
-        switchMap(([oldMode, newMode]) => combineLatest(this.editorDataTxt, of(oldMode), of(newMode)).pipe(take(1))),
+        switchMap(([oldMode, newMode]) => combineLatest([this.editorDataTxt, of(oldMode), of(newMode)]).pipe(take(1))),
         map(([txt, oldMode, newMode]) => ZNodeDataComponent.translateDataMode(txt, oldMode, newMode))
       )
       .forEach(data => this.editorDataTxt.next(data));
@@ -129,12 +129,12 @@ export class ZNodeDataComponent implements OnInit {
 
     // update pristine flag (note: if node not available -> editor is pristine)
     this.isEditorDataPristine =
-      combineLatest(this.editorNode, this.editorDataRaw)
+      combineLatest([this.editorNode, this.editorDataRaw])
         .pipe(map(([node, rawData]) => node.map(n => n.data == rawData).valueOr(true)));
 
     // update submit ready flag
     this.isSubmitReady =
-      combineLatest(this.isEditorDataPristine, this.isSubmitOngoing)
+      combineLatest([this.isEditorDataPristine, this.isSubmitOngoing])
         .pipe(map(([isEditorDataPristine, isSubmitOngoing]) => !isEditorDataPristine && !isSubmitOngoing));
 
     // on change of node do following
@@ -168,7 +168,7 @@ export class ZNodeDataComponent implements OnInit {
           return zip(of(node), o1, o2, o3).pipe(take(1));
         }),
         // update data txt
-        switchMap(([node]) => combineLatest(of(node), this.editorMode, this.editorComp).pipe(take(1))),
+        switchMap(([node]) => combineLatest([of(node), this.editorMode, this.editorComp]).pipe(take(1))),
         switchMap(([node, mode, mComp]) => ZNodeDataComponent.decodeFromRawData(node.data, mode, mComp))
       )
       .forEach(data => this.editorDataTxt.next(data));
@@ -180,7 +180,7 @@ export class ZNodeDataComponent implements OnInit {
       filter(nullableNode => nullableNode != null)
     );
 
-    combineLatest(submitNode, this.isSubmitReady)
+    combineLatest([submitNode, this.isSubmitReady])
       .pipe(
         switchMap(([node, ready]) => {
           if (!ready) {
@@ -189,7 +189,7 @@ export class ZNodeDataComponent implements OnInit {
 
           this.isSubmitOngoing.next(true);
 
-          return combineLatest(of(node), this.editorDataRaw);
+          return combineLatest([of(node), this.editorDataRaw]);
         }),
         switchMap(([node, rawData]) =>
           this.zNodeService.setData(
@@ -260,7 +260,7 @@ export class ZNodeDataComponent implements OnInit {
   }
 
   onFormatData(): void {
-    combineLatest(this.editorDataTxt, this.editorFormatter)
+    combineLatest([this.editorDataTxt, this.editorFormatter])
       .pipe(
         switchMap(([txtData, maybeFormatter]) =>
           maybeFormatter.caseOf<Observable<string>>({
