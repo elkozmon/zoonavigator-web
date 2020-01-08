@@ -15,27 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, OnInit} from "@angular/core";
+import {Component, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {catchError, finalize, switchMap} from "rxjs/operators";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {LoadingMode, LoadingType, TdLoadingService} from "@covalent/core";
 import {AuthInfo, Scheme, ZSessionHandler, ZSessionService} from "../core";
 import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
+import {Subscription} from "rxjs/Rx";
 
 @Component({
   templateUrl: "./connect.component.html",
   styleUrls: ["./connect.component.scss"]
 })
-export class ConnectComponent implements OnInit {
+export class ConnectComponent implements OnInit, OnDestroy {
 
-  connectForm: FormGroup;
-
-  errorMsg: any = null;
+  private subscription: Subscription;
 
   private redirectUrl: string;
 
   private loadingFullscreenKey = "loadingFullscreen";
+
+  connectForm: FormGroup;
+
+  errorMsg: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -47,6 +50,10 @@ export class ConnectComponent implements OnInit {
   ) {
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
   ngOnInit(): void {
     this.loadingService.create({
       name: this.loadingFullscreenKey,
@@ -55,7 +62,7 @@ export class ConnectComponent implements OnInit {
       color: "accent",
     });
 
-    this.route
+    this.subscription = this.route
       .queryParamMap
       .subscribe(paramMap => {
         this.errorMsg = paramMap.get(CONNECT_QUERY_ERROR_MSG) || null;
@@ -83,18 +90,20 @@ export class ConnectComponent implements OnInit {
     this.errorMsg = null;
     this.startLoader();
 
-    this.zSessionService
-      .create({
-        connectionString: this.getConnectionStringFormValue(),
-        authInfo: this.getAuthInfoFormValue()
-      })
-      .pipe(
-        switchMap((sessionInfo) => this.zSessionHandler.setSessionInfo(sessionInfo)),
-        switchMap(() => this.router.navigateByUrl(this.redirectUrl)),
-        finalize(() => this.stopLoader()),
-        catchError(err => this.errorMsg = err)
-      )
-      .subscribe();
+    this.subscription.add(
+      this.zSessionService
+        .create({
+          connectionString: this.getConnectionStringFormValue(),
+          authInfo: this.getAuthInfoFormValue()
+        })
+        .pipe(
+          switchMap((sessionInfo) => this.zSessionHandler.setSessionInfo(sessionInfo)),
+          switchMap(() => this.router.navigateByUrl(this.redirectUrl)),
+          finalize(() => this.stopLoader()),
+          catchError(err => this.errorMsg = err)
+        )
+        .subscribe()
+    );
   }
 
   get credentialsFormArray(): FormArray {

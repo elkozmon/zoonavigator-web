@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
+import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
-import {Observable, throwError, of} from "rxjs";
+import {Observable, Subscription, throwError, of} from "rxjs";
 import {catchError, map, pluck, switchMap, mapTo} from "rxjs/operators";
 import {Either, Maybe} from "tsmonad";
 import {Ordering} from "./ordering";
@@ -30,9 +30,11 @@ import {RegexpFilterComponent} from "../shared";
   templateUrl: "editor.component.html",
   styleUrls: ["editor.component.scss"]
 })
-export class EditorComponent implements OnInit, AfterViewInit {
+export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild("childrenFilter") childrenFilter: RegexpFilterComponent;
+
+  private subscription: Subscription;
 
   zPath: Observable<ZPath>;
   zNode: Observable<Maybe<ZNodeWithChildren>>;
@@ -64,6 +66,10 @@ export class EditorComponent implements OnInit, AfterViewInit {
     return this.selectedZNodes.filter(value => -1 !== this.filteredZNodes.indexOf(value));
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
   ngOnInit(): void {
     this.zPath = this.route
       .queryParams
@@ -86,7 +92,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
         )
       );
 
-    this.zNode.forEach(maybeNode =>
+    this.subscription = this.zNode.subscribe(maybeNode =>
       maybeNode.caseOf({
         just: node => this.updateChildren(node.children),
         nothing: () => {}
@@ -105,39 +111,43 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   showSessionInfo(): void {
-    this.zSessionHandler
-      .getSessionInfo()
-      .pipe(
-        switchMap((maybeSessionInfo) =>
-          maybeSessionInfo.caseOf({
-            just: sessionInfo =>
-              this.dialogService.showSessionInfo(sessionInfo, this.viewContainerRef),
-            nothing: () =>
-              throwError(new Error("Session was lost"))
-          })
-        ),
-        catchError(error => this.dialogService.showError(error, this.viewContainerRef))
-      )
-      .subscribe();
+    this.subscription.add(
+      this.zSessionHandler
+        .getSessionInfo()
+        .pipe(
+          switchMap((maybeSessionInfo) =>
+            maybeSessionInfo.caseOf({
+              just: sessionInfo =>
+                this.dialogService.showSessionInfo(sessionInfo, this.viewContainerRef),
+              nothing: () =>
+                throwError(new Error("Session was lost"))
+            })
+          ),
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef))
+        )
+        .subscribe()
+    );
   }
 
   disconnect(): void {
-    this.zSessionHandler
-      .getSessionInfo()
-      .pipe(
-        switchMap(maybeSessionInfo =>
-          maybeSessionInfo.caseOf({
-            just: sessionInfo =>
-              this.zSessionService.close(sessionInfo),
-            nothing: () =>
-              throwError(new Error("Session was already closed"))
-          })
-        ),
-        switchMap(() => this.zSessionHandler.removeSessionInfo()),
-        switchMap(() => this.router.navigate(["connect"])),
-        catchError(error => this.dialogService.showError(error, this.viewContainerRef))
-      )
-      .subscribe();
+    this.subscription.add(
+      this.zSessionHandler
+        .getSessionInfo()
+        .pipe(
+          switchMap(maybeSessionInfo =>
+            maybeSessionInfo.caseOf({
+              just: sessionInfo =>
+                this.zSessionService.close(sessionInfo),
+              nothing: () =>
+                throwError(new Error("Session was already closed"))
+            })
+          ),
+          switchMap(() => this.zSessionHandler.removeSessionInfo()),
+          switchMap(() => this.router.navigate(["connect"])),
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef))
+        )
+        .subscribe()
+    );
   }
 
   selectZNode(zPath: ZPath): void {

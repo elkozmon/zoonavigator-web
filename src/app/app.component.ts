@@ -15,16 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, OnInit} from "@angular/core";
+import {Component, OnDestroy, OnInit} from "@angular/core";
 import {Title} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
 import {EDITOR_QUERY_NODE_PATH} from "./editor";
+import {Subscription} from "rxjs/Rx";
 
 @Component({
   selector: "zoo-app",
   template: `<router-outlet></router-outlet>`
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+
+  private subscription: Subscription;
 
   constructor(
     private titleService: Title,
@@ -32,8 +35,12 @@ export class AppComponent implements OnInit {
   ) {
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
   ngOnInit(): void {
-    this.activatedRoute
+    this.subscription = this.activatedRoute
       .queryParamMap
       .subscribe(
         map => {

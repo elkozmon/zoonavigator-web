@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, EventEmitter, Input, Output, ViewContainerRef} from "@angular/core";
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {state, style, trigger} from "@angular/animations";
 import {EMPTY, of} from "rxjs";
@@ -32,6 +32,7 @@ import {
 } from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {Ordering} from "../ordering";
+import {Subscription} from "rxjs/Rx";
 
 @Component({
   selector: "zoo-editor-nav-actions",
@@ -44,7 +45,9 @@ import {Ordering} from "../ordering";
     ])
   ]
 })
-export class NavActionsComponent {
+export class NavActionsComponent implements OnInit, OnDestroy {
+
+  private subscription: Subscription;
 
   @Output() selectAll: EventEmitter<any> = new EventEmitter();
   @Output() refresh: EventEmitter<any> = new EventEmitter();
@@ -68,6 +71,14 @@ export class NavActionsComponent {
   ) {
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  ngOnInit(): void {
+    this.subscription = Subscription.EMPTY;
+  }
+
   onSelectAllClick(): void {
     this.selectAll.emit();
   }
@@ -88,97 +99,103 @@ export class NavActionsComponent {
   }
 
   onImportClick(): void {
-    this.dialogService
-      .showImportZNodes(
-        {
-          path: this.zPath.isRoot ? "/" : this.zPath.path.concat("/"),
-          redirect: false
-        },
-        this.viewContainerRef
-      )
-      .pipe(
-        switchMap(ref => ref.afterClosed()),
-        switchMap((data: ImportZNodesData) => {
-          if (data && data.file) {
-            return this.fileReaderService
-              .readAsText(data.file)
-              .pipe(
-                switchMap(str => this.zNodeService.importNodes(data.path, JSON.parse(str))),
-                catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-                switchMapTo(of(data))
-              );
+    this.subscription.add(
+      this.dialogService
+        .showImportZNodes(
+          {
+            path: this.zPath.isRoot ? "/" : this.zPath.path.concat("/"),
+            redirect: false
+          },
+          this.viewContainerRef
+        )
+        .pipe(
+          switchMap(ref => ref.afterClosed()),
+          switchMap((data: ImportZNodesData) => {
+            if (data && data.file) {
+              return this.fileReaderService
+                .readAsText(data.file)
+                .pipe(
+                  switchMap(str => this.zNodeService.importNodes(data.path, JSON.parse(str))),
+                  catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                  switchMapTo(of(data))
+                );
+            }
+
+            return EMPTY;
+          })
+        )
+        .subscribe((data: ImportZNodesData) => {
+          if (data.redirect) {
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: {
+                [EDITOR_QUERY_NODE_PATH]: data.path
+              },
+              queryParamsHandling: "merge"
+            });
+
+            return;
           }
 
-          return EMPTY;
+          this.refresh.emit();
         })
-      )
-      .forEach((data: ImportZNodesData) => {
-        if (data.redirect) {
-          this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {
-              [EDITOR_QUERY_NODE_PATH]: data.path
-            },
-            queryParamsHandling: "merge"
-          });
-
-          return;
-        }
-
-        this.refresh.emit();
-      });
+    );
   }
 
   onCreateClick(): void {
-    this.dialogService
-      .showCreateZNode(
-        {
-          path: this.zPath.isRoot ? "/" : this.zPath.path.concat("/"),
-          redirect: false
-        },
-        this.viewContainerRef
-      )
-      .pipe(
-        switchMap(ref => ref.afterClosed()),
-        switchMap((data: CreateZNodeData) => {
-          if (data) {
-            return this.zNodeService
-              .createNode(data.path)
-              .pipe(
-                catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-                switchMapTo(of(data))
-              );
+    this.subscription.add(
+      this.dialogService
+        .showCreateZNode(
+          {
+            path: this.zPath.isRoot ? "/" : this.zPath.path.concat("/"),
+            redirect: false
+          },
+          this.viewContainerRef
+        )
+        .pipe(
+          switchMap(ref => ref.afterClosed()),
+          switchMap((data: CreateZNodeData) => {
+            if (data) {
+              return this.zNodeService
+                .createNode(data.path)
+                .pipe(
+                  catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                  switchMapTo(of(data))
+                );
+            }
+
+            return EMPTY;
+          })
+        )
+        .subscribe((data: CreateZNodeData) => {
+          if (data.redirect) {
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: {
+                [EDITOR_QUERY_NODE_PATH]: data.path
+              },
+              queryParamsHandling: "merge"
+            });
+
+            return;
           }
 
-          return EMPTY;
+          this.refresh.emit();
         })
-      )
-      .forEach((data: CreateZNodeData) => {
-        if (data.redirect) {
-          this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {
-              [EDITOR_QUERY_NODE_PATH]: data.path
-            },
-            queryParamsHandling: "merge"
-          });
-
-          return;
-        }
-
-        this.refresh.emit();
-      });
+    );
   }
 
   onExportClick(): void {
     const paths = this.zNodes.map(node => node.path);
 
-    this.zNodeService
-      .exportNodes(paths)
-      .pipe(
-        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-      )
-      .forEach((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name));
+    this.subscription.add(
+      this.zNodeService
+        .exportNodes(paths)
+        .pipe(
+          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+        )
+        .subscribe((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name))
+    );
   }
 
   onDeleteClick(): void {
@@ -187,23 +204,25 @@ export class NavActionsComponent {
 
     const message = `Do you want to delete ${names.length} ${names.length === 1 ? "node and its" : "nodes and their"} children?`;
 
-    this.dialogService
-      .showRecursiveDeleteZNode(message, this.viewContainerRef)
-      .pipe(
-        switchMap(([ref, result]) => result),
-        switchMap((confirm: boolean) => {
-          if (confirm) {
-            return this.zNodeService
-              .deleteChildren(path, names.map(name => name.valueOrThrow()))
-              .pipe(
-                catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-                map(() => this.refresh.emit())
-              );
-          }
+    this.subscription.add(
+      this.dialogService
+        .showRecursiveDeleteZNode(message, this.viewContainerRef)
+        .pipe(
+          switchMap(([ref, result]) => result),
+          switchMap((confirm: boolean) => {
+            if (confirm) {
+              return this.zNodeService
+                .deleteChildren(path, names.map(name => name.valueOrThrow()))
+                .pipe(
+                  catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                  map(() => this.refresh.emit())
+                );
+            }
 
-          return EMPTY;
-        })
-      )
-      .subscribe();
+            return EMPTY;
+          })
+        )
+        .subscribe()
+    );
   }
 }

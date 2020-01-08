@@ -15,18 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, OnInit, ViewContainerRef} from "@angular/core";
+import {Component, OnDestroy, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {Observable} from "rxjs";
 import {pluck} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {DialogService, ZNodeMeta, ZNodeWithChildren} from "../../../core";
+import {Subscription} from "rxjs/Rx";
 
 @Component({
   templateUrl: "znode-meta.component.html",
   styleUrls: ["znode-meta.component.scss"]
 })
-export class ZNodeMetaComponent implements OnInit {
+export class ZNodeMetaComponent implements OnInit, OnDestroy {
+
+  private subscription: Subscription;
 
   meta: ZNodeMeta;
 
@@ -37,9 +40,13 @@ export class ZNodeMetaComponent implements OnInit {
   ) {
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
   ngOnInit(): void {
-    (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pipe(pluck("zNodeWithChildren")))
-      .forEach(either =>
+    this.subscription = (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pipe(pluck("zNodeWithChildren")))
+      .subscribe(either =>
         either.caseOf<void>({
           left: err => {
             this.dialogService.showError(err, this.viewContainerRef);

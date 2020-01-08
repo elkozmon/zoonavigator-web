@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewContainerRef} from "@angular/core";
+import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {EMPTY, of} from "rxjs";
 import {catchError, map, switchMap, switchMapTo} from "rxjs/operators";
@@ -24,13 +24,16 @@ import {DialogService, FileSaverService, ZNodeExport, ZNodeService, ZPath} from 
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {DuplicateZNodeData, MoveZNodeData} from "../../core/dialog/dialogs";
 import {CreateZNodeData} from "../../core/dialog";
+import {Subscription} from "rxjs/Rx";
 
 @Component({
   selector: "zoo-editor-nav-list",
   templateUrl: "nav-list.component.html",
   styleUrls: ["nav-list.component.scss"]
 })
-export class NavListComponent implements OnChanges {
+export class NavListComponent implements OnInit, OnDestroy, OnChanges {
+
+  private subscription: Subscription;
 
   @Output() refresh: EventEmitter<any> = new EventEmitter();
   @Output() select: EventEmitter<ZPath> = new EventEmitter();
@@ -75,6 +78,14 @@ export class NavListComponent implements OnChanges {
   ) {
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  ngOnInit(): void {
+    this.subscription = Subscription.EMPTY;
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.hasOwnProperty("zNodes") || changes.hasOwnProperty("zNodesOrdering")) {
       this.sortZNodes();
@@ -100,117 +111,125 @@ export class NavListComponent implements OnChanges {
   }
 
   onNodeDeleteClick(zPath: ZPath): void {
-    this.dialogService
-      .showRecursiveDeleteZNode(
-        `Do you want to delete node '${zPath.name.valueOrThrow()}' and its children?`,
-        this.viewContainerRef
-      )
-      .pipe(
-        switchMap(([ref, result]) => result),
-        switchMap((confirm: boolean) => {
-          if (confirm) {
-            const parentDir = zPath.goUp().path;
+    this.subscription.add(
+      this.dialogService
+        .showRecursiveDeleteZNode(
+          `Do you want to delete node '${zPath.name.valueOrThrow()}' and its children?`,
+          this.viewContainerRef
+        )
+        .pipe(
+          switchMap(([ref, result]) => result),
+          switchMap((confirm: boolean) => {
+            if (confirm) {
+              const parentDir = zPath.goUp().path;
 
-            return this.zNodeService.deleteChildren(parentDir, [zPath.name.valueOrThrow()]);
-          }
+              return this.zNodeService.deleteChildren(parentDir, [zPath.name.valueOrThrow()]);
+            }
 
-          return EMPTY;
-        }),
-        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-        map(() => this.refresh.emit())
-      )
-      .subscribe();
+            return EMPTY;
+          }),
+          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+          map(() => this.refresh.emit())
+        )
+        .subscribe()
+    );
   }
 
   onNodeExportClick(zPath: ZPath): void {
-    this.zNodeService
-      .exportNodes([zPath.path])
-      .pipe(
-        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-      )
-      .forEach((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name));
+    this.subscription.add(
+      this.zNodeService
+        .exportNodes([zPath.path])
+        .pipe(
+          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+        )
+        .subscribe((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name))
+    );
   }
 
   onNodeDuplicateClick(zPath: ZPath): void {
-    this.dialogService
-      .showDuplicateZNode(
-        {
-          path: zPath.path,
-          redirect: false
-        },
-        this.viewContainerRef
-      )
-      .pipe(
-        switchMap(ref => ref.afterClosed()),
-        switchMap((data: DuplicateZNodeData) => {
-          if (data) {
-            return this.zNodeService
-              .duplicateNode(zPath.path, data.path)
-              .pipe(
-                catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-                switchMapTo(of(data))
-              );
+    this.subscription.add(
+      this.dialogService
+        .showDuplicateZNode(
+          {
+            path: zPath.path,
+            redirect: false
+          },
+          this.viewContainerRef
+        )
+        .pipe(
+          switchMap(ref => ref.afterClosed()),
+          switchMap((data: DuplicateZNodeData) => {
+            if (data) {
+              return this.zNodeService
+                .duplicateNode(zPath.path, data.path)
+                .pipe(
+                  catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                  switchMapTo(of(data))
+                );
+            }
+
+            return EMPTY;
+          })
+        )
+        .subscribe((data: CreateZNodeData) => {
+          if (data.redirect) {
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: {
+                [EDITOR_QUERY_NODE_PATH]: data.path
+              },
+              queryParamsHandling: "merge"
+            });
+
+            return;
           }
 
-          return EMPTY;
+          this.refresh.emit();
         })
-      )
-      .forEach((data: CreateZNodeData) => {
-        if (data.redirect) {
-          this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {
-              [EDITOR_QUERY_NODE_PATH]: data.path
-            },
-            queryParamsHandling: "merge"
-          });
-
-          return;
-        }
-
-        this.refresh.emit();
-      });
+    );
   }
 
   onNodeMoveClick(zPath: ZPath): void {
-    this.dialogService
-      .showMoveZNode(
-        {
-          path: zPath.path,
-          redirect: false
-        },
-        this.viewContainerRef
-      )
-      .pipe(
-        switchMap(ref => ref.afterClosed()),
-        switchMap((data: MoveZNodeData) => {
-          if (data) {
-            return this.zNodeService
-              .moveNode(zPath.path, data.path)
-              .pipe(
-                catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-                switchMapTo(of(data))
-              );
+    this.subscription.add(
+      this.dialogService
+        .showMoveZNode(
+          {
+            path: zPath.path,
+            redirect: false
+          },
+          this.viewContainerRef
+        )
+        .pipe(
+          switchMap(ref => ref.afterClosed()),
+          switchMap((data: MoveZNodeData) => {
+            if (data) {
+              return this.zNodeService
+                .moveNode(zPath.path, data.path)
+                .pipe(
+                  catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
+                  switchMapTo(of(data))
+                );
+            }
+
+            return EMPTY;
+          })
+        )
+        .subscribe((data: CreateZNodeData) => {
+          if (data.redirect) {
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: {
+                [EDITOR_QUERY_NODE_PATH]: data.path
+              },
+              queryParamsHandling: "merge"
+            });
+
+            return;
           }
 
-          return EMPTY;
+          this.refresh.emit();
         })
-      )
-      .forEach((data: CreateZNodeData) => {
-        if (data.redirect) {
-          this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {
-              [EDITOR_QUERY_NODE_PATH]: data.path
-            },
-            queryParamsHandling: "merge"
-          });
-
-          return;
-        }
-
-        this.refresh.emit();
-      });
+    );
   }
 
   //noinspection JSMethodCanBeStatic,JSUnusedLocalSymbols

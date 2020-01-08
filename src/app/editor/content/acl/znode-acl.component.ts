@@ -15,9 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Component, OnInit, ViewContainerRef} from "@angular/core";
+import {Component, OnDestroy, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router, UrlTree} from "@angular/router";
-import {from, Observable, of} from "rxjs";
+import {from, Observable, Subscription, of} from "rxjs";
 import {catchError, pluck, switchMap} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {DialogService, ZNodeAcl, ZNodeService, ZNodeWithChildren} from "../../../core";
@@ -30,7 +30,9 @@ import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
   templateUrl: "znode-acl.component.html",
   styleUrls: ["znode-acl.component.scss"]
 })
-export class ZNodeAclComponent implements OnInit {
+export class ZNodeAclComponent implements OnInit, OnDestroy {
+
+  private subscription: Subscription;
 
   aclForm: AclForm;
 
@@ -45,9 +47,13 @@ export class ZNodeAclComponent implements OnInit {
   ) {
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
   ngOnInit(): void {
-    (<Observable<Either<Error, ZNodeWithChildren>>>this.route.parent.data.pipe(pluck("zNodeWithChildren")))
-      .forEach(either =>
+    this.subscription = (<Observable<Either<Error, ZNodeWithChildren>>>this.route.parent.data.pipe(pluck("zNodeWithChildren")))
+      .subscribe(either =>
         either.caseOf<void>({
           left: error => {
             this.dialogService.showError(error, this.viewContainerRef);
@@ -83,15 +89,17 @@ export class ZNodeAclComponent implements OnInit {
     const values = this.aclForm.values;
     const version = this.aclForm.aclVersion;
 
-    confirmation.forEach(confirm => {
-      if (confirm) {
-        this.saveZNodeAcl(
-          values,
-          version,
-          recursive
-        );
-      }
-    });
+    this.subscription.add(
+      confirmation.subscribe(confirm => {
+        if (confirm) {
+          this.saveZNodeAcl(
+            values,
+            version,
+            recursive
+          );
+        }
+      })
+    );
   }
 
   clearForm(): void {
@@ -101,57 +109,61 @@ export class ZNodeAclComponent implements OnInit {
       return;
     }
 
-    this.dialogService
-      .showConfirm(
-        {
-          icon: "help",
-          title: "Confirm clearing the form",
-          message: "Do you want to remove all ACL inputs? Changes will not be applied yet.",
-          acceptText: "Clear",
-          cancelText: "Cancel"
-        },
-        this.viewContainerRef
-      )
-      .pipe(
-        switchMap(([ref, result]) => result)
-      )
-      .forEach(
-        discard => {
-          if (discard) {
-            this.aclForm.clearAclFormArray();
+    this.subscription.add(
+      this.dialogService
+        .showConfirm(
+          {
+            icon: "help",
+            title: "Confirm clearing the form",
+            message: "Do you want to remove all ACL inputs? Changes will not be applied yet.",
+            acceptText: "Clear",
+            cancelText: "Cancel"
+          },
+          this.viewContainerRef
+        )
+        .pipe(
+          switchMap(([ref, result]) => result)
+        )
+        .subscribe(
+          discard => {
+            if (discard) {
+              this.aclForm.clearAclFormArray();
+            }
           }
-        }
-      );
+        )
+    );
   }
 
   private saveZNodeAcl(acl: ZNodeAcl, aclVersion: number, recursive: boolean): void {
-    this.zNodeService
-      .setAcl(
-        this.currentPath,
-        aclVersion,
-        acl,
-        recursive
-      )
-      .pipe(
-        switchMap(newMeta => {
-          this.aclForm.markAsPristine();
+    this.subscription.add(
+      this.zNodeService
+        .setAcl(
+          this.currentPath,
+          aclVersion,
+          acl,
+          recursive
+        )
+        .pipe(
+          switchMap(newMeta => {
+            this.aclForm.markAsPristine();
 
-          // refresh node data in resolver
-          const redirect = this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {
-              aclVersion: newMeta.aclVersion
-            },
-            queryParamsHandling: "merge"
-          });
+            // refresh node data in resolver
+            const redirect = this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: {
+                aclVersion: newMeta.aclVersion
+              },
+              queryParamsHandling: "merge"
+            });
 
-          return from(redirect);
-        }),
-        switchMap(() => this.dialogService.showSnackbar("Changes saved", this.viewContainerRef)),
-        switchMap(ref => ref.afterOpened()),
-        catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-      )
-      .subscribe();
+            return from(redirect);
+          }),
+          switchMap(() => this.dialogService.showSnackbar("Changes saved", this.viewContainerRef)),
+          switchMap(ref => ref.afterOpened()),
+          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+        )
+        .subscribe()
+    );
   }
 
   private get currentPath(): string | null {
