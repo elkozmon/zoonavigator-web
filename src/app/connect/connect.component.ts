@@ -62,12 +62,16 @@ export class ConnectComponent implements OnInit, OnDestroy {
       color: "accent",
     });
 
-    this.subscription = this.route
-      .queryParamMap
-      .subscribe(paramMap => {
-        this.errorMsg = paramMap.get(CONNECT_QUERY_ERROR_MSG) || null;
-        this.redirectUrl = paramMap.get(CONNECT_QUERY_RETURN_URL) || "/editor";
-      });
+    this.subscription = new Subscription(() => {});
+
+    this.subscription.add(
+      this.route
+        .queryParamMap
+        .subscribe(paramMap => {
+          this.errorMsg = paramMap.get(CONNECT_QUERY_ERROR_MSG) || null;
+          this.redirectUrl = paramMap.get(CONNECT_QUERY_RETURN_URL) || "/editor";
+        })
+    );
 
     this.connectForm = this.newConnectForm();
   }

@@ -89,27 +89,31 @@ export class ZNodeDataComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // setup
+    this.subscription = new Subscription(() => {});
     this.editorNode = new BehaviorSubject(Maybe.nothing());
     this.editorDataTxt = new BehaviorSubject("");
     this.isSubmitOngoing = new BehaviorSubject(false);
     this.editorWrap = new BehaviorSubject(ZNodeDataComponent.defaultWrap);
     this.editorModeId = new BehaviorSubject(ZNodeDataComponent.defaultMode);
     this.editorCompId = new BehaviorSubject(Maybe.nothing());
-    this.subscription = this.route.parent.data
-      .pipe(
-        pluck("zNodeWithChildren"),
-        switchMap((either: Either<Error, ZNodeWithChildren>) =>
-          either.caseOf<Observable<Maybe<ZNodeWithChildren>>>({
-            left: error =>
-              this.dialogService
-                .showError(error, this.viewContainerRef)
-                .pipe(mapTo(Maybe.nothing())),
-            right: node =>
-              of(Maybe.just(node))
-          })
+
+    this.subscription.add(
+      this.route.parent.data
+        .pipe(
+          pluck("zNodeWithChildren"),
+          switchMap((either: Either<Error, ZNodeWithChildren>) =>
+            either.caseOf<Observable<Maybe<ZNodeWithChildren>>>({
+              left: error =>
+                this.dialogService
+                  .showError(error, this.viewContainerRef)
+                  .pipe(mapTo(Maybe.nothing())),
+              right: node =>
+                of(Maybe.just(node))
+            })
+          )
         )
-      )
-      .subscribe(maybeNode => this.editorNode.next(maybeNode));
+        .subscribe(maybeNode => this.editorNode.next(maybeNode))
+    );
 
     // update editor ready
     this.isEditorReady =
@@ -201,16 +205,10 @@ export class ZNodeDataComponent implements OnInit, OnDestroy {
         .pipe(
           take(1),
           map(([maybeNode, ready]) => [maybeNode.valueOr(null), ready]),
-          filter(([node, ready]) => node != null),
-          switchMap(([node, ready]) => {
-            if (!ready) {
-              return EMPTY;
-            }
-
-            this.isSubmitOngoing.next(true);
-
-            return zip(of(node), this.editorDataRaw.take(1));
-          }),
+          filter(([node, ready]) => node != null && ready),
+          tap(() => this.isSubmitOngoing.next(true)),
+          switchMap(([node, ready]) => combineLatest(of(node), this.editorDataRaw)),
+          take(1),
           switchMap(([node, rawData]) =>
             this.zNodeService.setData(
               node.path,
@@ -230,9 +228,13 @@ export class ZNodeDataComponent implements OnInit, OnDestroy {
 
             return from(redirect);
           }),
-          switchMap(() => this.dialogService.showSnackbar("Changes saved", this.viewContainerRef)),
-          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY))),
-          finalize(() => this.isSubmitOngoing.next(false))
+          tap(() => this.isSubmitOngoing.next(false)),
+          catchError(error => {
+            this.isSubmitOngoing.next(false);
+
+            return this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY));
+          }),
+          switchMap(() => this.dialogService.showSnackbar("Changes saved", this.viewContainerRef))
         )
         .subscribe()
     );

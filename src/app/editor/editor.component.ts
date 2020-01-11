@@ -93,11 +93,15 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         )
       );
 
-    this.subscription = this.zNode.subscribe(maybeNode =>
-      maybeNode.caseOf({
-        just: node => this.updateChildren(node.children),
-        nothing: () => {}
-      })
+    this.subscription = new Subscription(() => {});
+
+    this.subscription.add(
+      this.zNode.subscribe(maybeNode =>
+        maybeNode.caseOf({
+          just: node => this.updateChildren(node.children),
+          nothing: () => {}
+        })
+      )
     );
   }
 
@@ -148,7 +152,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
                 throwError(new Error("Session was already closed"))
             })
           ),
-          catchError((error => this.dialogService.showError(error, this.viewContainerRef)))
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef))
         )
         .subscribe()
     );

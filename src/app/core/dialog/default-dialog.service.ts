@@ -63,30 +63,34 @@ export class DefaultDialogService extends DialogService {
   ) {
     super();
 
-    this.subscription = this.showConfirmInput
-      .pipe(
-        groupBy(([id, confirmData, viewRef]) => id),
-        mergeMap((observable) => observable.pipe(debounceTime(this.debounceTime))),
-        mergeMap(([id, confirmData, viewRef]) => {
-          const dialog = this.dialog.open(ConfirmDialogComponent, {
-            data: confirmData,
-            viewContainerRef: viewRef,
-            role: "dialog",
-            hasBackdrop: true,
-            width: "500px",
-            maxWidth: "80vw",
-            height: "210px",
-            maxHeight: "80vw",
-            direction: "ltr",
-            autoFocus: true
-          });
+    this.subscription = new Subscription(() => {});
 
-          const closedObs: Observable<boolean> = dialog.afterClosed();
+    this.subscription.add(
+      this.showConfirmInput
+        .pipe(
+          groupBy(([id, confirmData, viewRef]) => id),
+          mergeMap((observable) => observable.pipe(debounceTime(this.debounceTime))),
+          mergeMap(([id, confirmData, viewRef]) => {
+            const dialog = this.dialog.open(ConfirmDialogComponent, {
+              data: confirmData,
+              viewContainerRef: viewRef,
+              role: "dialog",
+              hasBackdrop: true,
+              width: "500px",
+              maxWidth: "80vw",
+              height: "210px",
+              maxHeight: "80vw",
+              direction: "ltr",
+              autoFocus: true
+            });
 
-          return of(id).pipe(zip(closedObs));
-        })
-      )
-      .subscribe(this.showConfirmOutput);
+            const closedObs: Observable<boolean> = dialog.afterClosed();
+
+            return of(id).pipe(zip(closedObs));
+          })
+        )
+        .subscribe(this.showConfirmOutput)
+    );
 
     this.subscription.add(
       this.showInfoInput

@@ -46,18 +46,22 @@ export class ZNodeMetaComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscription = (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pipe(pluck("zNodeWithChildren")))
-      .switchMap(either =>
-        either.caseOf({
-          left: error =>
-            this.dialogService
-              .showError(error, this.viewContainerRef)
-              .pipe(mapTo(null)),
-          right: node =>
-            of(node.meta)
-        })
-      )
-      .subscribe((meta) => this.meta = meta);
+    this.subscription = new Subscription(() => {});
+
+    this.subscription.add(
+      (<Observable<Either<Error, ZNodeWithChildren>>> this.route.parent.data.pipe(pluck("zNodeWithChildren")))
+        .switchMap(either =>
+          either.caseOf({
+            left: error =>
+              this.dialogService
+                .showError(error, this.viewContainerRef)
+                .pipe(mapTo(null)),
+            right: node =>
+              of(node.meta)
+          })
+        )
+        .subscribe((meta) => this.meta = meta)
+    );
   }
 }
 

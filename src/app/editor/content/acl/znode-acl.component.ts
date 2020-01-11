@@ -53,18 +53,22 @@ export class ZNodeAclComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscription = (<Observable<Either<Error, ZNodeWithChildren>>>this.route.parent.data.pipe(pluck("zNodeWithChildren")))
-      .switchMap((either, index) =>
-        either.caseOf({
-          left: error =>
-            this.dialogService
-              .showError(error, this.viewContainerRef)
-              .pipe(mapTo(null)),
-          right: node =>
-            of(this.aclFormFactory.newForm(node.acl, node.meta))
-        })
-      )
-      .subscribe((form) => this.aclForm = form);
+    this.subscription = new Subscription(() => {});
+
+    this.subscription.add(
+      (<Observable<Either<Error, ZNodeWithChildren>>>this.route.parent.data.pipe(pluck("zNodeWithChildren")))
+        .switchMap((either, index) =>
+          either.caseOf({
+            left: error =>
+              this.dialogService
+                .showError(error, this.viewContainerRef)
+                .pipe(mapTo(null)),
+            right: node =>
+              of(this.aclFormFactory.newForm(node.acl, node.meta))
+          })
+        )
+        .subscribe((form) => this.aclForm = form)
+    );
   }
 
   onSubmit(recursive: boolean): void {
