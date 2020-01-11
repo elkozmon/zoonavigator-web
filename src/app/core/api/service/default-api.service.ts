@@ -98,10 +98,8 @@ export class DefaultApiService implements ApiService {
       if (anyError.status === 401) {
         const returnUrl = this.router.routerState.snapshot.url;
 
-        this.dialogService
-          .showError(error, null)
+        this.dialogService.showError(error, null)
           .pipe(
-            switchMap(ref => ref.afterClosed()),
             switchMapTo(this.zSessionHandler.removeSessionInfo()),
             switchMapTo(from(
               this.router.navigate(["/"], {

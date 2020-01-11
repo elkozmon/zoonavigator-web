@@ -54,9 +54,7 @@ export class CanDeactivateZNodeDataComponent implements CanDeactivate<ZNodeDataC
           return of(true);
         }
 
-        return this.dialogService
-          .showDiscardChanges(component.viewContainerRef)
-          .pipe(switchMap(([ref, result]) => result));
+        return this.dialogService.showDiscardChanges(component.viewContainerRef);
       })
     );
   }

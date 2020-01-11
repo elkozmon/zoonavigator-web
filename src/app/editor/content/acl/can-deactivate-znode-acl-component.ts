@@ -56,8 +56,6 @@ export class CanDeactivateZNodeAclComponent implements CanDeactivate<ZNodeAclCom
       return true;
     }
 
-    return this.dialogService
-      .showDiscardChanges(component.viewContainerRef)
-      .pipe(switchMap(([ref, result]) => result));
+    return this.dialogService.showDiscardChanges(component.viewContainerRef);
   }
 }

@@ -18,13 +18,14 @@
 import {Component, OnDestroy, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router, UrlTree} from "@angular/router";
 import {from, Observable, Subscription, of} from "rxjs";
-import {catchError, pluck, switchMap} from "rxjs/operators";
+import {catchError, mapTo, pluck, switchMap, tap} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {DialogService, ZNodeAcl, ZNodeService, ZNodeWithChildren} from "../../../core";
 import {ZPathService} from "../../../core/zpath";
 import {AclFormFactory} from "./acl-form.factory";
 import {AclForm} from "./acl-form";
 import {EDITOR_QUERY_NODE_PATH} from "../../editor-routing.constants";
+import {EMPTY} from "rxjs/internal/observable/empty";
 
 @Component({
   templateUrl: "znode-acl.component.html",
@@ -52,38 +53,38 @@ export class ZNodeAclComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscription = (<Observable<Either<Error, ZNodeWithChildren>>>this.route.parent.data.pipe(pluck("zNodeWithChildren")))
-      .subscribe(either =>
-        either.caseOf<void>({
-          left: error => {
-            this.dialogService.showError(error, this.viewContainerRef);
-            this.aclForm = null;
-          },
-          right: node => {
-            this.aclForm = this.aclFormFactory.newForm(node.acl, node.meta);
-          }
-        })
-      );
+    this.subscription = new Subscription(() => {});
+
+    this.subscription.add(
+      (<Observable<Either<Error, ZNodeWithChildren>>>this.route.parent.data.pipe(pluck("zNodeWithChildren")))
+        .switchMap((either, index) =>
+          either.caseOf({
+            left: error =>
+              this.dialogService
+                .showError(error, this.viewContainerRef)
+                .pipe(mapTo(null)),
+            right: node =>
+              of(this.aclFormFactory.newForm(node.acl, node.meta))
+          })
+        )
+        .subscribe((form) => this.aclForm = form)
+    );
   }
 
   onSubmit(recursive: boolean): void {
     let confirmation: Observable<boolean> = of(true);
 
     if (recursive) {
-      confirmation = this.dialogService
-        .showConfirm(
-          {
-            icon: "help",
-            title: "Confirm recursive change",
-            message: "Do you want to apply these settings to this node and its children?",
-            acceptText: "Apply",
-            cancelText: "Cancel"
-          },
-          this.viewContainerRef
-        )
-        .pipe(
-          switchMap(([ref, result]) => result)
-        );
+      confirmation = this.dialogService.showConfirm(
+        {
+          icon: "help",
+          title: "Confirm recursive change",
+          message: "Do you want to apply these settings to this node and its children?",
+          acceptText: "Apply",
+          cancelText: "Cancel"
+        },
+        this.viewContainerRef
+      );
     }
 
     const values = this.aclForm.values;
@@ -121,9 +122,6 @@ export class ZNodeAclComponent implements OnInit, OnDestroy {
           },
           this.viewContainerRef
         )
-        .pipe(
-          switchMap(([ref, result]) => result)
-        )
         .subscribe(
           discard => {
             if (discard) {
@@ -158,9 +156,8 @@ export class ZNodeAclComponent implements OnInit, OnDestroy {
 
             return from(redirect);
           }),
-          switchMap(() => this.dialogService.showSnackbar("Changes saved", this.viewContainerRef)),
-          switchMap(ref => ref.afterOpened()),
-          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY))),
+          switchMap(() => this.dialogService.showSnackbar("Changes saved", this.viewContainerRef))
         )
         .subscribe()
     );

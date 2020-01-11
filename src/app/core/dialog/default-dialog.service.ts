@@ -17,9 +17,9 @@
 
 import {Injectable, ViewContainerRef} from "@angular/core";
 import {TdDialogService} from "@covalent/core";
-import {MatDialog, MatDialogRef, MatSnackBar, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
-import {Observable, ConnectableObservable, of, defer, Subject, AsyncSubject} from "rxjs";
-import {delay, publishReplay, publishLast, tap, switchMapTo, switchMap} from "rxjs/operators";
+import {MatDialog, MatSnackBar} from "@angular/material";
+import {Observable, of, Subject} from "rxjs";
+import {debounceTime, groupBy, map, mapTo, mergeMap, zip} from "rxjs/operators";
 import {DialogService} from "./dialog.service";
 import {
   ConfirmData,
@@ -37,16 +37,24 @@ import {
   SessionInfoDialogComponent
 } from "./dialogs";
 import {ZSessionInfo} from "../zsession/zsession-info";
-import {ReplaySubject} from "rxjs/Rx";
-
-type GroupKey = string;
+import {Subscription} from "rxjs/Rx";
+import {Maybe} from "tsmonad";
 
 @Injectable()
 export class DefaultDialogService extends DialogService {
 
-  private showConfirmInstances: Map<GroupKey, [MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]> = new Map();
+  private debounceTime = 100;
 
-  private showInfoInstances: Map<GroupKey, Subject<MatDialogRef<InfoDialogComponent>>> = new Map();
+  private subscription: Subscription;
+
+  private showConfirmInput: Subject<[string, ConfirmData, ViewContainerRef]> = new Subject<[string, ConfirmData, ViewContainerRef]>();
+  private showConfirmOutput: Subject<[string, boolean]> = new Subject<[string, boolean]>();
+
+  private showInfoInput: Subject<[string, InfoData, ViewContainerRef]> = new Subject<[string, InfoData, ViewContainerRef]>();
+  private showInfoOutput: Subject<string> = new Subject<string>();
+
+  private showSnackbarInput: Subject<[string, ViewContainerRef]> = new Subject<[string, ViewContainerRef]>();
+  private showSnackbarOutput: Subject<string> = new Subject<string>();
 
   constructor(
     private dialogService: TdDialogService,
@@ -54,11 +62,86 @@ export class DefaultDialogService extends DialogService {
     private snackBar: MatSnackBar
   ) {
     super();
+
+    this.subscription = new Subscription(() => {});
+
+    this.subscription.add(
+      this.showConfirmInput
+        .pipe(
+          groupBy(([id, confirmData, viewRef]) => id),
+          mergeMap((observable) => observable.pipe(debounceTime(this.debounceTime))),
+          mergeMap(([id, confirmData, viewRef]) => {
+            const dialog = this.dialog.open(ConfirmDialogComponent, {
+              data: confirmData,
+              viewContainerRef: viewRef,
+              role: "dialog",
+              hasBackdrop: true,
+              width: "500px",
+              maxWidth: "80vw",
+              height: "210px",
+              maxHeight: "80vw",
+              direction: "ltr",
+              autoFocus: true
+            });
+
+            const closedObs: Observable<boolean> = dialog.afterClosed();
+
+            return of(id).pipe(zip(closedObs));
+          })
+        )
+        .subscribe(this.showConfirmOutput)
+    );
+
+    this.subscription.add(
+      this.showInfoInput
+        .pipe(
+          groupBy(([id, infoData, viewRef]) => id),
+          mergeMap((observable) => observable.pipe(debounceTime(this.debounceTime))),
+          mergeMap(([id, infoData, viewRef]) => {
+            const dialog = this.dialog.open(InfoDialogComponent, {
+              data: infoData,
+              viewContainerRef: viewRef,
+              role: "dialog",
+              hasBackdrop: true,
+              width: "500px",
+              maxWidth: "80vw",
+              height: "210px",
+              maxHeight: "80vw",
+              direction: "ltr",
+              autoFocus: true
+            });
+
+            return dialog.afterClosed().pipe(mapTo(id));
+          })
+        )
+        .subscribe(this.showInfoOutput)
+    );
+
+    this.subscription.add(
+      this.showSnackbarInput
+        .pipe(
+          groupBy(([message, viewRef]) => message),
+          mergeMap((observable) => observable.pipe(debounceTime(this.debounceTime))),
+          mergeMap(([message, viewRef]) => {
+            const snackbar = this.snackBar.open(
+              message,
+              "Close",
+              {
+                duration: 3000,
+                viewContainerRef: viewRef
+              }
+            );
+
+            return snackbar.afterDismissed().pipe(mapTo(message));
+          })
+        )
+        .subscribe(this.showSnackbarOutput)
+    );
   }
 
   showDiscardChanges(
     viewRef?: ViewContainerRef
-  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]> {
+  ): Observable<boolean> {
     return this.showConfirm({
       icon: "help",
       title: "Discard changes?",
@@ -71,7 +154,7 @@ export class DefaultDialogService extends DialogService {
   showCreateZNode(
     defaults: CreateZNodeData,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<CreateZNodeDialogComponent>> {
+  ): Observable<Maybe<CreateZNodeData>> {
     const dialog = this.dialog.open(CreateZNodeDialogComponent, {
       data: defaults,
       viewContainerRef: viewRef,
@@ -86,13 +169,13 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
-    return of(dialog);
+    return dialog.afterClosed().pipe(map((data: CreateZNodeData, index) => Maybe.maybe(data)));
   }
 
   showImportZNodes(
     defaults: ImportZNodesData,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<ImportZNodesDialogComponent>> {
+  ): Observable<Maybe<ImportZNodesData>> {
     const dialog = this.dialog.open(ImportZNodesDialogComponent, {
       data: defaults,
       viewContainerRef: viewRef,
@@ -107,13 +190,13 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
-    return of(dialog);
+    return dialog.afterClosed().pipe(map((data: ImportZNodesData, index) => Maybe.maybe(data)));
   }
 
   showDuplicateZNode(
     defaults: DuplicateZNodeData,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<DuplicateZNodeDialogComponent>> {
+  ): Observable<Maybe<DuplicateZNodeData>> {
     const dialog = this.dialog.open(DuplicateZNodeDialogComponent, {
       data: defaults,
       viewContainerRef: viewRef,
@@ -128,13 +211,13 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
-    return of(dialog);
+    return dialog.afterClosed().pipe(map((data: DuplicateZNodeData, index) => Maybe.maybe(data)));
   }
 
   showRecursiveDeleteZNode(
     message: string,
     viewRef?: ViewContainerRef
-  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]> {
+  ): Observable<boolean> {
     return this.showConfirm({
       icon: "help",
       title: "Confirm recursive delete",
@@ -147,7 +230,7 @@ export class DefaultDialogService extends DialogService {
   showMoveZNode(
     defaults: MoveZNodeData,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<MoveZNodeDialogComponent>> {
+  ): Observable<Maybe<MoveZNodeData>> {
     const dialog = this.dialog.open(MoveZNodeDialogComponent, {
       data: defaults,
       viewContainerRef: viewRef,
@@ -162,13 +245,13 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
-    return of(dialog);
+    return dialog.afterClosed().pipe(map((data: MoveZNodeData, index) => Maybe.maybe(data)));
   }
 
   showSessionInfo(
     sessionInfo: ZSessionInfo,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<SessionInfoDialogComponent>> {
+  ): Observable<void> {
     const dialog = this.dialog.open(SessionInfoDialogComponent, {
       data: sessionInfo,
       viewContainerRef: viewRef,
@@ -182,13 +265,13 @@ export class DefaultDialogService extends DialogService {
       autoFocus: true
     });
 
-    return of(dialog);
+    return dialog.afterClosed();
   }
 
   showError(
     error: Error,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<InfoDialogComponent>> {
+  ): Observable<void> {
     return this.showInfo(
       {
         icon: "error",
@@ -203,103 +286,68 @@ export class DefaultDialogService extends DialogService {
   showConfirm(
     options: ConfirmData,
     viewRef?: ViewContainerRef
-  ): Observable<[MatDialogRef<ConfirmDialogComponent>, Observable<boolean>]> {
-    const key: GroupKey = options.title + options.message + options.acceptText;
+  ): Observable<boolean> {
+    return Observable.create(subscriber => {
+      const id = options.title + options.message + options.acceptText;
+      const sub = this.showConfirmOutput.subscribe(
+        ([id2, confirm]) => {
+          if (id2 == id) {
+            subscriber.next(confirm);
+            subscriber.complete();
+          }
+        },
+        (error) => subscriber.error(error),
+        () => subscriber.complete()
+      );
 
-    // Look for cached dialog
-    if (this.showConfirmInstances.has(key)) {
-      return of(this.showConfirmInstances.get(key));
-    }
+      this.showConfirmInput.next([id, options, viewRef]);
 
-    const dialog = this.dialog.open(ConfirmDialogComponent, {
-      data: options,
-      viewContainerRef: viewRef,
-      role: "dialog",
-      hasBackdrop: true,
-      width: "500px",
-      maxWidth: "80vw",
-      height: "210px",
-      maxHeight: "80vw",
-      direction: "ltr",
-      autoFocus: true
+      return () => sub.unsubscribe();
     });
-
-    const afterClosedRx = dialog
-      .afterClosed()
-      .pipe(publishLast()) as ConnectableObservable<boolean>;
-
-    afterClosedRx.connect();
-
-    // Cache dialog
-    this.showConfirmInstances.set(key, [dialog, afterClosedRx]);
-
-    // Uncache dialog once closed
-    afterClosedRx
-      .pipe(delay(100))
-      .forEach(() => this.showConfirmInstances.delete(key));
-
-    return of(this.showConfirmInstances.get(key));
   }
 
   showInfo(
     options: InfoData,
     viewRef?: ViewContainerRef
-  ): Observable<MatDialogRef<InfoDialogComponent>> {
-    const key: GroupKey = options.title + options.message;
-
-    // Look for cached dialog
-    if (this.showInfoInstances.has(key)) {
-      return this.showInfoInstances.get(key);
-    }
-
-    this.showInfoInstances.set(key, new ReplaySubject(1));
-
-    return of(null)
-      .pipe(
-        delay(10),
-        switchMap(() => {
-          const dialog = this.dialog.open(InfoDialogComponent, {
-            data: options,
-            viewContainerRef: viewRef,
-            role: "dialog",
-            hasBackdrop: true,
-            width: "500px",
-            maxWidth: "80vw",
-            height: "210px",
-            maxHeight: "80vw",
-            direction: "ltr",
-            autoFocus: true
-          });
-
-          // Cache dialog
-          this.showInfoInstances
-            .get(key)
-            .next(dialog);
-
-          // Uncache dialog once closed
-          dialog
-            .afterClosed()
-            .pipe(delay(100))
-            .forEach(() => this.showInfoInstances.delete(key));
-
-          return of(dialog);
-        })
+  ): Observable<void> {
+    return Observable.create(subscriber => {
+      const id = options.title + options.message;
+      const sub = this.showInfoOutput.subscribe(
+        ([id2]) => {
+          if (id2 == id) {
+            subscriber.next();
+            subscriber.complete();
+          }
+        },
+        (error) => subscriber.error(error),
+        () => subscriber.complete()
       );
+
+      this.showInfoInput.next([id, options, viewRef]);
+
+      return () => sub.unsubscribe();
+    });
   }
 
   showSnackbar(
     message: string,
     viewRef?: ViewContainerRef
-  ): Observable<MatSnackBarRef<SimpleSnackBar>> {
-    const snackBar = this.snackBar.open(
-      message,
-      "Close",
-      {
-        duration: 3000,
-        viewContainerRef: viewRef
-      }
-    );
+  ): Observable<void> {
+    return Observable.create(subscriber => {
+      const sub = this.showSnackbarOutput.subscribe(
+        ([message2]) => {
+          if (message2 == message) {
+            subscriber.next();
+            subscriber.complete();
+          }
+        },
+        (error) => subscriber.error(error),
+        () => subscriber.complete()
+      );
 
-    return of(snackBar);
+      this.showSnackbarInput.next([message, viewRef]);
+
+      return () => sub.unsubscribe();
+    });
   }
 }

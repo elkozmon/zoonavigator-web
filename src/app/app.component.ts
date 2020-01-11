@@ -40,7 +40,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscription = this.activatedRoute
+    this.subscription = new Subscription(() => {});
+
+    this.subscription.add(
+      this.activatedRoute
       .queryParamMap
       .subscribe(
         map => {
@@ -50,6 +53,7 @@ export class AppComponent implements OnInit, OnDestroy {
             this.titleService.setTitle("ZooNavigator");
           }
         }
-      );
+      )
+    );
   }
 }

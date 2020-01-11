@@ -19,12 +19,11 @@ import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, Vi
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {MatInput} from "@angular/material";
 import {ActivatedRoute, Router} from "@angular/router";
-import {EMPTY, of} from "rxjs";
-import {catchError, switchMap, switchMapTo} from "rxjs/operators";
+import {EMPTY} from "rxjs";
+import {catchError, mapTo, switchMap} from "rxjs/operators";
 import {Maybe} from "tsmonad";
 import {DialogService, FileSaverService, ZNodeExport, ZNodeService, ZNodeWithChildren, ZPath, ZPathService} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
-import {DuplicateZNodeData, MoveZNodeData} from "../../core/dialog/dialogs";
 import {CreateZNodeData} from "../../core/dialog";
 import {Subscription} from "rxjs/Rx";
 
@@ -74,7 +73,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscription = Subscription.EMPTY;
+    this.subscription = new Subscription(() => {});
   }
 
   onRefreshClick(): void {
@@ -102,7 +101,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
           this.viewContainerRef
         )
         .pipe(
-          switchMap(([ref, result]) => result),
           switchMap((confirm: boolean) => {
             if (confirm) {
               return this.zNodeService.deleteNode(zNode.path, zNode.meta.dataVersion);
@@ -110,17 +108,19 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
             return EMPTY;
           }),
-          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
         )
-        .subscribe(() => {
-          this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {
-              [EDITOR_QUERY_NODE_PATH]: parentPath
-            },
-            queryParamsHandling: "merge"
-          });
-        })
+        .subscribe(
+          () => {
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: {
+                [EDITOR_QUERY_NODE_PATH]: parentPath
+              },
+              queryParamsHandling: "merge"
+            });
+          }
+        )
     );
   }
 
@@ -129,9 +129,11 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.zNodeService
         .exportNodes([this.zPath.path])
         .pipe(
-          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
         )
-        .subscribe((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name))
+        .subscribe(
+          (data: ZNodeExport) => this.fileSaverService.save(data.blob, data.name)
+        )
     );
   }
 
@@ -148,33 +150,33 @@ export class ToolbarComponent implements OnInit, OnDestroy {
           this.viewContainerRef
         )
         .pipe(
-          switchMap(ref => ref.afterClosed()),
-          switchMap((data: DuplicateZNodeData) => {
-            if (data) {
-              return this.zNodeService
+          switchMap((maybeData) =>
+            maybeData.caseOf({
+              just: data => this.zNodeService
                 .duplicateNode(source, data.path)
-                .pipe(switchMapTo(of(data)));
+                .pipe(mapTo(data)),
+              nothing: () => EMPTY
+            })
+          ),
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
+        )
+        .subscribe(
+          (data: CreateZNodeData) => {
+            if (data.redirect) {
+              this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: {
+                  [EDITOR_QUERY_NODE_PATH]: data.path
+                },
+                queryParamsHandling: "merge"
+              });
+
+              return;
             }
 
-            return EMPTY;
-          }),
-          catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
-        )
-        .subscribe((data: CreateZNodeData) => {
-          if (data.redirect) {
-            this.router.navigate([], {
-              relativeTo: this.route,
-              queryParams: {
-                [EDITOR_QUERY_NODE_PATH]: data.path
-              },
-              queryParamsHandling: "merge"
-            });
-
-            return;
+            this.refresh.emit();
           }
-
-          this.refresh.emit();
-        })
+        )
     );
   }
 
@@ -190,27 +192,27 @@ export class ToolbarComponent implements OnInit, OnDestroy {
           this.viewContainerRef
         )
         .pipe(
-          switchMap(ref => ref.afterClosed()),
-          switchMap((data: MoveZNodeData) => {
-            if (data) {
-              return this.zNodeService
+          switchMap((maybeData) =>
+            maybeData.caseOf({
+              just: data => this.zNodeService
                 .moveNode(source, data.path)
-                .pipe(switchMapTo(of(data)));
-            }
-
-            return EMPTY;
-          }),
-          catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+                .pipe(mapTo(data)),
+              nothing: () => EMPTY
+            })
+          ),
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
         )
-        .subscribe((data: CreateZNodeData) => {
-          this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {
-              [EDITOR_QUERY_NODE_PATH]: data.path
-            },
-            queryParamsHandling: "merge"
-          });
-        })
+        .subscribe(
+          (data: CreateZNodeData) => {
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: {
+                [EDITOR_QUERY_NODE_PATH]: data.path
+              },
+              queryParamsHandling: "merge"
+            });
+          }
+        )
     );
   }
 

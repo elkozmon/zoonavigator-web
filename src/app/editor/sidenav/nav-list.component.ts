@@ -18,7 +18,7 @@
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {EMPTY, of} from "rxjs";
-import {catchError, map, switchMap, switchMapTo} from "rxjs/operators";
+import {catchError, map, mapTo, switchMap, switchMapTo} from "rxjs/operators";
 import {Ordering} from "../ordering";
 import {DialogService, FileSaverService, ZNodeExport, ZNodeService, ZPath} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
@@ -83,7 +83,7 @@ export class NavListComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit(): void {
-    this.subscription = Subscription.EMPTY;
+    this.subscription = new Subscription(() => {});
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -118,7 +118,6 @@ export class NavListComponent implements OnInit, OnDestroy, OnChanges {
           this.viewContainerRef
         )
         .pipe(
-          switchMap(([ref, result]) => result),
           switchMap((confirm: boolean) => {
             if (confirm) {
               const parentDir = zPath.goUp().path;
@@ -128,10 +127,9 @@ export class NavListComponent implements OnInit, OnDestroy, OnChanges {
 
             return EMPTY;
           }),
-          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-          map(() => this.refresh.emit())
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
         )
-        .subscribe()
+        .subscribe(() => this.refresh.emit())
     );
   }
 
@@ -140,9 +138,11 @@ export class NavListComponent implements OnInit, OnDestroy, OnChanges {
       this.zNodeService
         .exportNodes([zPath.path])
         .pipe(
-          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
         )
-        .subscribe((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name))
+        .subscribe(
+          (data: ZNodeExport) => this.fileSaverService.save(data.blob, data.name)
+        )
     );
   }
 
@@ -157,35 +157,34 @@ export class NavListComponent implements OnInit, OnDestroy, OnChanges {
           this.viewContainerRef
         )
         .pipe(
-          switchMap(ref => ref.afterClosed()),
-          switchMap((data: DuplicateZNodeData) => {
-            if (data) {
-              return this.zNodeService
-                .duplicateNode(zPath.path, data.path)
-                .pipe(
-                  catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-                  switchMapTo(of(data))
-                );
+          switchMap((maybeData) =>
+            maybeData.caseOf({
+              just: data =>
+                this.zNodeService
+                  .duplicateNode(zPath.path, data.path)
+                  .pipe(switchMapTo(of(data))),
+              nothing: () => EMPTY
+            })
+          ),
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
+        )
+        .subscribe(
+          (data: CreateZNodeData) => {
+            if (data.redirect) {
+              this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: {
+                  [EDITOR_QUERY_NODE_PATH]: data.path
+                },
+                queryParamsHandling: "merge"
+              });
+
+              return;
             }
 
-            return EMPTY;
-          })
-        )
-        .subscribe((data: CreateZNodeData) => {
-          if (data.redirect) {
-            this.router.navigate([], {
-              relativeTo: this.route,
-              queryParams: {
-                [EDITOR_QUERY_NODE_PATH]: data.path
-              },
-              queryParamsHandling: "merge"
-            });
-
-            return;
+            this.refresh.emit();
           }
-
-          this.refresh.emit();
-        })
+        )
     );
   }
 
@@ -200,35 +199,34 @@ export class NavListComponent implements OnInit, OnDestroy, OnChanges {
           this.viewContainerRef
         )
         .pipe(
-          switchMap(ref => ref.afterClosed()),
-          switchMap((data: MoveZNodeData) => {
-            if (data) {
-              return this.zNodeService
-                .moveNode(zPath.path, data.path)
-                .pipe(
-                  catchError((err) => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-                  switchMapTo(of(data))
-                );
+          switchMap((maybeData) =>
+            maybeData.caseOf({
+              just: data =>
+                this.zNodeService
+                  .moveNode(zPath.path, data.path)
+                  .pipe(switchMapTo(of(data))),
+              nothing: () => EMPTY
+            })
+          ),
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
+        )
+        .subscribe(
+          (data: CreateZNodeData) => {
+            if (data.redirect) {
+              this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: {
+                  [EDITOR_QUERY_NODE_PATH]: data.path
+                },
+                queryParamsHandling: "merge"
+              });
+
+              return;
             }
 
-            return EMPTY;
-          })
-        )
-        .subscribe((data: CreateZNodeData) => {
-          if (data.redirect) {
-            this.router.navigate([], {
-              relativeTo: this.route,
-              queryParams: {
-                [EDITOR_QUERY_NODE_PATH]: data.path
-              },
-              queryParamsHandling: "merge"
-            });
-
-            return;
+            this.refresh.emit();
           }
-
-          this.refresh.emit();
-        })
+        )
     );
   }
 
