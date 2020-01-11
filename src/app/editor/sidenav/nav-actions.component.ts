@@ -18,8 +18,8 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {state, style, trigger} from "@angular/animations";
-import {EMPTY, of} from "rxjs";
-import {catchError, map, switchMap, switchMapTo} from "rxjs/operators";
+import {EMPTY} from "rxjs";
+import {catchError, mapTo, switchMap} from "rxjs/operators";
 import {
   CreateZNodeData,
   DialogService,
@@ -76,7 +76,7 @@ export class NavActionsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscription = Subscription.EMPTY;
+    this.subscription = new Subscription(() => {});
   }
 
   onSelectAllClick(): void {
@@ -109,36 +109,42 @@ export class NavActionsComponent implements OnInit, OnDestroy {
           this.viewContainerRef
         )
         .pipe(
-          switchMap(ref => ref.afterClosed()),
-          switchMap((data: ImportZNodesData) => {
-            if (data && data.file) {
-              return this.fileReaderService
-                .readAsText(data.file)
-                .pipe(
-                  switchMap(str => this.zNodeService.importNodes(data.path, JSON.parse(str))),
-                  catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-                  switchMapTo(of(data))
-                );
+          switchMap((maybeData) =>
+            maybeData.caseOf({
+              just: data => {
+                if (data.file) {
+                  return this.fileReaderService
+                    .readAsText(data.file)
+                    .pipe(
+                      switchMap(str => this.zNodeService.importNodes(data.path, JSON.parse(str))),
+                      mapTo(data)
+                    );
+                }
+
+                return EMPTY;
+              },
+              nothing: () => EMPTY
+            })
+          ),
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
+        )
+        .subscribe(
+          (data: ImportZNodesData) => {
+            if (data.redirect) {
+              this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: {
+                  [EDITOR_QUERY_NODE_PATH]: data.path
+                },
+                queryParamsHandling: "merge"
+              });
+
+              return;
             }
 
-            return EMPTY;
-          })
-        )
-        .subscribe((data: ImportZNodesData) => {
-          if (data.redirect) {
-            this.router.navigate([], {
-              relativeTo: this.route,
-              queryParams: {
-                [EDITOR_QUERY_NODE_PATH]: data.path
-              },
-              queryParamsHandling: "merge"
-            });
-
-            return;
+            this.refresh.emit();
           }
-
-          this.refresh.emit();
-        })
+        )
     );
   }
 
@@ -153,35 +159,31 @@ export class NavActionsComponent implements OnInit, OnDestroy {
           this.viewContainerRef
         )
         .pipe(
-          switchMap(ref => ref.afterClosed()),
-          switchMap((data: CreateZNodeData) => {
-            if (data) {
-              return this.zNodeService
-                .createNode(data.path)
-                .pipe(
-                  catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-                  switchMapTo(of(data))
-                );
+          switchMap((maybeData) =>
+            maybeData.caseOf({
+              just: data => this.zNodeService.createNode(data.path).pipe(mapTo(data)),
+              nothing: () => EMPTY
+            })
+          ),
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
+        )
+        .subscribe(
+          (data: CreateZNodeData) => {
+            if (data.redirect) {
+              this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: {
+                  [EDITOR_QUERY_NODE_PATH]: data.path
+                },
+                queryParamsHandling: "merge"
+              });
+
+              return;
             }
 
-            return EMPTY;
-          })
-        )
-        .subscribe((data: CreateZNodeData) => {
-          if (data.redirect) {
-            this.router.navigate([], {
-              relativeTo: this.route,
-              queryParams: {
-                [EDITOR_QUERY_NODE_PATH]: data.path
-              },
-              queryParamsHandling: "merge"
-            });
-
-            return;
+            this.refresh.emit();
           }
-
-          this.refresh.emit();
-        })
+        )
     );
   }
 
@@ -192,9 +194,11 @@ export class NavActionsComponent implements OnInit, OnDestroy {
       this.zNodeService
         .exportNodes(paths)
         .pipe(
-          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef))
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
         )
-        .subscribe((zNodeExport: ZNodeExport) => this.fileSaverService.save(zNodeExport.blob, zNodeExport.name))
+        .subscribe(
+          (data: ZNodeExport) => this.fileSaverService.save(data.blob, data.name)
+        )
     );
   }
 
@@ -208,21 +212,16 @@ export class NavActionsComponent implements OnInit, OnDestroy {
       this.dialogService
         .showRecursiveDeleteZNode(message, this.viewContainerRef)
         .pipe(
-          switchMap(([ref, result]) => result),
           switchMap((confirm: boolean) => {
             if (confirm) {
-              return this.zNodeService
-                .deleteChildren(path, names.map(name => name.valueOrThrow()))
-                .pipe(
-                  catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-                  map(() => this.refresh.emit())
-                );
+              return this.zNodeService.deleteChildren(path, names.map(name => name.valueOrThrow()));
             }
 
             return EMPTY;
-          })
+          }),
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY)))
         )
-        .subscribe()
+        .subscribe(() => this.refresh.emit())
     );
   }
 }

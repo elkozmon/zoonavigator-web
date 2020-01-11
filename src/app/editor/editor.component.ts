@@ -18,8 +18,8 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
-import {Observable, Subscription, throwError, of} from "rxjs";
-import {catchError, map, pluck, switchMap, mapTo} from "rxjs/operators";
+import {Observable, of, Subscription, throwError} from "rxjs";
+import {catchError, map, mapTo, pluck, switchMap} from "rxjs/operators";
 import {Either, Maybe} from "tsmonad";
 import {Ordering} from "./ordering";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
@@ -83,7 +83,8 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         pluck("zNodeWithChildren"),
         switchMap((either: Either<Error, ZNodeWithChildren>) =>
           either.caseOf<Observable<Maybe<ZNodeWithChildren>>>({
-            left: error => this.dialogService
+            left: error =>
+              this.dialogService
                 .showError(error, this.viewContainerRef)
                 .pipe(mapTo(Maybe.nothing())),
             right: node =>
@@ -123,7 +124,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
                 throwError(new Error("Session was lost"))
             })
           ),
-          catchError(error => this.dialogService.showError(error, this.viewContainerRef))
+          catchError((error => this.dialogService.showError(error, this.viewContainerRef)))
         )
         .subscribe()
     );
@@ -137,14 +138,17 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           switchMap(maybeSessionInfo =>
             maybeSessionInfo.caseOf({
               just: sessionInfo =>
-                this.zSessionService.close(sessionInfo),
+                this.zSessionService
+                  .close(sessionInfo)
+                  .pipe(
+                    switchMap(() => this.zSessionHandler.removeSessionInfo()),
+                    switchMap(() => this.router.navigate(["connect"])),
+                  ),
               nothing: () =>
                 throwError(new Error("Session was already closed"))
             })
           ),
-          switchMap(() => this.zSessionHandler.removeSessionInfo()),
-          switchMap(() => this.router.navigate(["connect"])),
-          catchError(error => this.dialogService.showError(error, this.viewContainerRef))
+          catchError((error => this.dialogService.showError(error, this.viewContainerRef)))
         )
         .subscribe()
     );

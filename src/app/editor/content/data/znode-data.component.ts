@@ -209,7 +209,7 @@ export class ZNodeDataComponent implements OnInit, OnDestroy {
 
             this.isSubmitOngoing.next(true);
 
-            return combineLatest([of(node), this.editorDataRaw]);
+            return zip(of(node), this.editorDataRaw.take(1));
           }),
           switchMap(([node, rawData]) =>
             this.zNodeService.setData(
@@ -231,10 +231,8 @@ export class ZNodeDataComponent implements OnInit, OnDestroy {
             return from(redirect);
           }),
           switchMap(() => this.dialogService.showSnackbar("Changes saved", this.viewContainerRef)),
-          switchMap(ref => ref.afterOpened()),
-          catchError(err => this.dialogService.showErrorAndThrowOnClose(err, this.viewContainerRef)),
-          finalize(() => this.isSubmitOngoing.next(false)),
-          take(1)
+          catchError(error => this.dialogService.showError(error, this.viewContainerRef).pipe(mapTo(EMPTY))),
+          finalize(() => this.isSubmitOngoing.next(false))
         )
         .subscribe()
     );
@@ -258,8 +256,7 @@ export class ZNodeDataComponent implements OnInit, OnDestroy {
               Maybe.just(newMode)
             )
           ),
-          mapTo(newMode),
-          take(1)
+          mapTo(newMode)
         )
         .subscribe(newMode => this.editorModeId.next(newMode))
     );
@@ -279,8 +276,7 @@ export class ZNodeDataComponent implements OnInit, OnDestroy {
               Maybe.just(newWrap)
             )
           ),
-          mapTo(newWrap),
-          take(1)
+          mapTo(newWrap)
         )
         .subscribe(newMode => this.editorWrap.next(newMode))
     );
@@ -298,8 +294,7 @@ export class ZNodeDataComponent implements OnInit, OnDestroy {
             })
           ),
           tap(data => this.editorDataTxt.next(data)),
-          catchError(error => this.dialogService.showSnackbar("Error:  " + error.message, this.viewContainerRef)),
-          take(1)
+          catchError(error => this.dialogService.showSnackbar("Error:  " + error.message, this.viewContainerRef))
         )
         .subscribe()
     );
