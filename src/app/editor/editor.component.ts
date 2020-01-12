@@ -19,7 +19,7 @@ import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChil
 import {ActivatedRoute, Router} from "@angular/router";
 import {TdMediaService} from "@covalent/core";
 import {Observable, of, Subscription, throwError} from "rxjs";
-import {catchError, map, mapTo, pluck, switchMap} from "rxjs/operators";
+import {catchError, map, mapTo, pluck, switchMap, tap} from "rxjs/operators";
 import {Either, Maybe} from "tsmonad";
 import {Ordering} from "./ordering";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
@@ -81,6 +81,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.zNode = (<Observable<Either<Error, ZNodeWithChildren>>>this.route.data)
       .pipe(
         pluck("zNodeWithChildren"),
+        tap(() => this.childrenFilter.clear()),
         switchMap((either: Either<Error, ZNodeWithChildren>) =>
           either.caseOf<Observable<Maybe<ZNodeWithChildren>>>({
             left: error =>
