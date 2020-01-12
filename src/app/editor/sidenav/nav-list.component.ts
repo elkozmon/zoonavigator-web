@@ -19,8 +19,9 @@ import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Si
 import {ActivatedRoute, Router} from "@angular/router";
 import {EMPTY, of} from "rxjs";
 import {catchError, map, mapTo, switchMap, switchMapTo} from "rxjs/operators";
+import {difference} from "underscore";
 import {Ordering} from "../ordering";
-import {DialogService, FileSaverService, ZNodeExport, ZNodeService, ZPath} from "../../core";
+import {DialogService, FileSaverService, ZNodeExport, ZNodePath, ZNodeService, ZPath} from "../../core";
 import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {DuplicateZNodeData, MoveZNodeData} from "../../core/dialog/dialogs";
 import {CreateZNodeData} from "../../core/dialog";
@@ -40,9 +41,12 @@ export class NavListComponent implements OnInit, OnDestroy, OnChanges {
   @Output() deselect: EventEmitter<ZPath> = new EventEmitter();
 
   @Input() zPath: ZPath;
-  @Input() zNodes: ZPath[];
+  @Input() zNodesChildren: ZPath[];
+  @Input() zNodesFiltered: ZPath[];
   @Input() zNodesSelected: ZPath[];
   @Input() zNodesOrdering: Ordering;
+
+  zNodesSorted: ZPath[];
 
   private static compareZNodesAscending(a: ZPath, b: ZPath): number {
     if (a.name.valueOrThrow() > b.name.valueOrThrow()) {
@@ -87,7 +91,7 @@ export class NavListComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.hasOwnProperty("zNodes") || changes.hasOwnProperty("zNodesOrdering")) {
+    if (changes.hasOwnProperty("zNodesChildren") || changes.hasOwnProperty("zNodesFiltered") || changes.hasOwnProperty("zNodesOrdering")) {
       this.sortZNodes();
     }
   }
@@ -236,11 +240,14 @@ export class NavListComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private sortZNodes(): void {
+    const zNodesFiltered = this.zNodesFiltered ? this.zNodesFiltered : this.zNodesChildren;
+    const zNodesUnfiltered = this.zNodesFiltered ? difference(this.zNodesChildren, this.zNodesFiltered) : [];
+
+    let compareFun = NavListComponent.compareZNodesDescending;
     if (this.zNodesOrdering === Ordering.Ascending) {
-      this.zNodes = this.zNodes.sort(NavListComponent.compareZNodesAscending);
-      return;
+      compareFun = NavListComponent.compareZNodesAscending;
     }
 
-    this.zNodes = this.zNodes.sort(NavListComponent.compareZNodesDescending);
+    this.zNodesSorted = zNodesFiltered.sort(compareFun).concat(zNodesUnfiltered.sort(compareFun))
   }
 }

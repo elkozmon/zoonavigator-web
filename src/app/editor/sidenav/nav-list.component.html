@@ -26,40 +26,46 @@
   </mat-icon>
   ../
 </a>
-<a
-  mat-list-item
-  *ngFor="let zNodePath of zNodes; trackBy: trackByPath"
-  class="zoo-nav-item zoo-node-item">
-  <mat-checkbox
-    [checked]="zNodesSelected.indexOf(zNodePath) >= 0"
-    (click)="$event.stopPropagation()"
-    (change)="$event.checked ? onNodeChecked(zNodePath) : onNodeUnchecked(zNodePath)">
-  </mat-checkbox>
+<ng-container *ngFor="let zNodePath of zNodesSorted; trackBy: trackByPath">
   <a
-    class="zoo-node-name"
-    #zooNodeName
-    [matTooltip]="(zooNodeName.offsetWidth < zooNodeName.scrollWidth) ? zNodePath.name.valueOrThrow() : null"
-    matTooltipPosition="below"
-    (click)="onNavigateClick(zNodePath)">
-    {{zNodePath.name.valueOrThrow()}}
+    mat-list-item
+    *ngIf="{inactive: zNodesFiltered && zNodesFiltered.indexOf(zNodePath) === -1} as state"
+    [ngClass]="['zoo-node-item', 'zoo-nav-item', state.inactive ? 'zoo-nav-item-inactive' : '']">
+    <mat-checkbox
+      [disabled]="state.inactive"
+      [checked]="zNodesSelected.indexOf(zNodePath) >= 0"
+      (click)="$event.stopPropagation()"
+      (change)="$event.checked ? onNodeChecked(zNodePath) : onNodeUnchecked(zNodePath)">
+    </mat-checkbox>
+    <a
+      class="zoo-node-name"
+      #zooNodeName
+      [matTooltip]="(zooNodeName.offsetWidth < zooNodeName.scrollWidth) ? zNodePath.name.valueOrThrow() : null"
+      matTooltipPosition="below"
+      (click)="onNavigateClick(zNodePath)">
+      {{zNodePath.name.valueOrThrow()}}
+    </a>
+    <div class="zoo-node-actions">
+      <button
+        mat-icon-button
+        #nodeMenuTrigger="matMenuTrigger"
+        [matMenuTriggerFor]="nodeMenu">
+        <mat-icon class="mat-24">more_vert</mat-icon>
+      </button>
+      <mat-menu #nodeMenu="matMenu">
+        <button mat-menu-item (click)="onNodeDeleteClick(zNodePath)">
+          <mat-icon>delete_forever</mat-icon><span>Delete</span>
+        </button>
+        <button mat-menu-item (click)="onNodeExportClick(zNodePath)">
+          <mat-icon>cloud_download</mat-icon><span>Export</span>
+        </button>
+        <button mat-menu-item (click)="onNodeDuplicateClick(zNodePath)">
+          <mat-icon>content_copy</mat-icon><span>Duplicate</span>
+        </button>
+        <button mat-menu-item (click)="onNodeMoveClick(zNodePath)">
+          <mat-icon>content_cut</mat-icon><span>Move</span>
+        </button>
+      </mat-menu>
+    </div>
   </a>
-  <div class="zoo-node-actions">
-    <button mat-icon-button #nodeMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="nodeMenu">
-      <mat-icon class="mat-24">more_vert</mat-icon>
-    </button>
-    <mat-menu #nodeMenu="matMenu">
-      <button mat-menu-item (click)="onNodeDeleteClick(zNodePath)">
-        <mat-icon>delete_forever</mat-icon><span>Delete</span>
-      </button>
-      <button mat-menu-item (click)="onNodeExportClick(zNodePath)">
-        <mat-icon>cloud_download</mat-icon><span>Export</span>
-      </button>
-      <button mat-menu-item (click)="onNodeDuplicateClick(zNodePath)">
-        <mat-icon>content_copy</mat-icon><span>Duplicate</span>
-      </button>
-      <button mat-menu-item (click)="onNodeMoveClick(zNodePath)">
-        <mat-icon>content_cut</mat-icon><span>Move</span>
-      </button>
-    </mat-menu>
-  </div>
-</a>
+</ng-container>
