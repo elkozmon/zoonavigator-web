@@ -104,7 +104,7 @@ export class ConnectComponent implements OnInit, OnDestroy {
           switchMap((sessionInfo) => this.zSessionHandler.setSessionInfo(sessionInfo)),
           switchMap(() => this.router.navigateByUrl(this.redirectUrl)),
           finalize(() => this.stopLoader()),
-          catchError(err => this.errorMsg = err)
+          catchError(err => this.errorMsg = err.toString())
         )
         .subscribe()
     );
