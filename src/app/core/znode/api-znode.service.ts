@@ -26,7 +26,7 @@ import {ZNodeData} from "./znode-data";
 import {ZNodeAcl} from "./znode-acl";
 import {ZNodeWithChildren} from "./znode-with-children";
 import {ZSessionHandler} from "../zsession";
-import {ApiRequestFactory, ApiService, JsonRequestContent, TextRequestContent} from "../api";
+import {ApiRequestFactory, ApiService, JsonRequestContent} from "../api";
 import {ZNodeExport} from "./znode-export";
 
 @Injectable()
@@ -234,7 +234,7 @@ export class ApiZNodeService implements ZNodeService {
         "/znode/data",
         params,
         null,
-        new TextRequestContent(data),
+        new JsonRequestContent(JSON.stringify(data)),
         token
       );
 
