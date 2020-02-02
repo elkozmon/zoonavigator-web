@@ -26,8 +26,9 @@ import {ZNodeData} from "./znode-data";
 import {ZNodeAcl} from "./znode-acl";
 import {ZNodeWithChildren} from "./znode-with-children";
 import {ZSessionHandler} from "../zsession";
-import {ApiRequestFactory, ApiService, JsonRequestContent} from "../api";
+import {ApiRequestFactory, ApiService, FileContent, JsonRequestContent} from "../api";
 import {ZNodeExport} from "./znode-export";
+import {Buffer} from "buffer";
 
 @Injectable()
 export class ApiZNodeService implements ZNodeService {
@@ -319,9 +320,13 @@ export class ApiZNodeService implements ZNodeService {
         .dispatch(request)
         .pipe(
           map(response => {
+            const gzipData = Buffer
+              .from(response.payload as string, "base64")
+              .buffer;
+
             return {
-              blob: new Blob([JSON.stringify(response.payload)], {type: "text/plain"}),
-              name: "znode-export-" + new Date().toISOString() + ".json"
+              blob: new Blob([gzipData], {type: "application/octet-stream"}),
+              name: "znode-export-" + new Date().toISOString() + ".gz"
             }
           })
         );
@@ -330,7 +335,7 @@ export class ApiZNodeService implements ZNodeService {
 
   importNodes(
     path: string,
-    nodes: any
+    file: File
   ): Observable<void> {
     return this.withAuthToken(token => {
       const params = new HttpParams({
@@ -343,7 +348,7 @@ export class ApiZNodeService implements ZNodeService {
         "/znode/import",
         params,
         null,
-        new JsonRequestContent(nodes),
+        new FileContent(file),
         token
       );
 

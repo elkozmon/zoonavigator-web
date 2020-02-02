@@ -113,10 +113,9 @@ export class NavActionsComponent implements OnInit, OnDestroy {
             maybeData.caseOf({
               just: data => {
                 if (data.file) {
-                  return this.fileReaderService
-                    .readAsText(data.file)
+                  return this.zNodeService
+                    .importNodes(data.path, data.file)
                     .pipe(
-                      switchMap(str => this.zNodeService.importNodes(data.path, JSON.parse(str))),
                       mapTo(data)
                     );
                 }

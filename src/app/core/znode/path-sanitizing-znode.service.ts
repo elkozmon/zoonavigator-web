@@ -84,10 +84,10 @@ export class PathSanitizingZNodeService implements ZNodeService {
     );
   }
 
-  importNodes(path: string, nodes: any): Observable<void> {
+  importNodes(path: string, file: File): Observable<void> {
     return this.zNodeService.importNodes(
       PathSanitizingZNodeService.stripSeparatorSuffix(path),
-      nodes
+      file
     );
   }
 

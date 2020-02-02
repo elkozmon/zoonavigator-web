@@ -65,7 +65,10 @@ export class DefaultApiService implements ApiService {
 
     if (apiRequest.content) {
       options.body = apiRequest.content.data;
-      options.headers = options.headers.set("Content-Type", apiRequest.content.type);
+
+      if (apiRequest.content.type) {
+        options.headers = options.headers.set("Content-Type", apiRequest.content.type);
+      }
     }
 
     if (apiRequest.authToken) {

@@ -78,6 +78,6 @@ export abstract class ZNodeService {
 
   abstract importNodes(
     path: string,
-    nodes: any
+    file: File
   ): Observable<void>
 }

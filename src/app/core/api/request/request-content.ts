@@ -18,7 +18,7 @@
 export abstract class RequestContent {
   constructor(
     public data: any,
-    public type: string
+    public type?: string
   ) {
   }
 }
@@ -29,8 +29,8 @@ export class JsonRequestContent extends RequestContent {
   }
 }
 
-export class TextRequestContent extends RequestContent {
-  constructor(data: string) {
-    super(data, "text/plain; charset=UTF-8");
+export class FileContent extends RequestContent {
+  constructor(file: File) {
+    super(file);
   }
 }
