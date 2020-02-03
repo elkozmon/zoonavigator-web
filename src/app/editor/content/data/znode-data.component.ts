@@ -221,7 +221,7 @@ export class ZNodeDataComponent implements OnInit, OnDestroy {
             const redirect = this.router.navigate([], {
               relativeTo: this.route,
               queryParams: {
-                dataVersion: newMeta.dataVersion
+                sid: (parseInt(this.route.snapshot.queryParamMap.get("sid")) || 0) + 1
               },
               queryParamsHandling: "merge"
             });
