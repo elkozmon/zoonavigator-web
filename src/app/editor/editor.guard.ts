@@ -19,7 +19,7 @@ import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs";
 import {map} from "rxjs/operators";
-import {ZSessionHandler} from "../core/zsession/handler";
+import {ConnectionManager} from "../core/connection/manager";
 import {CONNECT_QUERY_RETURN_URL} from "../connect/connect-routing.constants";
 
 @Injectable()
@@ -27,7 +27,7 @@ export class EditorGuard implements CanActivate, CanActivateChild {
 
   constructor(
     private router: Router,
-    private zSessionHandler: ZSessionHandler
+    private connectionManager: ConnectionManager
   ) {
   }
 
@@ -35,7 +35,7 @@ export class EditorGuard implements CanActivate, CanActivateChild {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
-    return this.checkSession(state.url);
+    return this.checkConnection(state.url);
   }
 
   canActivateChild(
@@ -45,16 +45,16 @@ export class EditorGuard implements CanActivate, CanActivateChild {
     return this.canActivate(childRoute, state);
   }
 
-  private checkSession(url: string): Observable<boolean> {
-    return this.zSessionHandler
-      .getSessionInfo()
+  private checkConnection(url: string): Observable<boolean> {
+    return this.connectionManager
+      .getConnection()
       .pipe(
-        map((maybeSessionInfo) => {
-          const sessionInfoExists = maybeSessionInfo
+        map((maybeConnection) => {
+          const connectionExists = maybeConnection
             .map(() => true)
             .valueOr(false);
 
-          if (sessionInfoExists) {
+          if (connectionExists) {
             return true;
           }
 

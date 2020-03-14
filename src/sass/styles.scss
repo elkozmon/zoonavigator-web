@@ -19,6 +19,10 @@
 @import "./utils";
 @import "./bootstrap";
 
+html, body {
+  background: #eeeeee !important;
+}
+
 div.zoo-error-bar {
   padding: 10px !important;
   margin-bottom: 20px;

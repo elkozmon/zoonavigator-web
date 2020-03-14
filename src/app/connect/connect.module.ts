@@ -17,7 +17,7 @@
 
 import {NgModule} from "@angular/core";
 import {ReactiveFormsModule} from "@angular/forms";
-import {MatButtonModule, MatCardModule, MatInputModule, MatSnackBarModule} from "@angular/material";
+import {MatButtonModule, MatCardModule, MatInputModule, MatSelectModule, MatSnackBarModule} from "@angular/material";
 import {CovalentCommonModule, CovalentLoadingModule} from "@covalent/core";
 import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {ConnectRoutingModule} from "./connect-routing.module";
@@ -32,6 +32,7 @@ import {ConnectComponent} from "./connect.component";
     ConnectRoutingModule,
     MatCardModule,
     MatInputModule,
+    MatSelectModule,
     MatButtonModule,
     MatSnackBarModule
   ],

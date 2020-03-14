@@ -19,33 +19,39 @@ import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {map} from "rxjs/operators";
 import {Maybe} from "tsmonad";
-import {ZSessionHandler} from "./zsession.handler";
-import {ZSessionInfo} from "../zsession-info";
+import {ConnectionManager} from "./connection-manager";
 import {StorageService} from "../../storage";
+import {ConnectionPredef} from "../connection-predef";
+import {ConnectionParams} from "../connection-params";
+import {ConfigService} from "../../../config";
+import {of} from "rxjs/internal/observable/of";
 
 @Injectable()
-export class DefaultZSessionHandler implements ZSessionHandler {
+export class DefaultConnectionManager implements ConnectionManager {
 
-  private sessionInfoKey = "DefaultZSessionHandler.sessionInfo";
+  private connectionKey = "DefaultConnectionManager.connection";
 
-  constructor(private storageService: StorageService) {
+  constructor(private storageService: StorageService, private configService: ConfigService) {
   }
 
-  getSessionInfo(): Observable<Maybe<ZSessionInfo>> {
+  // TODO
+  getConnection(): Observable<Maybe<ConnectionPredef | ConnectionParams>> {
     return this.storageService
-      .get(this.sessionInfoKey)
+      .get(this.connectionKey)
       .pipe(
         map((value) => Maybe.maybe(value ? JSON.parse(value) : null))
       );
   }
 
-  setSessionInfo(value: ZSessionInfo): Observable<void> {
+  // TODO
+  useConnection(value: ConnectionPredef | ConnectionParams): Observable<void> {
     return this.storageService
-      .set(this.sessionInfoKey, JSON.stringify(value));
+      .set(this.connectionKey, JSON.stringify(value));
   }
 
-  removeSessionInfo(): Observable<void> {
+  // TODO
+  removeConnection(): Observable<void> {
     return this.storageService
-      .remove(this.sessionInfoKey);
+      .remove(this.connectionKey);
   }
 }

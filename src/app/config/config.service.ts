@@ -19,6 +19,7 @@ import {HttpClient} from "@angular/common/http";
 import {Inject, Injectable} from "@angular/core";
 import {Config} from "./config";
 import {APP_BASE_HREF} from "@angular/common";
+import {environment} from "../../environments/environment";
 
 @Injectable()
 export class ConfigService {
@@ -33,7 +34,7 @@ export class ConfigService {
 
   load() {
     return this.httpClient
-      .get(this.baseHref.replace(/\/$/, "") + "/config.json")
+      .get(environment.apiHref.replace(/\/$/, "") + "/config")
       .forEach((data: Config) => this._config = data);
   }
 

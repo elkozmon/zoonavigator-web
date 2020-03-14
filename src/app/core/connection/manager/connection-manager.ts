@@ -15,10 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {ZSessionToken} from "./zsession-token";
-import {ConnectionString} from "./connection-string";
+import {Injectable} from "@angular/core";
+import {Observable} from "rxjs";
+import {Maybe} from "tsmonad";
+import {ConnectionPredef} from "../connection-predef";
+import {ConnectionParams} from "../connection-params";
 
-export interface ZSessionInfo {
-  token: ZSessionToken;
-  connectionString: ConnectionString;
+@Injectable()
+export abstract class ConnectionManager {
+
+  abstract getConnection(): Observable<Maybe<ConnectionPredef | ConnectionParams>>
+
+  abstract useConnection(value: ConnectionPredef | ConnectionParams): Observable<void>
+
+  abstract removeConnection(): Observable<void>
 }

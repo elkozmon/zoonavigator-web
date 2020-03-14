@@ -15,15 +15,5 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Injectable} from "@angular/core";
-import {Observable} from "rxjs";
-import {ConnectionParams} from "../connection-params";
-import {ZSessionInfo} from "../zsession-info";
-
-@Injectable()
-export abstract class ZSessionService {
-
-  abstract create(params: ConnectionParams): Observable<ZSessionInfo>
-
-  abstract close(session: ZSessionInfo): Observable<void>
-}
+export * from "./default-connection-manager"
+export * from "./connection-manager"

@@ -33,10 +33,8 @@ import {
   InfoData,
   InfoDialogComponent,
   MoveZNodeData,
-  MoveZNodeDialogComponent,
-  SessionInfoDialogComponent
+  MoveZNodeDialogComponent
 } from "./dialogs";
-import {ZSessionInfo} from "../zsession/zsession-info";
 import {Subscription} from "rxjs/Rx";
 import {Maybe} from "tsmonad";
 
@@ -246,26 +244,6 @@ export class DefaultDialogService extends DialogService {
     });
 
     return dialog.afterClosed().pipe(map((data: MoveZNodeData, index) => Maybe.maybe(data)));
-  }
-
-  showSessionInfo(
-    sessionInfo: ZSessionInfo,
-    viewRef?: ViewContainerRef
-  ): Observable<void> {
-    const dialog = this.dialog.open(SessionInfoDialogComponent, {
-      data: sessionInfo,
-      viewContainerRef: viewRef,
-      role: "dialog",
-      hasBackdrop: true,
-      width: "500px",
-      maxWidth: "80vw",
-      height: "250px",
-      maxHeight: "80vw",
-      direction: "ltr",
-      autoFocus: true
-    });
-
-    return dialog.afterClosed();
   }
 
   showError(
