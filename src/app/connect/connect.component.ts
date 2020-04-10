@@ -40,6 +40,8 @@ export class ConnectComponent implements OnInit, OnDestroy {
 
   errorMsg: any = null;
 
+  docsUrl: string = environment.docsUrl;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,

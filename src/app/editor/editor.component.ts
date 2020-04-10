@@ -25,6 +25,7 @@ import {Ordering} from "./ordering";
 import {EDITOR_QUERY_NODE_PATH} from "./editor-routing.constants";
 import {DialogService, ZNodePath, ZNodeWithChildren, ZPath, ZPathService, ZSessionHandler, ZSessionService} from "../core";
 import {RegexpFilterComponent} from "../shared";
+import {environment} from "../../environments/environment";
 
 @Component({
   templateUrl: "editor.component.html",
@@ -44,6 +45,8 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   childrenZNodes: ZPath[] = [];
   filteredZNodes: ZPath[] = [];
   selectedZNodes: ZPath[] = [];
+
+  docsUrl: string = environment.docsUrl;
 
   private static filterZNodes(nodes: ZPath[], regexp: RegExp): ZPath[] {
     return nodes.filter(node => node.name.valueOrThrow().match(regexp));

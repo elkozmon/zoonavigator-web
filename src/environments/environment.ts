@@ -22,6 +22,7 @@
 
 export const environment = {
   production: false,
+  docsUrl: "https://zoonavigator.elkozmon.com/en/latest",
   appVersion: "dev",
   baseHref: "/",
   apiHref: "/api"

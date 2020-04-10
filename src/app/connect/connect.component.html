@@ -60,7 +60,9 @@
                      formControlName="username"
                      (change)="onCredentialsChange(i)"/>
               <!--<span mat-prefix><mat-icon>person</mat-icon></span>-->
-              <mat-hint *ngIf="i == 0"><a href="http://www.elkozmon.com/zoonavigator/help/faqs/#what-should-i-fill-in-for-auth-username-and-auth-password" target="_blank">What's this?</a></mat-hint>
+              <mat-hint *ngIf="i == 0"><a
+                [href]="docsUrl.concat('/help/faqs.html#what-should-i-fill-in-for-auth-username-and-auth-password')"
+                target="_blank">What's this?</a></mat-hint>
             </mat-form-field>
             <mat-form-field>
               <input matInput
