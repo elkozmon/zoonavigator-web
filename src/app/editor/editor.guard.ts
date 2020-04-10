@@ -16,18 +16,22 @@
  */
 
 import {Injectable} from "@angular/core";
-import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot} from "@angular/router";
-import {Observable} from "rxjs";
-import {map} from "rxjs/operators";
+import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, PRIMARY_OUTLET, Router, RouterStateSnapshot} from "@angular/router";
+import {Observable, of} from "rxjs";
+import {switchMap, map, mapTo, take, tap} from "rxjs/operators";
 import {ConnectionManager} from "../core/connection/manager";
 import {CONNECT_QUERY_RETURN_URL} from "../connect/connect-routing.constants";
+import {EDITOR_QUERY_NODE_CONNECTION} from "./editor-routing.constants";
+import {ConfigService} from "../config";
+import {ConnectionPredef} from "../core/connection/connection-predef";
 
 @Injectable()
 export class EditorGuard implements CanActivate, CanActivateChild {
 
   constructor(
     private router: Router,
-    private connectionManager: ConnectionManager
+    private connectionManager: ConnectionManager,
+    private configService: ConfigService,
   ) {
   }
 
@@ -35,7 +39,7 @@ export class EditorGuard implements CanActivate, CanActivateChild {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
-    return this.checkConnection(state.url);
+    return this.checkConnection(route, state);
   }
 
   canActivateChild(
@@ -45,27 +49,73 @@ export class EditorGuard implements CanActivate, CanActivateChild {
     return this.canActivate(childRoute, state);
   }
 
-  private checkConnection(url: string): Observable<boolean> {
-    return this.connectionManager
-      .getConnection()
-      .pipe(
-        map((maybeConnection) => {
-          const connectionExists = maybeConnection
-            .map(() => true)
-            .valueOr(false);
+  private isConnectionPredef(object: any): object is ConnectionPredef {
+    return "name" in object;
+  }
 
-          if (connectionExists) {
-            return true;
+  private checkConnection(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+    return this.connectionManager
+      .observeConnection()
+      .pipe(
+        take(1),
+        switchMap((maybeConnection) => {
+          if (route.queryParamMap.has(EDITOR_QUERY_NODE_CONNECTION)) {
+            const name = decodeURI(route.queryParamMap.get(EDITOR_QUERY_NODE_CONNECTION));
+            const conn = this.configService.config.connections.find((f) => f.name === name);
+
+            if (conn) {
+              return this.connectionManager.useConnection(conn).pipe(mapTo(true));
+            }
           }
 
-          this.router.navigate(["/"], {
+          const connection = maybeConnection.valueOr(null);
+
+          if (connection) {
+            // add node connection query param when using predef conn
+            if (this.isConnectionPredef(connection) && !route.queryParamMap.has(EDITOR_QUERY_NODE_CONNECTION)) {
+              const segments = route
+                .url
+                .map(s => s.path);
+
+              this.router.navigate(segments, {
+                  queryParams: {
+                    [EDITOR_QUERY_NODE_CONNECTION]: encodeURI(connection.name)
+                  },
+                  queryParamsHandling: "merge"
+                }
+              );
+
+              return of(false);
+            }
+
+            // remove node connection query param when not using predef conn
+            if (!this.isConnectionPredef(connection) && route.queryParamMap.has(EDITOR_QUERY_NODE_CONNECTION)) {
+              const segments = route
+                .url
+                .map(s => s.path);
+
+              this.router.navigate(segments, {
+                  queryParams: {
+                    [EDITOR_QUERY_NODE_CONNECTION]: undefined
+                  },
+                  queryParamsHandling: "merge"
+                }
+              );
+
+              return of(false);
+            }
+
+            return of(true);
+          }
+
+          this.router.navigate(["connect"], {
               queryParams: {
-                [CONNECT_QUERY_RETURN_URL]: url
+                [CONNECT_QUERY_RETURN_URL]: encodeURI(state.url)
               }
             }
           );
 
-          return false;
+          return of(false);
         })
       );
   }

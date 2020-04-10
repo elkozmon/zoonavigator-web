@@ -37,8 +37,14 @@ export class ZNodeWithChildrenResolver implements Resolve<Either<Error, ZNodeWit
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ) {
+    let uri = "/";
+
+    if (route.queryParamMap.has(EDITOR_QUERY_NODE_PATH)) {
+      uri = decodeURI(route.queryParamMap.get(EDITOR_QUERY_NODE_PATH));
+    }
+
     const nodePath = this.zPathService
-      .parse(route.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/")
+      .parse(uri)
       .path;
 
     return this.zNodeService

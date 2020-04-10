@@ -35,9 +35,9 @@ export class DefaultConnectionManager implements ConnectionManager {
   }
 
   // TODO
-  getConnection(): Observable<Maybe<ConnectionPredef | ConnectionParams>> {
+  observeConnection(): Observable<Maybe<ConnectionPredef | ConnectionParams>> {
     return this.storageService
-      .get(this.connectionKey)
+      .observe(this.connectionKey)
       .pipe(
         map((value) => Maybe.maybe(value ? JSON.parse(value) : null))
       );

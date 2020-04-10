@@ -74,7 +74,13 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       .queryParams
       .pipe(
         pluck(EDITOR_QUERY_NODE_PATH),
-        map((maybePath: string) => this.zPathService.parse(maybePath || "/"))
+        map((maybePath: string) => {
+          if (maybePath) {
+            return this.zPathService.parse(decodeURI(maybePath));
+          }
+
+          return this.zPathService.parse("/");
+        })
       );
 
     this.zNode = (<Observable<Either<Error, ZNodeWithChildren>>>this.route.data)

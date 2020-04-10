@@ -30,14 +30,14 @@
       </i>
     </p>
   </div>
+  <div *ngIf="errorMessage" class="zoo-error-bar">
+    {{errorMessage}}
+  </div>
   <mat-card>
     <mat-card-content>
       <form [formGroup]="cxnParamsForm"
             layout="column"
             layout-align="center center">
-        <div *ngIf="cxnParamsError" class="zoo-error-bar">
-          {{cxnParamsError}}
-        </div>
         <div>
           <mat-form-field>
             <input matInput
@@ -88,9 +88,6 @@
       <form [formGroup]="cxnPredefForm"
             layout="column"
             layout-align="center center">
-        <div *ngIf="cxnPredefError" class="zoo-error-bar">
-          {{cxnPredefError}}
-        </div>
         <div>
           <mat-form-field>
             <mat-label>Cluster name</mat-label>
@@ -110,4 +107,7 @@
       </form>
     </mat-card-content>
   </mat-card>
+  <p class="tc-grey-600 text-md zoo-footer">
+    {{appVersion}}
+  </p>
 </div>

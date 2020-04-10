@@ -16,12 +16,13 @@
  */
 
 import {Injectable} from "@angular/core";
-import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
+import {ActivatedRouteSnapshot, CanActivate, PRIMARY_OUTLET, Router, RouterStateSnapshot} from "@angular/router";
 import {Observable, of} from "rxjs";
 import {ConfigService} from "./config";
 import {ConnectionManager} from "./core";
 import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect/connect-routing.constants";
 import {ConnectionPredef} from "./core/connection/connection-predef";
+import {EDITOR_QUERY_NODE_CONNECTION} from "./editor";
 
 /**
  * Looks for auto-connect configuration which this guard uses
@@ -46,11 +47,11 @@ export class AppGuard implements CanActivate {
     const autoConnect = this.configService.config.autoConnect;
 
     if (autoConnect) {
-      const cxn: ConnectionPredef | undefined = this.configService.config.connections.find(t => t.name === autoConnect);
+      const conn: ConnectionPredef | undefined = this.configService.config.connections.find(t => t.name === autoConnect);
 
-      if (cxn) {
+      if (conn) {
         this.connectionManager
-          .useConnection(cxn)
+          .useConnection(conn)
           .subscribe(
             () => {
               if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {
@@ -64,7 +65,7 @@ export class AppGuard implements CanActivate {
             error => this.navigateToConnect(route, error)
           );
       } else {
-        this.navigateToConnect(route);
+        this.navigateToConnect(route, `Auto connect failed. Make sure connection named '${autoConnect}' was defined.`);
       }
     }
 
@@ -82,11 +83,11 @@ export class AppGuard implements CanActivate {
     const queryParams = {};
 
     if (error) {
-      queryParams[CONNECT_QUERY_ERROR_MSG] = error;
+      queryParams[CONNECT_QUERY_ERROR_MSG] = encodeURI(error);
     }
 
     if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {
-      queryParams[CONNECT_QUERY_RETURN_URL] = route.queryParamMap.get(CONNECT_QUERY_RETURN_URL);
+      queryParams[CONNECT_QUERY_RETURN_URL] = encodeURI(route.queryParamMap.get(CONNECT_QUERY_RETURN_URL));
     }
 
     this.router.navigate(["connect"], {

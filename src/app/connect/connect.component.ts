@@ -16,7 +16,7 @@
  */
 
 import {Component, OnDestroy, OnInit} from "@angular/core";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, PRIMARY_OUTLET, Router} from "@angular/router";
 import {catchError, finalize, switchMap} from "rxjs/operators";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {LoadingMode, LoadingType, TdLoadingService} from "@covalent/core";
@@ -25,6 +25,8 @@ import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect-routi
 import {Subscription} from "rxjs/Rx";
 import {ConnectionPredef} from "../core/connection/connection-predef";
 import {ConfigService} from "../config";
+import {EDITOR_QUERY_NODE_CONNECTION} from "../editor";
+import {environment} from "../../environments/environment";
 
 @Component({
   templateUrl: "./connect.component.html",
@@ -38,13 +40,13 @@ export class ConnectComponent implements OnInit, OnDestroy {
 
   private loadingFullscreenKey = "loadingFullscreen";
 
-  cxnParamsForm: FormGroup;
+  errorMessage: any = null;
 
-  cxnParamsError: any = null;
+  cxnParamsForm: FormGroup;
 
   cxnPredefForm: FormGroup;
 
-  cxnPredefError: any = null;
+  appVersion: string = environment.appVersion;
 
   constructor(
     private route: ActivatedRoute,
@@ -74,8 +76,17 @@ export class ConnectComponent implements OnInit, OnDestroy {
       this.route
         .queryParamMap
         .subscribe(paramMap => {
-          this.cxnParamsError = paramMap.get(CONNECT_QUERY_ERROR_MSG) || null;
-          this.redirectUrl = paramMap.get(CONNECT_QUERY_RETURN_URL) || "/editor";
+          if (paramMap.has(CONNECT_QUERY_ERROR_MSG)) {
+            this.errorMessage = decodeURI(paramMap.get(CONNECT_QUERY_ERROR_MSG));
+          } else {
+            this.errorMessage = null;
+          }
+
+          if (paramMap.has(CONNECT_QUERY_RETURN_URL)) {
+            this.redirectUrl = decodeURI(paramMap.get(CONNECT_QUERY_RETURN_URL));
+          } else {
+            this.redirectUrl = "/editor/data";
+          }
         })
     );
 
@@ -102,7 +113,7 @@ export class ConnectComponent implements OnInit, OnDestroy {
   }
 
   onCxnParamsSubmit(): void {
-    this.cxnParamsError = null;
+    this.errorMessage = null;
     this.startLoader();
 
     this.subscription.add(
@@ -114,7 +125,7 @@ export class ConnectComponent implements OnInit, OnDestroy {
         .pipe(
           switchMap(() => this.router.navigateByUrl(this.redirectUrl)),
           finalize(() => this.stopLoader()),
-          catchError(err => this.cxnParamsError = err.toString())
+          catchError(err => this.errorMessage = err.toString())
         )
         .subscribe()
     );
@@ -190,16 +201,18 @@ export class ConnectComponent implements OnInit, OnDestroy {
   }
 
   onCxnPredefSubmit(): void {
-    this.cxnPredefError = null;
+    this.errorMessage = null;
     this.startLoader();
+
+    const conn = this.getCxnPredefConnectionFormValue();
 
     this.subscription.add(
       this.connectionManager
-        .useConnection(this.getCxnPredefConnectionFormValue())
+        .useConnection(conn)
         .pipe(
           switchMap(() => this.router.navigateByUrl(this.redirectUrl)),
           finalize(() => this.stopLoader()),
-          catchError(err => this.cxnPredefError = err.toString())
+          catchError(err => this.errorMessage = err.toString())
         )
         .subscribe()
     );

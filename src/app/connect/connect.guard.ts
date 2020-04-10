@@ -18,7 +18,7 @@
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs";
-import {map} from "rxjs/operators";
+import {map, take, tap} from "rxjs/operators";
 import {ConnectionManager} from "../core/connection/manager";
 import {CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 import {EDITOR_QUERY_NODE_PATH} from "../editor";
@@ -41,8 +41,9 @@ export class ConnectGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
     return this.connectionManager
-      .getConnection()
+      .observeConnection()
       .pipe(
+        take(1),
         map((maybeConnection) => {
           const connectionExists = maybeConnection
             .map(() => true)

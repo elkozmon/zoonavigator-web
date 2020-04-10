@@ -24,5 +24,5 @@ export const environment = {
   production: false,
   appVersion: "dev",
   baseHref: "/",
-  apiHref: "/api"
+  apiHref: "/api",
 };

@@ -24,7 +24,7 @@ import {ConnectionParams} from "../connection-params";
 @Injectable()
 export abstract class ConnectionManager {
 
-  abstract getConnection(): Observable<Maybe<ConnectionPredef | ConnectionParams>>
+  abstract observeConnection(): Observable<Maybe<ConnectionPredef | ConnectionParams>>
 
   abstract useConnection(value: ConnectionPredef | ConnectionParams): Observable<void>
 

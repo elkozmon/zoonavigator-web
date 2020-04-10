@@ -82,7 +82,6 @@ export class DefaultApiService implements ApiService {
       .pipe(
         timeoutWith(config.requestTimeoutMillis, defer(() => throwError("Request timed out"))),
         map((t: HttpResponse<Object>) => {
-          console.log(t);
           if (t.headers.has("Content-Type") && t.headers.get("Content-Type").startsWith("application/json")) {
             return DefaultApiService.extractResponse<T>(t.body);
           } else {
@@ -116,7 +115,7 @@ export class DefaultApiService implements ApiService {
             switchMapTo(from(
               this.router.navigate(["/"], {
                 queryParams: {
-                  [CONNECT_QUERY_RETURN_URL]: returnUrl
+                  [CONNECT_QUERY_RETURN_URL]: encodeURI(returnUrl)
                 }
               })
             )),

@@ -133,7 +133,7 @@ export class NavActionsComponent implements OnInit, OnDestroy {
               this.router.navigate([], {
                 relativeTo: this.route,
                 queryParams: {
-                  [EDITOR_QUERY_NODE_PATH]: data.path
+                  [EDITOR_QUERY_NODE_PATH]: encodeURI(data.path)
                 },
                 queryParamsHandling: "merge"
               });
@@ -172,7 +172,7 @@ export class NavActionsComponent implements OnInit, OnDestroy {
               this.router.navigate([], {
                 relativeTo: this.route,
                 queryParams: {
-                  [EDITOR_QUERY_NODE_PATH]: data.path
+                  [EDITOR_QUERY_NODE_PATH]: encodeURI(data.path)
                 },
                 queryParamsHandling: "merge"
               });

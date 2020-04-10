@@ -17,15 +17,33 @@
 
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef} from "@angular/core";
 import {animate, state, style, transition, trigger} from "@angular/animations";
-import {MatInput} from "@angular/material";
+import {MatInput, MatSelectChange} from "@angular/material";
 import {ActivatedRoute, Router} from "@angular/router";
-import {EMPTY} from "rxjs";
-import {catchError, mapTo, switchMap} from "rxjs/operators";
+import {EMPTY, of} from "rxjs";
+import {catchError, map, mapTo, switchMap, take} from "rxjs/operators";
 import {Maybe} from "tsmonad";
-import {DialogService, FileSaverService, ZNodeExport, ZNodeService, ZNodeWithChildren, ZPath, ZPathService} from "../../core";
-import {EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
+import {
+  ConnectionManager,
+  ConnectionParams,
+  DialogService,
+  FileSaverService,
+  ZNodeExport,
+  ZNodeService,
+  ZNodeWithChildren,
+  ZPath,
+  ZPathService
+} from "../../core";
+import {EDITOR_QUERY_NODE_CONNECTION, EDITOR_QUERY_NODE_PATH} from "../editor-routing.constants";
 import {CreateZNodeData} from "../../core/dialog";
 import {Subscription} from "rxjs/Rx";
+import {ConfigService} from "../../config";
+import {ConnectionPredef} from "../../core/connection/connection-predef";
+import {Observable} from "rxjs/Observable";
+
+interface ConnectionOption {
+  label: string;
+  value: ConnectionPredef | ConnectionParams;
+}
 
 @Component({
   selector: "zoo-toolbar",
@@ -53,9 +71,25 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   @Input() zPath: ZPath;
   @Input() zNode: Maybe<ZNodeWithChildren>;
 
+  connections: Observable<(ConnectionPredef | ConnectionParams)[]>;
+  connectionsOptionCurrent: Observable<ConnectionOption>;
+  connectionsOptionArray: Observable<ConnectionOption[]>;
+
   navigationError: string;
 
   refreshButtonRotatedState = "default";
+
+  compareConnections = (c1: ConnectionOption, c2: ConnectionOption): boolean => {
+    if (c1.label !== c2.label) {
+      return false;
+    }
+
+    if (c1.value.connectionString !== c2.value.connectionString) {
+      return false;
+    }
+
+    return this.isConnectionPredef(c1.value) === this.isConnectionPredef(c2.value);
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -63,9 +97,72 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     private zNodeService: ZNodeService,
     private zPathService: ZPathService,
     private dialogService: DialogService,
+    private configService: ConfigService,
+    private connectionManager: ConnectionManager,
     private fileSaverService: FileSaverService,
     private viewContainerRef: ViewContainerRef
   ) {
+    this.connections = this.connectionManager.observeConnection().pipe(
+      take(1), // hack to retain custom connection on connection change
+      map((maybeConn) => {
+          const connArray = maybeConn.caseOf<(ConnectionPredef | ConnectionParams)[]>({
+            just: conn => {
+              if (this.isConnectionPredef(conn)) {
+                return [];
+              }
+
+              return [conn];
+            },
+            nothing: () => []
+          });
+
+          return connArray.concat(this.configService.config.connections);
+        }
+      )
+    );
+
+    this.connectionsOptionCurrent = this.connectionManager.observeConnection().pipe(
+      switchMap((maybeConn) =>
+        maybeConn.caseOf<Observable<ConnectionOption>>({
+          just: conn => {
+            if (this.isConnectionPredef(conn)) {
+              return of({
+                label: conn.name,
+                value: conn
+              });
+            }
+
+            return of({
+              label: conn.connectionString,
+              value: conn
+            });
+          },
+          nothing: () => EMPTY
+        })
+      )
+    );
+
+    this.connectionsOptionArray = this.connections.pipe(
+      map((connections) =>
+        connections.map(conn => {
+          if (this.isConnectionPredef(conn)) {
+            return {
+              label: conn.name,
+              value: conn
+            };
+          }
+
+          return {
+            label: conn.connectionString,
+            value: conn
+          };
+        })
+      )
+    );
+  }
+
+  isConnectionPredef(object: any): object is ConnectionPredef {
+    return "name" in object;
   }
 
   ngOnDestroy(): void {
@@ -73,7 +170,44 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscription = new Subscription(() => {});
+    this.subscription = new Subscription(() => {
+    });
+  }
+
+  onConnectionOptionChange(selectChange: MatSelectChange): void {
+    const option = selectChange.value as ConnectionOption;
+    const conn = option.value;
+
+    if (this.isConnectionPredef(conn)) {
+      this.subscription.add(
+        this.connectionManager
+          .useConnection(conn)
+          .subscribe(() => {
+            this.router.navigate([], {
+                queryParams: {
+                  [EDITOR_QUERY_NODE_CONNECTION]: encodeURI(conn.name)
+                },
+                queryParamsHandling: "merge"
+              }
+            )
+          })
+      );
+      return;
+    }
+
+    this.subscription.add(
+      this.connectionManager
+        .useConnection(conn)
+        .subscribe(() => {
+          this.router.navigate([], {
+              queryParams: {
+                [EDITOR_QUERY_NODE_CONNECTION]: undefined
+              },
+              queryParamsHandling: "merge"
+            }
+          )
+        })
+    );
   }
 
   onRefreshClick(): void {
@@ -86,6 +220,10 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   onHomeClick(): void {
     this.router.navigate([], {
       relativeTo: this.route,
+      queryParams: {
+        [EDITOR_QUERY_NODE_PATH]: undefined
+      },
+      queryParamsHandling: "merge"
     });
   }
 
@@ -115,7 +253,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
             this.router.navigate([], {
               relativeTo: this.route,
               queryParams: {
-                [EDITOR_QUERY_NODE_PATH]: parentPath
+                [EDITOR_QUERY_NODE_PATH]: encodeURI(parentPath)
               },
               queryParamsHandling: "merge"
             });
@@ -166,7 +304,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
               this.router.navigate([], {
                 relativeTo: this.route,
                 queryParams: {
-                  [EDITOR_QUERY_NODE_PATH]: data.path
+                  [EDITOR_QUERY_NODE_PATH]: encodeURI(data.path)
                 },
                 queryParamsHandling: "merge"
               });
@@ -207,7 +345,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
             this.router.navigate([], {
               relativeTo: this.route,
               queryParams: {
-                [EDITOR_QUERY_NODE_PATH]: data.path
+                [EDITOR_QUERY_NODE_PATH]: encodeURI(data.path)
               },
               queryParamsHandling: "merge"
             });
@@ -231,7 +369,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       .navigate([], {
         relativeTo: this.route,
         queryParams: {
-          [EDITOR_QUERY_NODE_PATH]: zPath.path
+          [EDITOR_QUERY_NODE_PATH]: encodeURI(zPath.path)
         },
         queryParamsHandling: "merge"
       })

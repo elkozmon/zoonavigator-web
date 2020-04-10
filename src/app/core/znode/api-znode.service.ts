@@ -18,7 +18,7 @@
 import {Injectable} from "@angular/core";
 import {HttpHeaders, HttpParams} from "@angular/common/http";
 import {Observable, of, throwError} from "rxjs";
-import {map, mapTo, switchMap} from "rxjs/operators";
+import {map, mapTo, switchMap, take} from "rxjs/operators";
 import {ZNodeService} from "./znode.service";
 import {ZNodeChildren} from "./znode-children";
 import {ZNodeMeta} from "./znode-meta";
@@ -43,8 +43,9 @@ export class ApiZNodeService implements ZNodeService {
 
   private withAuthToken<T>(fun: (string) => Observable<T>): Observable<T> {
     return this.connectionManager
-      .getConnection()
+      .observeConnection()
       .pipe(
+        take(1),
         switchMap(maybeConnection => maybeConnection.caseOf({
           just: cxn => of(this.connectionToToken(cxn)),
           nothing: () => throwError(new Error("Connection was lost"))
