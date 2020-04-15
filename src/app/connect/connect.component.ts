@@ -23,6 +23,7 @@ import {LoadingMode, LoadingType, TdLoadingService} from "@covalent/core";
 import {AuthInfo, Scheme, ZSessionHandler, ZSessionService} from "../core";
 import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 import {Subscription} from "rxjs/Rx";
+import {environment} from "../../environments/environment";
 
 @Component({
   templateUrl: "./connect.component.html",
