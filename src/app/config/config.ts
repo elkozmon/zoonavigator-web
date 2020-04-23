@@ -15,8 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {ConnectionPredef} from "../core/connection/connection-predef";
+
 export interface Config {
-  apiRequestTimeoutMillis: number;
-  autoConnectConnectionString?: string;
-  autoConnectAuthInfo?: string[];
+  requestTimeoutMillis: number;
+  autoConnect?: string;
+  connections: ConnectionPredef[];
 }

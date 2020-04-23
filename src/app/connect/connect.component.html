@@ -16,7 +16,7 @@
   -->
 
 <!--suppress HtmlUnknownTag, HtmlUnknownAttribute -->
-<div layout="column" layout-align="start center" layout-fill class="bgc-grey-200">
+<div layout="column" layout-align="start center" layout-fill>
   <div layout="column" layout-align="center center" class="zoo-header">
     <span layout-margin class="mat-display-1 tc-blue-grey-600">
       <fa name="paw"></fa>
@@ -30,14 +30,14 @@
       </i>
     </p>
   </div>
+  <div *ngIf="errorMessage" class="zoo-error-bar">
+    {{errorMessage}}
+  </div>
   <mat-card>
     <mat-card-content>
-      <form [formGroup]="connectForm"
+      <form [formGroup]="cxnParamsForm"
             layout="column"
             layout-align="center center">
-        <div *ngIf="errorMsg" class="zoo-error-bar">
-          {{errorMsg}}
-        </div>
         <div>
           <mat-form-field>
             <input matInput
@@ -51,14 +51,14 @@
         </div>
         <div formArrayName="credentialsArray">
           <div layout="row"
-               *ngFor="let credentials of credentialsFormArray.controls; let i = index"
+               *ngFor="let credentials of cxnParamsCredentialsFormArray.controls; let i = index"
                [formGroup]="credentials">
             <mat-form-field>
               <input matInput
                      type="text"
                      placeholder="Auth username"
                      formControlName="username"
-                     (change)="onCredentialsChange(i)"/>
+                     (change)="onCxnParamsCredentialsChange(i)"/>
               <!--<span mat-prefix><mat-icon>person</mat-icon></span>-->
               <mat-hint *ngIf="i == 0"><a
                 [href]="docsUrl.concat('/help/faqs.html#what-should-i-fill-in-for-auth-username-and-auth-password')"
@@ -69,15 +69,45 @@
                      type="password"
                      placeholder="Auth password"
                      formControlName="password"
-                     (change)="onCredentialsChange(i)"/>
+                     (change)="onCxnParamsCredentialsChange(i)"/>
               <!--<span mat-prefix><mat-icon>lock</mat-icon></span>-->
             </mat-form-field>
           </div>
         </div>
-        <button mat-raised-button color="primary" [disabled]="!connectForm.valid" (click)="onSubmit()">
+        <button mat-raised-button color="primary" [disabled]="!cxnParamsForm.valid" (click)="onCxnParamsSubmit()">
           Connect
         </button>
       </form>
     </mat-card-content>
   </mat-card>
+  <p class="tc-grey-600 text-md" *ngIf="cxnPredefConnectionsArray?.length">
+    or select from predefined clusters
+  </p>
+  <mat-card *ngIf="cxnPredefConnectionsArray?.length">
+    <mat-card-content>
+      <form [formGroup]="cxnPredefForm"
+            layout="column"
+            layout-align="center center">
+        <div>
+          <mat-form-field>
+            <mat-label>Cluster name</mat-label>
+            <mat-select
+              formControlName="connectionName"
+              [required]="true">
+              <mat-option *ngFor="let connection of cxnPredefConnectionsArray" [value]="connection">
+                {{connection.name}}
+              </mat-option>
+            </mat-select>
+            <mat-hint>Required</mat-hint>
+          </mat-form-field>
+        </div>
+        <button mat-raised-button color="primary" [disabled]="!cxnPredefForm.valid" (click)="onCxnPredefSubmit()">
+          Connect
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+  <p class="tc-grey-600 text-md zoo-footer">
+    {{appVersion}}
+  </p>
 </div>

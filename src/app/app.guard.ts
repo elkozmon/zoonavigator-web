@@ -16,13 +16,13 @@
  */
 
 import {Injectable} from "@angular/core";
-import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
+import {ActivatedRouteSnapshot, CanActivate, PRIMARY_OUTLET, Router, RouterStateSnapshot} from "@angular/router";
 import {Observable, of} from "rxjs";
-import {switchMap} from "rxjs/operators";
 import {ConfigService} from "./config";
-import {ZSessionHandler, ZSessionService} from "./core";
-import {AuthInfo, ConnectionParams} from "./core/zsession";
+import {ConnectionManager} from "./core";
 import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect/connect-routing.constants";
+import {ConnectionPredef} from "./core/connection/connection-predef";
+import {EDITOR_QUERY_NODE_CONNECTION} from "./editor";
 
 /**
  * Looks for auto-connect configuration which this guard uses
@@ -36,8 +36,7 @@ export class AppGuard implements CanActivate {
   constructor(
     private router: Router,
     private configService: ConfigService,
-    private zSessionService: ZSessionService,
-    private zSessionHandler: ZSessionHandler
+    private connectionManager: ConnectionManager
   ) {
   }
 
@@ -45,40 +44,29 @@ export class AppGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.configService.config.autoConnectConnectionString) {
-      let authInfo: AuthInfo[] = [];
+    const autoConnect = this.configService.config.autoConnect;
 
-      if (this.configService.config.autoConnectAuthInfo) {
-        authInfo = this.configService.config.autoConnectAuthInfo.map<AuthInfo>(id => {
-          return {
-            id: id,
-            scheme: "digest"
-          };
-        })
+    if (autoConnect) {
+      const conn: ConnectionPredef | undefined = this.configService.config.connections.find(t => t.name === autoConnect);
+
+      if (conn) {
+        this.connectionManager
+          .useConnection(conn)
+          .subscribe(
+            () => {
+              if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {
+                this.router.navigateByUrl(route.queryParamMap.get(CONNECT_QUERY_RETURN_URL));
+
+                return;
+              }
+
+              this.navigateToEditor();
+            },
+            error => this.navigateToConnect(route, error)
+          );
+      } else {
+        this.navigateToConnect(route, `Auto connect failed. Make sure connection named '${autoConnect}' was defined.`);
       }
-
-      const connectionParams: ConnectionParams = {
-        connectionString: this.configService.config.autoConnectConnectionString,
-        authInfo: authInfo
-      };
-
-      this.zSessionService
-        .create(connectionParams)
-        .pipe(switchMap(sessionInfo => this.zSessionHandler.setSessionInfo(sessionInfo)))
-        .subscribe(
-          () => {
-            if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {
-              this.router.navigateByUrl(route.queryParamMap.get(CONNECT_QUERY_RETURN_URL));
-
-              return;
-            }
-
-            this.navigateToEditor();
-          },
-          error => this.navigateToConnect(route, error)
-        );
-    } else {
-      this.navigateToConnect(route);
     }
 
     return of(false);
@@ -95,11 +83,11 @@ export class AppGuard implements CanActivate {
     const queryParams = {};
 
     if (error) {
-      queryParams[CONNECT_QUERY_ERROR_MSG] = error;
+      queryParams[CONNECT_QUERY_ERROR_MSG] = encodeURI(error);
     }
 
     if (route.queryParamMap.has(CONNECT_QUERY_RETURN_URL)) {
-      queryParams[CONNECT_QUERY_RETURN_URL] = route.queryParamMap.get(CONNECT_QUERY_RETURN_URL);
+      queryParams[CONNECT_QUERY_RETURN_URL] = encodeURI(route.queryParamMap.get(CONNECT_QUERY_RETURN_URL));
     }
 
     this.router.navigate(["connect"], {

@@ -17,18 +17,19 @@
 
 import {Inject, Injectable} from "@angular/core";
 import {Router} from "@angular/router";
-import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpResponse} from "@angular/common/http";
 import {defer, from, Observable, throwError} from "rxjs";
 import {catchError, map, switchMap, switchMapTo, take, timeoutWith} from "rxjs/operators";
 import {ConfigService} from "../../../config";
 import {CONNECT_QUERY_RETURN_URL} from "../../../connect/connect-routing.constants";
 import {ApiResponse} from "../response";
-import {ZSessionHandler} from "../../zsession/handler";
+import {ConnectionManager} from "../../connection/manager";
 import {DialogService} from "../../dialog";
 import {ApiRequest} from "../request";
 import {ApiService} from "./api.service";
 import {APP_BASE_HREF} from "@angular/common";
 import {environment} from "../../../../environments/environment";
+import {HttpObserve} from "@angular/common/http/src/client";
 
 @Injectable()
 export class DefaultApiService implements ApiService {
@@ -44,7 +45,7 @@ export class DefaultApiService implements ApiService {
   constructor(
     private router: Router,
     private httpClient: HttpClient,
-    private zSessionHandler: ZSessionHandler,
+    private connectionManager: ConnectionManager,
     private dialogService: DialogService,
     private configService: ConfigService,
     @Inject(APP_BASE_HREF) private baseHref: string
@@ -59,6 +60,7 @@ export class DefaultApiService implements ApiService {
     const options = {
       body: null,
       url: url,
+      observe: "response" as HttpObserve,
       params: apiRequest.params,
       headers: apiRequest.headers || new HttpHeaders()
     };
@@ -78,8 +80,14 @@ export class DefaultApiService implements ApiService {
     return <Observable<ApiResponse<T>>>this.httpClient
       .request(apiRequest.method, url, options)
       .pipe(
-        timeoutWith(config.apiRequestTimeoutMillis, defer(() => throwError("Request timed out"))),
-        map((t) => DefaultApiService.extractResponse<T>(t)),
+        timeoutWith(config.requestTimeoutMillis, defer(() => throwError("Request timed out"))),
+        map((t: HttpResponse<Object>) => {
+          if (t.headers.has("Content-Type") && t.headers.get("Content-Type").startsWith("application/json")) {
+            return DefaultApiService.extractResponse<T>(t.body);
+          } else {
+            return { success: t.ok };
+          }
+        }),
         catchError(err => this.handleError(err))
       );
   }
@@ -103,11 +111,11 @@ export class DefaultApiService implements ApiService {
 
         this.dialogService.showError(error, null)
           .pipe(
-            switchMapTo(this.zSessionHandler.removeSessionInfo()),
+            switchMapTo(this.connectionManager.removeConnection()),
             switchMapTo(from(
               this.router.navigate(["/"], {
                 queryParams: {
-                  [CONNECT_QUERY_RETURN_URL]: returnUrl
+                  [CONNECT_QUERY_RETURN_URL]: encodeURI(returnUrl)
                 }
               })
             )),

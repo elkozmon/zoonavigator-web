@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019  Ľuboš Kozmon <https://www.elkozmon.com>
+ * Copyright (C) 2020  Ľuboš Kozmon <https://www.elkozmon.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Injectable} from "@angular/core";
-import {Observable} from "rxjs";
-import {Maybe} from "tsmonad";
-import {ZSessionInfo} from "../zsession-info";
+import {ConnectionString} from "./connection-string";
 
-@Injectable()
-export abstract class ZSessionHandler {
-
-  abstract getSessionInfo(): Observable<Maybe<ZSessionInfo>>
-
-  abstract setSessionInfo(value: ZSessionInfo): Observable<void>
-
-  abstract removeSessionInfo(): Observable<void>
+export interface ConnectionPredef {
+  name: string;
+  connectionString: ConnectionString;
 }

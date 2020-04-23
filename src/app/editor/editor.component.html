@@ -45,13 +45,13 @@
         matTooltipPosition="below">
         <fa name="github" class="mat-24"></fa>
       </a>
-      <button mat-icon-button [matMenuTriggerFor]="editorActionsMenu">
-        <mat-icon class="mat-24">more_vert</mat-icon>
-      </button>
-      <mat-menu #editorActionsMenu="matMenu">
-        <button mat-menu-item (click)="showSessionInfo()">Show session info</button>
-        <button mat-menu-item (click)="disconnect()">Disconnect</button>
-      </mat-menu>
+      <a
+        mat-icon-button
+        matTooltip="Disconnect"
+        matTooltipPosition="below"
+        (click)="disconnect()">
+        <fa name="sign-out" class="mat-24"></fa>
+      </a>
     </div>
 
     <td-layout-manage-list

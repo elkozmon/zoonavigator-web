@@ -18,23 +18,58 @@
 import {Injectable} from "@angular/core";
 import {StorageService} from "./storage.service";
 import {Observable, of} from "rxjs";
-import {mapTo} from "rxjs/operators";
+import {map} from "rxjs/operators";
+import {Subject, Subscription} from "rxjs/Rx";
+import {Maybe} from "tsmonad";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
 
 @Injectable()
 export class LocalStorageService implements StorageService {
 
+  private subjects: Map<string, Subject<any>>;
+  private subscription: Subscription;
+
   constructor() {
+    this.subjects = new Map<string, Subject<Maybe<any>>>();
+    this.subscription = new Subscription(() => {});
+  }
+
+  private getSubject(key: string): Subject<any> {
+    const sub = this.subjects.get(key);
+
+    if (sub) {
+      return sub;
+    }
+
+    const newSub = new BehaviorSubject<Maybe<any>>(Maybe.maybe(localStorage.getItem(key) || null));
+
+    this.subjects.set(key, newSub);
+    this.subscription.add(newSub.subscribe(maybeValue => {
+      maybeValue.caseOf({
+        just: value => localStorage.setItem(key, value),
+        nothing: () => localStorage.removeItem(key)
+      })
+    }));
+
+    return newSub;
   }
 
   set(key: string, value: any): Observable<void> {
-    return of(localStorage.setItem(key, value)).pipe(mapTo(null));
+    return of(this.getSubject(key).next(Maybe.just(value)));
   }
 
-  get(key: string): Observable<any> {
-    return of(localStorage.getItem(key));
+  observe(key: string): Observable<any> {
+    return this.getSubject(key).pipe(
+      map(maybeValue => {
+        return maybeValue.caseOf({
+          just: value => value,
+          nothing: () => null
+        })
+      })
+    );
   }
 
   remove(key: string): Observable<void> {
-    return of(localStorage.removeItem(key)).pipe(mapTo(null));
+    return of(this.getSubject(key).next(Maybe.nothing()));
   }
 }

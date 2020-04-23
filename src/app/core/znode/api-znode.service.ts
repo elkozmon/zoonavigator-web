@@ -16,40 +16,52 @@
  */
 
 import {Injectable} from "@angular/core";
-import {HttpParams} from "@angular/common/http";
+import {HttpHeaders, HttpParams} from "@angular/common/http";
 import {Observable, of, throwError} from "rxjs";
-import {map, mapTo, switchMap} from "rxjs/operators";
+import {map, mapTo, switchMap, take} from "rxjs/operators";
 import {ZNodeService} from "./znode.service";
 import {ZNodeChildren} from "./znode-children";
 import {ZNodeMeta} from "./znode-meta";
 import {ZNodeData} from "./znode-data";
 import {ZNodeAcl} from "./znode-acl";
 import {ZNodeWithChildren} from "./znode-with-children";
-import {ZSessionHandler} from "../zsession";
+import {ConnectionManager, ConnectionParams} from "../connection";
 import {ApiRequestFactory, ApiService, FileContent, JsonRequestContent} from "../api";
 import {ZNodeExport} from "./znode-export";
 import {Buffer} from "buffer";
+import {ConnectionPredef} from "../connection/connection-predef";
 
 @Injectable()
 export class ApiZNodeService implements ZNodeService {
 
   constructor(
     private apiService: ApiService,
-    private zSessionHandler: ZSessionHandler,
+    private connectionManager: ConnectionManager,
     private apiRequestFactory: ApiRequestFactory
   ) {
   }
 
   private withAuthToken<T>(fun: (string) => Observable<T>): Observable<T> {
-    return this.zSessionHandler
-      .getSessionInfo()
+    return this.connectionManager
+      .observeConnection()
       .pipe(
-        switchMap(maybeSessionInfo => maybeSessionInfo.caseOf({
-          just: info => of(info.token),
-          nothing: () => throwError(new Error("Session was lost"))
+        take(1),
+        switchMap(maybeConnection => maybeConnection.caseOf({
+          just: cxn => of(this.connectionToToken(cxn)),
+          nothing: () => throwError(new Error("Connection was lost"))
         })),
         switchMap(fun)
       );
+  }
+
+  private connectionToToken(cxn: any): string {
+    if (cxn.name) {
+      const c = cxn as ConnectionPredef;
+      return "CxnPredef " + new Buffer(c.name).toString("base64");
+    }
+
+    const c = cxn as ConnectionParams;
+    return "CxnParams " + new Buffer(JSON.stringify(c)).toString("base64");
   }
 
   getNode(path: string): Observable<ZNodeWithChildren> {
@@ -309,10 +321,13 @@ export class ApiZNodeService implements ZNodeService {
         }
       });
 
+      const headers = new HttpHeaders();
+      headers.append("Accept", "application/octet-stream");
+
       const request = this.apiRequestFactory.getRequest(
         "/znode/export",
         params,
-        null,
+        headers,
         token
       );
 

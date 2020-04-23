@@ -23,7 +23,7 @@ export abstract class StorageService {
 
   abstract set(key: string, value: any): Observable<void>
 
-  abstract get(key: string): Observable<any>
+  abstract observe(key: string): Observable<any>
 
   abstract remove(key: string): Observable<void>
 }

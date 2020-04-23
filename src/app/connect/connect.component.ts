@@ -16,13 +16,15 @@
  */
 
 import {Component, OnDestroy, OnInit} from "@angular/core";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, PRIMARY_OUTLET, Router} from "@angular/router";
 import {catchError, finalize, switchMap} from "rxjs/operators";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {LoadingMode, LoadingType, TdLoadingService} from "@covalent/core";
-import {AuthInfo, Scheme, ZSessionHandler, ZSessionService} from "../core";
+import {AuthInfo, Scheme, ConnectionManager} from "../core";
 import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 import {Subscription} from "rxjs/Rx";
+import {ConnectionPredef} from "../core/connection/connection-predef";
+import {ConfigService} from "../config";
 import {environment} from "../../environments/environment";
 
 @Component({
@@ -37,9 +39,13 @@ export class ConnectComponent implements OnInit, OnDestroy {
 
   private loadingFullscreenKey = "loadingFullscreen";
 
-  connectForm: FormGroup;
+  errorMessage: any = null;
 
-  errorMsg: any = null;
+  cxnParamsForm: FormGroup;
+
+  cxnPredefForm: FormGroup;
+
+  appVersion: string = environment.appVersion;
 
   docsUrl: string = environment.docsUrl;
 
@@ -47,8 +53,8 @@ export class ConnectComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private formBuilder: FormBuilder,
-    private zSessionService: ZSessionService,
-    private zSessionHandler: ZSessionHandler,
+    private configService: ConfigService,
+    private connectionManager: ConnectionManager,
     private loadingService: TdLoadingService
   ) {
   }
@@ -71,105 +77,146 @@ export class ConnectComponent implements OnInit, OnDestroy {
       this.route
         .queryParamMap
         .subscribe(paramMap => {
-          this.errorMsg = paramMap.get(CONNECT_QUERY_ERROR_MSG) || null;
-          this.redirectUrl = paramMap.get(CONNECT_QUERY_RETURN_URL) || "/editor";
+          if (paramMap.has(CONNECT_QUERY_ERROR_MSG)) {
+            this.errorMessage = decodeURI(paramMap.get(CONNECT_QUERY_ERROR_MSG));
+          } else {
+            this.errorMessage = null;
+          }
+
+          if (paramMap.has(CONNECT_QUERY_RETURN_URL)) {
+            this.redirectUrl = decodeURI(paramMap.get(CONNECT_QUERY_RETURN_URL));
+          } else {
+            this.redirectUrl = "/editor/data";
+          }
         })
     );
 
-    this.connectForm = this.newConnectForm();
+    this.cxnParamsForm = this.newCxnParamsForm();
+    this.cxnPredefForm = this.newCxnPredefForm();
   }
 
-  onCredentialsChange(index: number): void {
-    const isEmpty = this.isCredentialsFormGroupEmpty(index);
-    const isLast = this.getCredentialsLastNonEmptyIndex() < index;
+  onCxnParamsCredentialsChange(index: number): void {
+    const isEmpty = this.isCxnParamsCredentialsFormGroupEmpty(index);
+    const isLast = this.getCxnParamsCredentialsLastNonEmptyIndex() < index;
 
     if (isEmpty && !isLast) {
-      this.credentialsFormArray.removeAt(index);
+      this.cxnParamsCredentialsFormArray.removeAt(index);
       return;
     }
 
     if (!isEmpty && isLast) {
-      this.credentialsFormArray.push(this.newCredentialsFormGroup());
+      this.cxnParamsCredentialsFormArray.push(this.newCxnParamsCredentialsFormGroup());
     }
   }
 
-  onSubmit(): void {
-    this.errorMsg = null;
+  get cxnParamsCredentialsFormArray(): FormArray {
+    return <FormArray>this.cxnParamsForm.get("credentialsArray");
+  }
+
+  onCxnParamsSubmit(): void {
+    this.errorMessage = null;
     this.startLoader();
 
     this.subscription.add(
-      this.zSessionService
-        .create({
-          connectionString: this.getConnectionStringFormValue(),
-          authInfo: this.getAuthInfoFormValue()
+      this.connectionManager
+        .useConnection({
+          connectionString: this.getCxnParamsConnectionStringFormValue(),
+          authInfo: this.getCxnParamsAuthInfoFormValue()
         })
         .pipe(
-          switchMap((sessionInfo) => this.zSessionHandler.setSessionInfo(sessionInfo)),
           switchMap(() => this.router.navigateByUrl(this.redirectUrl)),
           finalize(() => this.stopLoader()),
-          catchError(err => this.errorMsg = err.toString())
+          catchError(err => this.errorMessage = err.toString())
         )
         .subscribe()
     );
   }
 
-  get credentialsFormArray(): FormArray {
-    return <FormArray>this.connectForm.get("credentialsArray");
-  }
-
-  private newConnectForm(): FormGroup {
+  private newCxnParamsForm(): FormGroup {
     return this.formBuilder.group({
       connectionString: ["", [Validators.required]],
       credentialsArray: this.formBuilder.array([
-        this.newCredentialsFormGroup()
+        this.newCxnParamsCredentialsFormGroup()
       ])
     });
   }
 
-  private newCredentialsFormGroup(): FormGroup {
+  private newCxnParamsCredentialsFormGroup(): FormGroup {
     return this.formBuilder.group({
       username: [""],
       password: [""]
     });
   }
 
-  private getCredentialsFormGroup(index: number): FormGroup {
-    return <FormGroup>this.credentialsFormArray.at(index);
+  private getCxnParamsCredentialsFormGroup(index: number): FormGroup {
+    return <FormGroup>this.cxnParamsCredentialsFormArray.at(index);
   }
 
-  private isCredentialsFormGroupEmpty(index: number): boolean {
-    return this.getCredentialsUsernameFormValue(index).length + this.getCredentialsPasswordFormValue(index).length === 0;
+  private isCxnParamsCredentialsFormGroupEmpty(index: number): boolean {
+    return this.getCxnParamsCredentialsUsernameFormValue(index).length + this.getCxnParamsCredentialsPasswordFormValue(index).length === 0;
   }
 
-  private getCredentialsLastNonEmptyIndex(): number {
+  private getCxnParamsCredentialsLastNonEmptyIndex(): number {
     // -2 since last row is always empty
-    return this.credentialsFormArray.controls.length - 2;
+    return this.cxnParamsCredentialsFormArray.controls.length - 2;
   }
 
-  private getConnectionStringFormValue(): string {
-    return this.connectForm.value.connectionString;
+  private getCxnParamsConnectionStringFormValue(): string {
+    return this.cxnParamsForm.value.connectionString;
   }
 
-  private getCredentialsUsernameFormValue(index: number): string {
-    return this.getCredentialsFormGroup(index).get("username").value;
+  private getCxnParamsCredentialsUsernameFormValue(index: number): string {
+    return this.getCxnParamsCredentialsFormGroup(index).get("username").value;
   }
 
-  private getCredentialsPasswordFormValue(index: number): string {
-    return this.getCredentialsFormGroup(index).get("password").value;
+  private getCxnParamsCredentialsPasswordFormValue(index: number): string {
+    return this.getCxnParamsCredentialsFormGroup(index).get("password").value;
   }
 
-  private getAuthInfoFormValue(): AuthInfo[] {
-    const lastIndex: number = this.getCredentialsLastNonEmptyIndex();
+  private getCxnParamsAuthInfoFormValue(): AuthInfo[] {
+    const lastIndex: number = this.getCxnParamsCredentialsLastNonEmptyIndex();
     const authInfos: AuthInfo[] = [];
 
     for (let i = 0; i <= lastIndex; i++) {
       authInfos.push({
-        id: `${this.getCredentialsUsernameFormValue(i)}:${this.getCredentialsPasswordFormValue(i)}`,
+        id: `${this.getCxnParamsCredentialsUsernameFormValue(i)}:${this.getCxnParamsCredentialsPasswordFormValue(i)}`,
         scheme: <Scheme>"digest"
       });
     }
 
     return authInfos;
+  }
+
+  private newCxnPredefForm(): FormGroup {
+    return this.formBuilder.group({
+      connectionName: ["", [Validators.required]]
+    });
+  }
+
+  get cxnPredefConnectionsArray(): ConnectionPredef[] {
+    return this.configService.config.connections;
+  }
+
+  private getCxnPredefConnectionFormValue(): ConnectionPredef {
+    return this.cxnPredefForm.value.connectionName;
+  }
+
+  onCxnPredefSubmit(): void {
+    this.errorMessage = null;
+    this.startLoader();
+
+    const conn = this.getCxnPredefConnectionFormValue();
+
+    this.subscription.add(
+      this.connectionManager
+        .useConnection(conn)
+        .pipe(
+          switchMap(() => this.router.navigateByUrl(this.redirectUrl)),
+          finalize(() => this.stopLoader()),
+          catchError(err => this.errorMessage = err.toString())
+        )
+        .subscribe()
+    );
   }
 
   private startLoader(): void {

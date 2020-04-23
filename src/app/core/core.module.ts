@@ -21,7 +21,7 @@ import {CommonModule} from "@angular/common";
 import {MatButtonModule, MatCheckboxModule, MatDialogModule, MatIconModule, MatInputModule} from "@angular/material";
 import {CovalentFileModule} from "@covalent/core";
 import {ApiRequestFactory, ApiService, DefaultApiRequestFactory, DefaultApiService} from "./api";
-import {ApiZSessionService, DefaultZSessionHandler, ZSessionHandler, ZSessionService} from "./zsession";
+import {DefaultConnectionManager, ConnectionManager} from "./connection";
 import {
   ConfirmDialogComponent,
   CreateZNodeDialogComponent,
@@ -30,8 +30,7 @@ import {
   DuplicateZNodeDialogComponent,
   ImportZNodesDialogComponent,
   InfoDialogComponent,
-  MoveZNodeDialogComponent,
-  SessionInfoDialogComponent
+  MoveZNodeDialogComponent
 } from "./dialog";
 import {LocalStorageService, StorageService} from "./storage";
 import {DefaultFileSaverService, FileSaverService} from "./file-saver";
@@ -60,8 +59,7 @@ import {PathSanitizingZNodeService} from "./znode/path-sanitizing-znode.service"
     ApiZNodeService,
     {provide: ZNodeService, deps: [ApiZNodeService], useFactory: (apiService) => new PathSanitizingZNodeService(apiService)},
     {provide: ZPathService, useClass: DefaultZPathService},
-    {provide: ZSessionService, useClass: ApiZSessionService},
-    {provide: ZSessionHandler, useClass: DefaultZSessionHandler},
+    {provide: ConnectionManager, useClass: DefaultConnectionManager},
     {provide: DialogService, useClass: DefaultDialogService}
   ],
   entryComponents: [
@@ -70,8 +68,7 @@ import {PathSanitizingZNodeService} from "./znode/path-sanitizing-znode.service"
     ImportZNodesDialogComponent,
     DuplicateZNodeDialogComponent,
     ConfirmDialogComponent,
-    InfoDialogComponent,
-    SessionInfoDialogComponent
+    InfoDialogComponent
   ],
   declarations: [
     MoveZNodeDialogComponent,
@@ -79,8 +76,7 @@ import {PathSanitizingZNodeService} from "./znode/path-sanitizing-znode.service"
     ImportZNodesDialogComponent,
     DuplicateZNodeDialogComponent,
     ConfirmDialogComponent,
-    InfoDialogComponent,
-    SessionInfoDialogComponent
+    InfoDialogComponent
   ]
 })
 export class CoreModule {

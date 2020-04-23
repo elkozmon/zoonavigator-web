@@ -16,3 +16,4 @@
  */
 
 export const EDITOR_QUERY_NODE_PATH = "path";
+export const EDITOR_QUERY_NODE_CONNECTION = "connection";

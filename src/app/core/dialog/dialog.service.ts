@@ -16,25 +16,8 @@
  */
 
 import {Injectable, ViewContainerRef} from "@angular/core";
-import {MatDialogRef, MatSnackBarRef, SimpleSnackBar} from "@angular/material";
-import {Observable, throwError} from "rxjs";
-import {switchMap, switchMapTo} from "rxjs/operators";
-import {
-  ConfirmData,
-  ConfirmDialogComponent,
-  CreateZNodeData,
-  CreateZNodeDialogComponent,
-  DuplicateZNodeData,
-  DuplicateZNodeDialogComponent,
-  ImportZNodesData,
-  ImportZNodesDialogComponent,
-  InfoData,
-  InfoDialogComponent,
-  MoveZNodeData,
-  MoveZNodeDialogComponent,
-  SessionInfoDialogComponent
-} from "./dialogs";
-import {ZSessionInfo} from "../zsession/zsession-info";
+import {Observable} from "rxjs";
+import {ConfirmData, CreateZNodeData, DuplicateZNodeData, ImportZNodesData, InfoData, MoveZNodeData} from "./dialogs";
 import {Maybe} from "tsmonad";
 
 @Injectable()
@@ -68,11 +51,6 @@ export abstract class DialogService {
     defaults: MoveZNodeData,
     viewRef?: ViewContainerRef
   ): Observable<Maybe<MoveZNodeData>>
-
-  abstract showSessionInfo(
-    sessionInfo: ZSessionInfo,
-    viewRef?: ViewContainerRef
-  ): Observable<void>
 
   abstract showError(
     error: Error,

@@ -164,8 +164,14 @@ export class ZNodeAclComponent implements OnInit, OnDestroy {
   }
 
   private get currentPath(): string | null {
+    let uri = "/";
+
+    if (this.route.snapshot.queryParamMap.has(EDITOR_QUERY_NODE_PATH)) {
+      uri = decodeURI(this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH));
+    }
+
     return this.zPathService
-      .parse(this.route.snapshot.queryParamMap.get(EDITOR_QUERY_NODE_PATH) || "/")
+      .parse(uri)
       .path;
   }
 }

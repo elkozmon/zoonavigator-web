@@ -74,6 +74,24 @@
   </button>
 
   <mat-form-field>
+    <mat-select
+      [required]="true"
+      (selectionChange)="onConnectionOptionChange($event)"
+      [compareWith]="compareConnections"
+      [value]="connectionsOptionCurrent | async"
+      matTooltip="Switch ZooKeeper cluster"
+      matTooltipPosition="below">
+      <mat-option *ngFor="let connection of connectionsOptionArray | async" [value]="connection">
+        {{connection.label}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <span style="margin-left: 12px">
+    @
+  </span>
+
+  <mat-form-field style="flex-grow: 5">
     <input
       matInput
       #pathInput="matInput"

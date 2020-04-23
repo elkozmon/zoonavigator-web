@@ -18,13 +18,13 @@
 import {Injectable} from "@angular/core";
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs";
-import {map} from "rxjs/operators";
-import {ZSessionHandler} from "../core/zsession/handler";
+import {map, take, tap} from "rxjs/operators";
+import {ConnectionManager} from "../core/connection/manager";
 import {CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 import {EDITOR_QUERY_NODE_PATH} from "../editor";
 
 /**
- * Checks whether user already has an active session.
+ * Checks whether user already has an active connection.
  * If so, redirects user directly to the editor.
  */
 @Injectable()
@@ -32,7 +32,7 @@ export class ConnectGuard implements CanActivate {
 
   constructor(
     private router: Router,
-    private zSessionHandler: ZSessionHandler
+    private connectionManager: ConnectionManager
   ) {
   }
 
@@ -40,15 +40,16 @@ export class ConnectGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
-    return this.zSessionHandler
-      .getSessionInfo()
+    return this.connectionManager
+      .observeConnection()
       .pipe(
-        map((maybeSessionInfo) => {
-          const sessionInfoExists = maybeSessionInfo
+        take(1),
+        map((maybeConnection) => {
+          const connectionExists = maybeConnection
             .map(() => true)
             .valueOr(false);
 
-          if (!sessionInfoExists) {
+          if (!connectionExists) {
             return true;
           }
 
