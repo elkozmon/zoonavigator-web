@@ -67,6 +67,8 @@ export class AppGuard implements CanActivate {
       } else {
         this.navigateToConnect(route, `Auto connect failed. Make sure connection named '${autoConnect}' was defined.`);
       }
+    } else {
+      this.navigateToConnect(route);
     }
 
     return of(false);
