@@ -18,15 +18,15 @@
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {Maybe} from "tsmonad";
-import {ConnectionPredef} from "../connection-predef";
+import {ConnectionPreset} from "../connection-preset";
 import {ConnectionParams} from "../connection-params";
 
 @Injectable()
 export abstract class ConnectionManager {
 
-  abstract observeConnection(): Observable<Maybe<ConnectionPredef | ConnectionParams>>
+  abstract observeConnection(): Observable<Maybe<ConnectionPreset | ConnectionParams>>
 
-  abstract useConnection(value: ConnectionPredef | ConnectionParams): Observable<void>
+  abstract useConnection(value: ConnectionPreset | ConnectionParams): Observable<void>
 
   abstract removeConnection(): Observable<void>
 }

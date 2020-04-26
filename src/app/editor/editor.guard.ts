@@ -23,7 +23,7 @@ import {ConnectionManager} from "../core/connection/manager";
 import {CONNECT_QUERY_RETURN_URL} from "../connect/connect-routing.constants";
 import {EDITOR_QUERY_NODE_CONNECTION} from "./editor-routing.constants";
 import {ConfigService} from "../config";
-import {ConnectionPredef} from "../core/connection/connection-predef";
+import {ConnectionPreset} from "../core/connection/connection-preset";
 
 @Injectable()
 export class EditorGuard implements CanActivate, CanActivateChild {
@@ -49,7 +49,7 @@ export class EditorGuard implements CanActivate, CanActivateChild {
     return this.canActivate(childRoute, state);
   }
 
-  private isConnectionPredef(object: any): object is ConnectionPredef {
+  private isConnectionPreset(object: any): object is ConnectionPreset {
     return "name" in object;
   }
 
@@ -71,8 +71,8 @@ export class EditorGuard implements CanActivate, CanActivateChild {
           const connection = maybeConnection.valueOr(null);
 
           if (connection) {
-            // add node connection query param when using predef conn
-            if (this.isConnectionPredef(connection) && !route.queryParamMap.has(EDITOR_QUERY_NODE_CONNECTION)) {
+            // add node connection query param when using preset conn
+            if (this.isConnectionPreset(connection) && !route.queryParamMap.has(EDITOR_QUERY_NODE_CONNECTION)) {
               const segments = route
                 .url
                 .map(s => s.path);
@@ -88,8 +88,8 @@ export class EditorGuard implements CanActivate, CanActivateChild {
               return of(false);
             }
 
-            // remove node connection query param when not using predef conn
-            if (!this.isConnectionPredef(connection) && route.queryParamMap.has(EDITOR_QUERY_NODE_CONNECTION)) {
+            // remove node connection query param when not using preset conn
+            if (!this.isConnectionPreset(connection) && route.queryParamMap.has(EDITOR_QUERY_NODE_CONNECTION)) {
               const segments = route
                 .url
                 .map(s => s.path);

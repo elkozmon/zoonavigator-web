@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {ConnectionPredef} from "../core/connection/connection-predef";
+import {ConnectionPreset} from "../core/connection/connection-preset";
 
 export interface Config {
   requestTimeoutMillis: number;
   autoConnect?: string;
-  connections: ConnectionPredef[];
+  connections: ConnectionPreset[];
 }

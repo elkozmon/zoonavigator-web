@@ -37,12 +37,12 @@ import {EDITOR_QUERY_NODE_CONNECTION, EDITOR_QUERY_NODE_PATH} from "../editor-ro
 import {CreateZNodeData} from "../../core/dialog";
 import {Subscription} from "rxjs/Rx";
 import {ConfigService} from "../../config";
-import {ConnectionPredef} from "../../core/connection/connection-predef";
+import {ConnectionPreset} from "../../core/connection/connection-preset";
 import {Observable} from "rxjs/Observable";
 
 interface ConnectionOption {
   label: string;
-  value: ConnectionPredef | ConnectionParams;
+  value: ConnectionPreset | ConnectionParams;
 }
 
 @Component({
@@ -71,7 +71,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   @Input() zPath: ZPath;
   @Input() zNode: Maybe<ZNodeWithChildren>;
 
-  connections: Observable<(ConnectionPredef | ConnectionParams)[]>;
+  connections: Observable<(ConnectionPreset | ConnectionParams)[]>;
   connectionsOptionCurrent: Observable<ConnectionOption>;
   connectionsOptionArray: Observable<ConnectionOption[]>;
 
@@ -88,7 +88,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    return this.isConnectionPredef(c1.value) === this.isConnectionPredef(c2.value);
+    return this.isConnectionPreset(c1.value) === this.isConnectionPreset(c2.value);
   }
 
   constructor(
@@ -105,9 +105,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.connections = this.connectionManager.observeConnection().pipe(
       take(1), // hack to retain custom connection on connection change
       map((maybeConn) => {
-          const connArray = maybeConn.caseOf<(ConnectionPredef | ConnectionParams)[]>({
+          const connArray = maybeConn.caseOf<(ConnectionPreset | ConnectionParams)[]>({
             just: conn => {
-              if (this.isConnectionPredef(conn)) {
+              if (this.isConnectionPreset(conn)) {
                 return [];
               }
 
@@ -125,7 +125,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       switchMap((maybeConn) =>
         maybeConn.caseOf<Observable<ConnectionOption>>({
           just: conn => {
-            if (this.isConnectionPredef(conn)) {
+            if (this.isConnectionPreset(conn)) {
               return of({
                 label: conn.name,
                 value: conn
@@ -145,7 +145,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.connectionsOptionArray = this.connections.pipe(
       map((connections) =>
         connections.map(conn => {
-          if (this.isConnectionPredef(conn)) {
+          if (this.isConnectionPreset(conn)) {
             return {
               label: conn.name,
               value: conn
@@ -161,7 +161,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     );
   }
 
-  isConnectionPredef(object: any): object is ConnectionPredef {
+  isConnectionPreset(object: any): object is ConnectionPreset {
     return "name" in object;
   }
 
@@ -178,7 +178,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     const option = selectChange.value as ConnectionOption;
     const conn = option.value;
 
-    if (this.isConnectionPredef(conn)) {
+    if (this.isConnectionPreset(conn)) {
       this.subscription.add(
         this.connectionManager
           .useConnection(conn)

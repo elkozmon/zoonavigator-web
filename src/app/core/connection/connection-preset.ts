@@ -17,7 +17,7 @@
 
 import {ConnectionString} from "./connection-string";
 
-export interface ConnectionPredef {
+export interface ConnectionPreset {
   name: string;
   connectionString: ConnectionString;
 }

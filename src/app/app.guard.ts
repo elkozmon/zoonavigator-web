@@ -21,7 +21,7 @@ import {Observable, of} from "rxjs";
 import {ConfigService} from "./config";
 import {ConnectionManager} from "./core";
 import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect/connect-routing.constants";
-import {ConnectionPredef} from "./core/connection/connection-predef";
+import {ConnectionPreset} from "./core/connection/connection-preset";
 import {EDITOR_QUERY_NODE_CONNECTION} from "./editor";
 
 /**
@@ -47,7 +47,7 @@ export class AppGuard implements CanActivate {
     const autoConnect = this.configService.config.autoConnect;
 
     if (autoConnect) {
-      const conn: ConnectionPredef | undefined = this.configService.config.connections.find(t => t.name === autoConnect);
+      const conn: ConnectionPreset | undefined = this.configService.config.connections.find(t => t.name === autoConnect);
 
       if (conn) {
         this.connectionManager

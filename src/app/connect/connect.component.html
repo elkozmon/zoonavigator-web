@@ -80,12 +80,12 @@
       </form>
     </mat-card-content>
   </mat-card>
-  <p class="tc-grey-600 text-md" *ngIf="cxnPredefConnectionsArray?.length">
-    or select from predefined clusters
+  <p class="tc-grey-600 text-md" *ngIf="cxnPresetConnectionsArray?.length">
+    or select from preset connections
   </p>
-  <mat-card *ngIf="cxnPredefConnectionsArray?.length">
+  <mat-card *ngIf="cxnPresetConnectionsArray?.length">
     <mat-card-content>
-      <form [formGroup]="cxnPredefForm"
+      <form [formGroup]="cxnPresetForm"
             layout="column"
             layout-align="center center">
         <div>
@@ -94,14 +94,14 @@
             <mat-select
               formControlName="connectionName"
               [required]="true">
-              <mat-option *ngFor="let connection of cxnPredefConnectionsArray" [value]="connection">
+              <mat-option *ngFor="let connection of cxnPresetConnectionsArray" [value]="connection">
                 {{connection.name}}
               </mat-option>
             </mat-select>
             <mat-hint>Required</mat-hint>
           </mat-form-field>
         </div>
-        <button mat-raised-button color="primary" [disabled]="!cxnPredefForm.valid" (click)="onCxnPredefSubmit()">
+        <button mat-raised-button color="primary" [disabled]="!cxnPresetForm.valid" (click)="onCxnPresetSubmit()">
           Connect
         </button>
       </form>

@@ -23,7 +23,7 @@ import {LoadingMode, LoadingType, TdLoadingService} from "@covalent/core";
 import {AuthInfo, Scheme, ConnectionManager} from "../core";
 import {CONNECT_QUERY_ERROR_MSG, CONNECT_QUERY_RETURN_URL} from "./connect-routing.constants";
 import {Subscription} from "rxjs/Rx";
-import {ConnectionPredef} from "../core/connection/connection-predef";
+import {ConnectionPreset} from "../core/connection/connection-preset";
 import {ConfigService} from "../config";
 import {environment} from "../../environments/environment";
 
@@ -43,7 +43,7 @@ export class ConnectComponent implements OnInit, OnDestroy {
 
   cxnParamsForm: FormGroup;
 
-  cxnPredefForm: FormGroup;
+  cxnPresetForm: FormGroup;
 
   appVersion: string = environment.appVersion;
 
@@ -92,7 +92,7 @@ export class ConnectComponent implements OnInit, OnDestroy {
     );
 
     this.cxnParamsForm = this.newCxnParamsForm();
-    this.cxnPredefForm = this.newCxnPredefForm();
+    this.cxnPresetForm = this.newCxnPresetForm();
   }
 
   onCxnParamsCredentialsChange(index: number): void {
@@ -187,25 +187,25 @@ export class ConnectComponent implements OnInit, OnDestroy {
     return authInfos;
   }
 
-  private newCxnPredefForm(): FormGroup {
+  private newCxnPresetForm(): FormGroup {
     return this.formBuilder.group({
       connectionName: ["", [Validators.required]]
     });
   }
 
-  get cxnPredefConnectionsArray(): ConnectionPredef[] {
+  get cxnPresetConnectionsArray(): ConnectionPreset[] {
     return this.configService.config.connections;
   }
 
-  private getCxnPredefConnectionFormValue(): ConnectionPredef {
-    return this.cxnPredefForm.value.connectionName;
+  private getCxnPresetConnectionFormValue(): ConnectionPreset {
+    return this.cxnPresetForm.value.connectionName;
   }
 
-  onCxnPredefSubmit(): void {
+  onCxnPresetSubmit(): void {
     this.errorMessage = null;
     this.startLoader();
 
-    const conn = this.getCxnPredefConnectionFormValue();
+    const conn = this.getCxnPresetConnectionFormValue();
 
     this.subscription.add(
       this.connectionManager

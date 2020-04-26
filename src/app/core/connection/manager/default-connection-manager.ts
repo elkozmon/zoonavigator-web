@@ -21,7 +21,7 @@ import {map} from "rxjs/operators";
 import {Maybe} from "tsmonad";
 import {ConnectionManager} from "./connection-manager";
 import {StorageService} from "../../storage";
-import {ConnectionPredef} from "../connection-predef";
+import {ConnectionPreset} from "../connection-preset";
 import {ConnectionParams} from "../connection-params";
 import {ConfigService} from "../../../config";
 import {of} from "rxjs/internal/observable/of";
@@ -35,7 +35,7 @@ export class DefaultConnectionManager implements ConnectionManager {
   }
 
   // TODO
-  observeConnection(): Observable<Maybe<ConnectionPredef | ConnectionParams>> {
+  observeConnection(): Observable<Maybe<ConnectionPreset | ConnectionParams>> {
     return this.storageService
       .observe(this.connectionKey)
       .pipe(
@@ -44,7 +44,7 @@ export class DefaultConnectionManager implements ConnectionManager {
   }
 
   // TODO
-  useConnection(value: ConnectionPredef | ConnectionParams): Observable<void> {
+  useConnection(value: ConnectionPreset | ConnectionParams): Observable<void> {
     return this.storageService
       .set(this.connectionKey, JSON.stringify(value));
   }

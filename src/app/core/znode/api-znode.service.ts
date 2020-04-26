@@ -29,7 +29,7 @@ import {ConnectionManager, ConnectionParams} from "../connection";
 import {ApiRequestFactory, ApiService, FileContent, JsonRequestContent} from "../api";
 import {ZNodeExport} from "./znode-export";
 import {Buffer} from "buffer";
-import {ConnectionPredef} from "../connection/connection-predef";
+import {ConnectionPreset} from "../connection/connection-preset";
 
 @Injectable()
 export class ApiZNodeService implements ZNodeService {
@@ -56,8 +56,8 @@ export class ApiZNodeService implements ZNodeService {
 
   private connectionToToken(cxn: any): string {
     if (cxn.name) {
-      const c = cxn as ConnectionPredef;
-      return "CxnPredef " + new Buffer(c.name).toString("base64");
+      const c = cxn as ConnectionPreset;
+      return "CxnPreset " + new Buffer(c.name).toString("base64");
     }
 
     const c = cxn as ConnectionParams;
