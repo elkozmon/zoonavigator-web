@@ -79,7 +79,7 @@
       (selectionChange)="onConnectionOptionChange($event)"
       [compareWith]="compareConnections"
       [value]="connectionsOptionCurrent | async"
-      matTooltip="Switch ZooKeeper cluster"
+      matTooltip="Switch ZooKeeper connection"
       matTooltipPosition="below">
       <mat-option *ngFor="let connection of connectionsOptionArray | async" [value]="connection">
         {{connection.label}}
