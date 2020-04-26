@@ -47,7 +47,7 @@ export class ConnectComponent implements OnInit, OnDestroy {
 
   appVersion: string = environment.appVersion;
 
-  docsUrl: string = environment.docsUrl;
+  docsFaqsAuthUrl: string = environment.docsFaqsAuthUrl;
 
   constructor(
     private route: ActivatedRoute,
