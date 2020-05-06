@@ -127,7 +127,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
           just: conn => {
             if (this.isConnectionPreset(conn)) {
               return of({
-                label: conn.name,
+                label: conn.name || conn.id,
                 value: conn
               });
             }
@@ -147,7 +147,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         connections.map(conn => {
           if (this.isConnectionPreset(conn)) {
             return {
-              label: conn.name,
+              label: conn.name || conn.id,
               value: conn
             };
           }
@@ -185,7 +185,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
           .subscribe(() => {
             this.router.navigate([], {
                 queryParams: {
-                  [EDITOR_QUERY_NODE_CONNECTION]: encodeURI(conn.name)
+                  [EDITOR_QUERY_NODE_CONNECTION]: encodeURI(conn.id)
                 },
                 queryParamsHandling: "merge"
               }

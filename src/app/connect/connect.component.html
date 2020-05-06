@@ -95,7 +95,7 @@
               formControlName="connectionName"
               [required]="true">
               <mat-option *ngFor="let connection of cxnPresetConnectionsArray" [value]="connection">
-                {{connection.name}}
+                {{connection.name || connection.id}}
               </mat-option>
             </mat-select>
             <mat-hint>Required</mat-hint>

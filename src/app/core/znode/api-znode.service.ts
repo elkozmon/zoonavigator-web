@@ -55,9 +55,9 @@ export class ApiZNodeService implements ZNodeService {
   }
 
   private connectionToToken(cxn: any): string {
-    if (cxn.name) {
+    if (cxn.id) {
       const c = cxn as ConnectionPreset;
-      return "CxnPreset " + new Buffer(c.name).toString("base64");
+      return "CxnPreset " + new Buffer(c.id).toString("base64");
     }
 
     const c = cxn as ConnectionParams;

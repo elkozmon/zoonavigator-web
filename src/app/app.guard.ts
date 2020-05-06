@@ -47,7 +47,7 @@ export class AppGuard implements CanActivate {
     const autoConnect = this.configService.config.autoConnect;
 
     if (autoConnect) {
-      const conn: ConnectionPreset | undefined = this.configService.config.connections.find(t => t.name === autoConnect);
+      const conn: ConnectionPreset | undefined = this.configService.config.connections.find(t => t.id === autoConnect);
 
       if (conn) {
         this.connectionManager
@@ -65,7 +65,7 @@ export class AppGuard implements CanActivate {
             error => this.navigateToConnect(route, error)
           );
       } else {
-        this.navigateToConnect(route, `Auto connect failed. Make sure connection named '${autoConnect}' was defined.`);
+        this.navigateToConnect(route, `Auto connect failed. Make sure connection with id '${autoConnect}' was defined.`);
       }
     } else {
       this.navigateToConnect(route);

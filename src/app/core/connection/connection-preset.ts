@@ -18,6 +18,7 @@
 import {ConnectionString} from "./connection-string";
 
 export interface ConnectionPreset {
-  name: string;
+  id: string;
+  name?: string;
   connectionString: ConnectionString;
 }

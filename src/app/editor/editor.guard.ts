@@ -60,8 +60,8 @@ export class EditorGuard implements CanActivate, CanActivateChild {
         take(1),
         switchMap((maybeConnection) => {
           if (route.queryParamMap.has(EDITOR_QUERY_NODE_CONNECTION)) {
-            const name = decodeURI(route.queryParamMap.get(EDITOR_QUERY_NODE_CONNECTION));
-            const conn = this.configService.config.connections.find((f) => f.name === name);
+            const connId = decodeURI(route.queryParamMap.get(EDITOR_QUERY_NODE_CONNECTION));
+            const conn = this.configService.config.connections.find(f => f.id === connId);
 
             if (conn) {
               return this.connectionManager.useConnection(conn).pipe(mapTo(true));
@@ -79,7 +79,7 @@ export class EditorGuard implements CanActivate, CanActivateChild {
 
               this.router.navigate(segments, {
                   queryParams: {
-                    [EDITOR_QUERY_NODE_CONNECTION]: encodeURI(connection.name)
+                    [EDITOR_QUERY_NODE_CONNECTION]: encodeURI(connection.id)
                   },
                   queryParamsHandling: "merge"
                 }
