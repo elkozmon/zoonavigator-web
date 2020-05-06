@@ -50,7 +50,7 @@ export class EditorGuard implements CanActivate, CanActivateChild {
   }
 
   private isConnectionPreset(object: any): object is ConnectionPreset {
-    return "name" in object;
+    return "id" in object;
   }
 
   private checkConnection(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {

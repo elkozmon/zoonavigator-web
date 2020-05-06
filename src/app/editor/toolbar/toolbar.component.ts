@@ -162,7 +162,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   }
 
   isConnectionPreset(object: any): object is ConnectionPreset {
-    return "name" in object;
+    return "id" in object;
   }
 
   ngOnDestroy(): void {
