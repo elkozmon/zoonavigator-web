@@ -17,12 +17,10 @@
 
 import {Component, OnDestroy, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
-import {Observable} from "rxjs";
+import {Subscription, Observable, of, zip} from "rxjs";
 import {mapTo, pluck} from "rxjs/operators";
 import {Either} from "tsmonad";
 import {DialogService, ZNodeMeta, ZNodeWithChildren} from "../../../core";
-import {Subscription} from "rxjs/Rx";
-import {of} from "rxjs/internal/observable/of";
 
 @Component({
   templateUrl: "znode-meta.component.html",

@@ -19,7 +19,10 @@ import {Component, OnDestroy, OnInit} from "@angular/core";
 import {Title} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
 import {EDITOR_QUERY_NODE_PATH} from "./editor";
-import {Subscription} from "rxjs/Rx";
+import {Subscription, of, zip} from "rxjs";
+import {ConnectionManager} from "./core/connection/manager";
+import {switchMap} from "rxjs/operators";
+import {ConnectionPreset} from "./core/connection/connection-preset";
 
 @Component({
   selector: "zoo-app",
@@ -31,8 +34,13 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     private titleService: Title,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private connectionManager: ConnectionManager
   ) {
+  }
+
+  private isConnectionPreset(object: any): object is ConnectionPreset {
+    return "id" in object;
   }
 
   ngOnDestroy(): void {
@@ -44,16 +52,30 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.subscription.add(
       this.activatedRoute
-      .queryParamMap
-      .subscribe(
-        map => {
-          if (map.has(EDITOR_QUERY_NODE_PATH) && map.get(EDITOR_QUERY_NODE_PATH).length > 1) {
-            this.titleService.setTitle("ZooNavigator - " + decodeURI(map.get(EDITOR_QUERY_NODE_PATH)));
-          } else {
-            this.titleService.setTitle("ZooNavigator");
+        .queryParamMap
+        .pipe(
+          switchMap(map => zip(of(map), this.connectionManager.observeConnection()))
+        )
+        .subscribe(
+          ([map, maybeConnection]) => {
+            let title = "ZooNavigator";
+
+            maybeConnection.caseOf({
+              just: val => {
+                if (this.isConnectionPreset(val)) {
+                  title += " – " + (val.name || val.id);
+                }
+              },
+              nothing: () => {}
+            });
+
+            if (map.has(EDITOR_QUERY_NODE_PATH) && map.get(EDITOR_QUERY_NODE_PATH).length > 1) {
+              title += " – " + decodeURI(map.get(EDITOR_QUERY_NODE_PATH))
+            }
+
+            this.titleService.setTitle(title);
           }
-        }
-      )
+        )
     );
   }
 }
