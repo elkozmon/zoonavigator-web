@@ -34,7 +34,7 @@ export class ConfigService {
 
   load() {
     return this.httpClient
-      .get(environment.apiHref.replace(/\/$/, "") + "/config")
+      .get(this.baseHref.replace(/\/$/, "") + environment.apiHref.replace(/\/$/, "") + "/config")
       .forEach((data: Config) => this._config = data);
   }
 
