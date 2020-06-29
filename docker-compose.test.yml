@@ -1,3 +1,3 @@
-sut:
+web:
   build: .
   dockerfile: Dockerfile.test
