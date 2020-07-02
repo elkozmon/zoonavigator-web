@@ -29,7 +29,6 @@ import {AppRoutingModule} from "./app-routing.module";
 import {CoreModule} from "./core";
 import {ConnectModule} from "./connect";
 import {EditorModule} from "./editor";
-import {environment} from "../environments/environment";
 
 @NgModule({
   imports: [
@@ -60,7 +59,7 @@ import {environment} from "../environments/environment";
     },
     {
       provide: APP_BASE_HREF,
-      useValue: environment.baseHref
+      useValue: window['base-href']
     }
   ],
   declarations: [

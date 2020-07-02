@@ -25,6 +25,5 @@ export const environment = {
   docsUrl: "https://zoonavigator.elkozmon.com/en/latest",
   docsFaqsAuthUrl: "https://zoonavigator.elkozmon.com/en/latest/faqs.html#what-should-i-fill-in-for-auth-username-and-auth-password",
   appVersion: "dev",
-  baseHref: "/",
   apiHref: "/api",
 };
