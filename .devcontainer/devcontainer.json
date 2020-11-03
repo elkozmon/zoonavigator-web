@@ -1,0 +1,21 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.140.1/containers/typescript-node
+{
+	"name": "ZooNavigator Web",
+	"dockerComposeFile": [
+		"../../.devcontainer/docker-compose.yml"
+	],
+	"workspaceFolder": "/workspace/zoonavigator/zoonavigator-web",
+	"service": "zoonavigator-web",
+	"shutdownAction": "none",
+	"settings": { 
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+	"extensions": [
+		"dbaeumer.vscode-eslint",
+		"ms-vscode.vscode-typescript-tslint-plugin",
+		"pflannery.vscode-versionlens",
+	],
+	"postCreateCommand": "npm install",
+	"remoteUser": "node"
+}
