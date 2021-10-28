@@ -74,7 +74,7 @@ export class DefaultApiService implements ApiService {
     }
 
     if (apiRequest.authToken) {
-      options.headers = options.headers.set("Authorization", apiRequest.authToken);
+      options.headers = options.headers.set("Zoo-Authorization", apiRequest.authToken);
     }
 
     return <Observable<ApiResponse<T>>>this.httpClient
