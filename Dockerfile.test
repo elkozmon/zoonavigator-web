@@ -1,4 +1,4 @@
-FROM node:10.15.3-jessie as npm
+FROM node:14.20.1-buster-slim as npm
 
 # Copy source code
 WORKDIR /app
