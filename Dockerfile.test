@@ -1,5 +1,4 @@
 FROM node:10.15.3-jessie as npm
-MAINTAINER Lubos Kozmon <lubosh91@gmail.com>
 
 # Copy source code
 WORKDIR /app
@@ -19,3 +18,5 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 ENV CHROME_BIN=google-chrome
 
 CMD ["npm", "run", "test:ci"]
+
+LABEL maintainer="Lubos Kozmon <contact@elkozmon.com>"
