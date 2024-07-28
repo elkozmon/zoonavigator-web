@@ -1,3 +1,7 @@
-sut:
-  build: .
-  dockerfile: Dockerfile.test
+version: "3.9"
+
+services:
+  sut:
+    build: 
+      context: .
+      dockerfile: Dockerfile.test
