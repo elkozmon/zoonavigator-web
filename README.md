@@ -1,3 +1,10 @@
+> ### ⚠️ Repository Moved
+> 
+> **This repository is archived.** Development continues at:  
+> ## **[github.com/elkozmon/zoonavigator](https://github.com/elkozmon/zoonavigator)**
+> 
+> *This repo is kept for historical reference only. All new development happens in the monorepo above.*
+
 ZooNavigator Web
 ================
 
